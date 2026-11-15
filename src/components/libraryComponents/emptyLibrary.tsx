@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { focusRing } from '../../styles/focus'
-import { Button } from '../button'
+import { buttonClasses } from '../button'
 import { LIBRARY_STATUS_BADGES } from '../gamesComponents/gameCard'
 import { sectionTitle } from '../homeComponents/styles'
 
@@ -14,7 +14,7 @@ const SHELVES = [
 const way =
   'flex flex-col items-start gap-2 rounded-lg border border-dark-border p-5'
 
-export function EmptyLibrary({ onImport }: { onImport: () => void }) {
+export function EmptyLibrary() {
   return (
     <section className="mt-8 flex flex-col gap-6">
       <div>
@@ -31,14 +31,12 @@ export function EmptyLibrary({ onImport }: { onImport: () => void }) {
             Conecte a Steam, a PSN ou o Xbox e seus jogos entram de uma vez, com
             as horas jogadas.
           </p>
-          <Button
-            type="button"
-            variant="primary"
-            className="mt-2"
-            onClick={onImport}
+          <Link
+            to="/importar"
+            className={buttonClasses({ variant: 'primary', className: 'mt-2' })}
           >
             Importar jogos
-          </Button>
+          </Link>
         </div>
 
         <div className={way}>

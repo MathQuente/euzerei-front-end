@@ -1,11 +1,12 @@
 import { UserMinus, UserPlus } from 'lucide-react'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useFollow } from '../../hooks/useFollow'
 import { useFollowers } from '../../hooks/useFollowers'
 import { useFollowing } from '../../hooks/useFollowing'
 import { useUserProfile } from '../../hooks/useUserProfile'
 import type { FollowSummary } from '../../types/follow'
-import { Button } from '../button'
+import { Button, buttonClasses } from '../button'
 import { IconButton } from '../iconButton'
 import { ProfileHeader } from '../libraryComponents/profileHeader'
 import { UserListModal } from '../userListModal'
@@ -13,7 +14,11 @@ import { DeleteAccountSection } from './deleteAccountSection'
 import { UserProfileForm } from './userProfileForm'
 import { UserProfileModal } from './userProfileModal'
 
-export function UserProfileDisplay({ onImport }: { onImport?: () => void }) {
+export function UserProfileDisplay({
+  showImport = false,
+}: {
+  showImport?: boolean
+}) {
   const [isOpen, setIsOpen] = useState(false)
   const [followersModalOpen, setFollowersModalOpen] = useState(false)
   const [followingModalOpen, setFollowingModalOpen] = useState(false)
@@ -53,10 +58,13 @@ export function UserProfileDisplay({ onImport }: { onImport?: () => void }) {
         onFollowingClick={() => setFollowingModalOpen(true)}
         actions={
           <>
-            {onImport && (
-              <Button type="button" variant="secondary" onClick={onImport}>
+            {showImport && (
+              <Link
+                to="/importar"
+                className={buttonClasses({ variant: 'secondary' })}
+              >
                 Importar jogos
-              </Button>
+              </Link>
             )}
             <Button
               type="button"

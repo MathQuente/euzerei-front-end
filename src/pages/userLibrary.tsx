@@ -1,7 +1,5 @@
-import { useState } from 'react'
 import { Button } from '../components/button'
 import { EmptyLibrary } from '../components/libraryComponents/emptyLibrary'
-import { ImportGamesModal } from '../components/libraryComponents/importGamesModal'
 import { LibraryShelves } from '../components/libraryComponents/libraryShelves'
 import { UserProfileDisplay } from '../components/userGamesComponents/userProfileDisplay'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
@@ -13,7 +11,6 @@ const SKELETON_SHELVES = ['a', 'b', 'c']
 export function UserLibrary() {
   useDocumentTitle('Minha biblioteca')
   usePlatformLinkResult()
-  const [importOpen, setImportOpen] = useState(false)
   const {
     UserGamesResponse,
     isErrorUserGames,
@@ -22,14 +19,11 @@ export function UserLibrary() {
     totalPerStatus,
   } = useUserGames(undefined, undefined, undefined, 'desc', 'completedAt')
 
-  const openImport = () => setImportOpen(true)
   const isEmpty = UserGamesResponse?.total === 0
 
   return (
     <>
-      <UserProfileDisplay
-        onImport={UserGamesResponse && !isEmpty ? openImport : undefined}
-      />
+      <UserProfileDisplay showImport={Boolean(UserGamesResponse) && !isEmpty} />
 
       {!UserGamesResponse &&
         (isErrorUserGames ? (
@@ -55,15 +49,13 @@ export function UserLibrary() {
 
       {UserGamesResponse &&
         (isEmpty ? (
-          <EmptyLibrary onImport={openImport} />
+          <EmptyLibrary />
         ) : (
           <LibraryShelves
             games={gamesByStatus}
             totalPerStatus={totalPerStatus}
           />
         ))}
-
-      <ImportGamesModal open={importOpen} onOpenChange={setImportOpen} />
     </>
   )
 }

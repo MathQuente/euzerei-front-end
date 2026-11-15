@@ -85,7 +85,7 @@ const VERY_SLOW_AFTER_SECONDS = 90
 
 export function getSlowImportNotice(elapsedSeconds: number): string | null {
   if (elapsedSeconds >= VERY_SLOW_AFTER_SECONDS) {
-    return 'Biblioteca grande, hein? Ainda estamos trabalhando. Pode fechar esta janela e continuar navegando, a importação segue em segundo plano.'
+    return 'Biblioteca grande, hein? Ainda estamos trabalhando. Pode sair desta página e continuar navegando, a importação segue em segundo plano.'
   }
   if (elapsedSeconds >= SLOW_AFTER_SECONDS) {
     return 'Bibliotecas grandes podem levar alguns minutos. Pode continuar navegando enquanto isso.'

@@ -18,6 +18,7 @@ import { GamePage } from './pages/gamePage'
 import { GameReviewsPage } from './pages/gameReviewsPage'
 import { Games } from './pages/games'
 import { Home } from './pages/home'
+import { ImportGamesPage } from './pages/importGamesPage'
 import { NotFoundPage } from './pages/notFoundPage'
 import { PrivacyPage } from './pages/privacyPage'
 import { ResetPasswordPage } from './pages/resetPasswordPage'
@@ -102,6 +103,14 @@ const router = createBrowserRouter([
             element: (
               <RequireAuth>
                 <UserLibrary />
+              </RequireAuth>
+            ),
+          },
+          {
+            path: '/importar',
+            element: (
+              <RequireAuth>
+                <ImportGamesPage />
               </RequireAuth>
             ),
           },

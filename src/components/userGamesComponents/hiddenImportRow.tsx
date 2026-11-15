@@ -29,7 +29,7 @@ export const HiddenImportRow = forwardRef<
   const pendingCount = platform ? suggestions.pendingCount : 0
 
   const tip = `Volta sozinho depois da próxima importação.${
-    memoryOnly ? ' Só vale até fechar esta janela.' : ''
+    memoryOnly ? ' Só vale até recarregar a página.' : ''
   }`
   const pendingTip =
     pendingCount === 1
@@ -60,7 +60,7 @@ export const HiddenImportRow = forwardRef<
               'text-xs text-amber-400 [@media(max-width:520px)]:hidden'
             }
           >
-            só nesta janela
+            até recarregar
           </span>
         )}
       </span>

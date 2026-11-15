@@ -385,10 +385,10 @@ export function PlatformImportSection<TResult>({
     <div className="flex flex-col gap-3 rounded-lg border border-dark-border bg-dark-bg-darker px-3.5 py-3">
       <div className="flex flex-col gap-1">
         <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-          <p className="text-sm text-white flex items-center gap-1.5">
+          <h2 className="text-sm font-normal text-white flex items-center gap-1.5">
             {icon}
             {label}
-          </p>
+          </h2>
           <StatusPill
             connectedId={connectedId}
             connectedName={connectedName}

@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Faq } from '../components/aboutComponents/faq'
 import { FeatureShowcase } from '../components/aboutComponents/featureShowcase'
@@ -9,7 +8,6 @@ import {
   sectionTitleClass,
 } from '../components/aboutComponents/styles'
 import { TypedGameName } from '../components/aboutComponents/typedGameName'
-import { ImportGamesModal } from '../components/libraryComponents/importGamesModal'
 import { useAuth } from '../hooks/useAuth'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { usePlatformLinkResult } from '../hooks/usePlatformLinkResult'
@@ -30,7 +28,6 @@ export function AboutPage() {
   useDocumentTitle('Sobre')
   usePlatformLinkResult()
   const { user, loading } = useAuth()
-  const [importOpen, setImportOpen] = useState(false)
 
   return (
     <div className="flex justify-center pt-2 pb-8 md:pt-4 md:pb-12">
@@ -55,13 +52,9 @@ export function AboutPage() {
             <div className="flex flex-wrap gap-2.5 pt-1">
               {loading ? null : user?.id ? (
                 <>
-                  <button
-                    type="button"
-                    className={primaryButtonClass}
-                    onClick={() => setImportOpen(true)}
-                  >
+                  <Link to="/importar" className={primaryButtonClass}>
                     Importar jogos
-                  </button>
+                  </Link>
                   <Link to="/userLibrary" className={secondaryButtonClass}>
                     Minha biblioteca
                   </Link>
@@ -129,10 +122,6 @@ export function AboutPage() {
         </div>
         <GameSheet />
       </article>
-
-      {user?.id && (
-        <ImportGamesModal open={importOpen} onOpenChange={setImportOpen} />
-      )}
     </div>
   )
 }
