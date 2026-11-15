@@ -3,6 +3,7 @@ import { toast } from 'react-toastify'
 import { USER_GAME_STATUS_ID as STATUS } from '../constants/gameStatus'
 import type { GameHoursResponse } from '../types/user'
 import { getErrorMessage } from '../utils/getErrorMessage'
+import { invalidateGameLists } from './invalidateGameLists'
 import { api } from './useApi'
 import { useAuth } from './useAuth'
 import { useGameStatus } from './useGameStatus'
@@ -49,11 +50,7 @@ export const useHoursPlayed = (igdbId: string) => {
       queryClient.invalidateQueries({ queryKey })
       queryClient.invalidateQueries({ queryKey: ['userGames', userId] })
       queryClient.invalidateQueries({ queryKey: ['userProfile', userId] })
-      queryClient.invalidateQueries({ queryKey: ['games'] })
-      queryClient.invalidateQueries({ queryKey: ['gameSearch'] })
-      queryClient.invalidateQueries({ queryKey: ['comingSoon'] })
-      queryClient.invalidateQueries({ queryKey: ['gamesFeatured'] })
-      queryClient.invalidateQueries({ queryKey: ['similarGames'] })
+      invalidateGameLists(queryClient)
       toast.success('Horas jogadas atualizadas com sucesso 👌')
     },
     onError: (error, _variables, context) => {

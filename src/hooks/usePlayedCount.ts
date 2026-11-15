@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
+import { USER_GAME_STATUS_ID as STATUS } from '../constants/gameStatus'
 import type { GameStatsResponse } from '../types/user'
 import { getErrorMessage } from '../utils/getErrorMessage'
+import { invalidateGameLists } from './invalidateGameLists'
 import { api } from './useApi'
 import { useAuth } from './useAuth'
 import { useGameStatus } from './useGameStatus'
@@ -19,8 +21,9 @@ export const usePlayedCount = (igdbId: string) => {
 
   const { gameStatus } = useGameStatus(igdbId)
   const statusId = gameStatus?.userGameStatus?.id
-  const isPlayed = statusId === 1
-  const tracksCompletions = statusId !== undefined && statusId !== 5
+  const isPlayed = statusId === STATUS.PLAYED
+  const tracksCompletions =
+    statusId !== undefined && statusId !== STATUS.WISHLIST
 
   const queryKey = getGameStatsQueryKey(userId, igdbId)
 
@@ -63,11 +66,7 @@ export const usePlayedCount = (igdbId: string) => {
         queryKey: ['gamesStatus', userId, igdbId],
       })
       queryClient.invalidateQueries({ queryKey: ['userGames', userId] })
-      queryClient.invalidateQueries({ queryKey: ['games'] })
-      queryClient.invalidateQueries({ queryKey: ['gameSearch'] })
-      queryClient.invalidateQueries({ queryKey: ['comingSoon'] })
-      queryClient.invalidateQueries({ queryKey: ['gamesFeatured'] })
-      queryClient.invalidateQueries({ queryKey: ['similarGames'] })
+      invalidateGameLists(queryClient)
     },
     onError: (error, _variables, context) => {
       if (context?.previousData) {

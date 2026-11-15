@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import type { GameStatusResponse } from '../types/games'
 import { getErrorMessage } from '../utils/getErrorMessage'
+import { invalidateGameLists } from './invalidateGameLists'
 import { api } from './useApi'
 import { useAuth } from './useAuth'
 
@@ -57,11 +58,7 @@ export const useGameStatus = (igdbId: string | undefined) => {
       toast.error(getErrorMessage(error, 'Erro ao atualizar status.'))
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['games'] })
-      queryClient.invalidateQueries({ queryKey: ['gameSearch'] })
-      queryClient.invalidateQueries({ queryKey: ['comingSoon'] })
-      queryClient.invalidateQueries({ queryKey: ['gamesFeatured'] })
-      queryClient.invalidateQueries({ queryKey: ['similarGames'] })
+      invalidateGameLists(queryClient)
       queryClient.invalidateQueries({ queryKey: ['userProfile', userId] })
     },
   })
