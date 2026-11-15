@@ -32,7 +32,7 @@ export function EmptyLibrary() {
             as horas jogadas.
           </p>
           <Link
-            to="/importar"
+            to="/configuracoes/importar"
             className={buttonClasses({ variant: 'primary', className: 'mt-2' })}
           >
             Importar jogos

@@ -1,4 +1,4 @@
-import { UserMinus, UserPlus } from 'lucide-react'
+import { Settings, UserMinus, UserPlus } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useFollow } from '../../hooks/useFollow'
@@ -11,11 +11,7 @@ import { IconButton } from '../iconButton'
 import { ProfileHeader } from '../libraryComponents/profileHeader'
 import { UserListModal } from '../userListModal'
 
-export function UserProfileDisplay({
-  showImport = false,
-}: {
-  showImport?: boolean
-}) {
+export function UserProfileDisplay() {
   const [followersModalOpen, setFollowersModalOpen] = useState(false)
   const [followingModalOpen, setFollowingModalOpen] = useState(false)
   const { UserProfileResponse, isLoading, isError } = useUserProfile()
@@ -53,22 +49,16 @@ export function UserProfileDisplay({
         onFollowersClick={() => setFollowersModalOpen(true)}
         onFollowingClick={() => setFollowingModalOpen(true)}
         actions={
-          <>
-            {showImport && (
-              <Link
-                to="/importar"
-                className={buttonClasses({ variant: 'secondary' })}
-              >
-                Importar jogos
-              </Link>
-            )}
-            <Link
-              to="/conta"
-              className={buttonClasses({ variant: 'secondary' })}
-            >
-              Editar perfil
-            </Link>
-          </>
+          <Link
+            to="/configuracoes"
+            className={buttonClasses({
+              variant: 'secondary',
+              className: 'gap-1.5',
+            })}
+          >
+            <Settings className="size-4" aria-hidden="true" />
+            Configurações
+          </Link>
         }
       />
 

@@ -8,6 +8,7 @@ export function ConfirmDialog({
   title,
   description,
   confirmLabel,
+  cancelLabel = 'Cancelar',
   onConfirm,
   isLoading,
   confirmDisabled,
@@ -20,6 +21,7 @@ export function ConfirmDialog({
   title: string
   description: ReactNode
   confirmLabel: string
+  cancelLabel?: string
   onConfirm: () => void
   isLoading?: boolean
   confirmDisabled?: boolean
@@ -75,7 +77,7 @@ export function ConfirmDialog({
                 data-cancel
                 disabled={lockWhileLoading && isLoading}
               >
-                Cancelar
+                {cancelLabel}
               </Button>
             </Dialog.Close>
             <Button

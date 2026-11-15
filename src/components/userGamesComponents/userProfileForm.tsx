@@ -163,17 +163,13 @@ export function UserProfileForm({
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      aria-labelledby="profile-title"
+      aria-label="Perfil"
       className="overflow-hidden rounded-xl border border-dark-border bg-dark-bg-darker"
     >
-      <div className="px-5 pt-4">
-        <h2 id="profile-title" className="text-base font-semibold text-white">
-          Perfil
-        </h2>
-        <p className="mt-0.5 text-sm text-gray-400">
-          Como as outras pessoas veem você.
-        </p>
-      </div>
+      <h2 className="sr-only">Perfil</h2>
+      <p className="px-5 pt-4 text-sm text-gray-400">
+        Como as outras pessoas veem você.
+      </p>
 
       <div className="relative mt-3.5 h-32 bg-dark-border">
         {bannerSrc && (

@@ -23,7 +23,7 @@ export function UserLibrary() {
 
   return (
     <>
-      <UserProfileDisplay showImport={Boolean(UserGamesResponse) && !isEmpty} />
+      <UserProfileDisplay />
 
       {!UserGamesResponse &&
         (isErrorUserGames ? (

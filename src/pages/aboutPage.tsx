@@ -52,7 +52,10 @@ export function AboutPage() {
             <div className="flex flex-wrap gap-2.5 pt-1">
               {loading ? null : user?.id ? (
                 <>
-                  <Link to="/importar" className={primaryButtonClass}>
+                  <Link
+                    to="/configuracoes/importar"
+                    className={primaryButtonClass}
+                  >
                     Importar jogos
                   </Link>
                   <Link to="/userLibrary" className={secondaryButtonClass}>

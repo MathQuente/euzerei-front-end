@@ -5,12 +5,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import { PostLoginRedirect } from './components/postLoginRedirect'
+import { RedirectKeepingSearch } from './components/redirectKeepingSearch'
 import { RouteError } from './components/routeError'
 import { AuthProvider } from './contexts/auth/authProvider'
 import { RequireAuth } from './contexts/auth/requireAuth'
 import { Layout } from './layout'
 import { AboutPage } from './pages/aboutPage'
-import { AccountPage } from './pages/accountPage'
 import { Authentication } from './pages/authentication'
 import { ComingSoonPage } from './pages/comingSoonPage'
 import { ContactPage } from './pages/contactPage'
@@ -19,11 +19,14 @@ import { GamePage } from './pages/gamePage'
 import { GameReviewsPage } from './pages/gameReviewsPage'
 import { Games } from './pages/games'
 import { Home } from './pages/home'
-import { ImportGamesPage } from './pages/importGamesPage'
 import { NotFoundPage } from './pages/notFoundPage'
 import { PrivacyPage } from './pages/privacyPage'
 import { ResetPasswordPage } from './pages/resetPasswordPage'
 import { SearchResults } from './pages/searchResults'
+import { AccountTab } from './pages/settings/accountTab'
+import { ImportTab } from './pages/settings/importTab'
+import { ProfileTab } from './pages/settings/profileTab'
+import { SettingsPage } from './pages/settingsPage'
 import { TermsPage } from './pages/termsPage'
 import { UserGamesPageByStatus } from './pages/userGamesPages'
 import { UserLibrary } from './pages/userLibrary'
@@ -108,20 +111,29 @@ const router = createBrowserRouter([
             ),
           },
           {
-            path: '/conta',
+            path: '/configuracoes',
             element: (
               <RequireAuth>
-                <AccountPage />
+                <SettingsPage />
               </RequireAuth>
             ),
+            children: [
+              {
+                index: true,
+                element: <RedirectKeepingSearch to="/configuracoes/perfil" />,
+              },
+              { path: 'perfil', element: <ProfileTab /> },
+              { path: 'importar', element: <ImportTab /> },
+              { path: 'conta', element: <AccountTab /> },
+            ],
+          },
+          {
+            path: '/conta',
+            element: <RedirectKeepingSearch to="/configuracoes/conta" />,
           },
           {
             path: '/importar',
-            element: (
-              <RequireAuth>
-                <ImportGamesPage />
-              </RequireAuth>
-            ),
+            element: <RedirectKeepingSearch to="/configuracoes/importar" />,
           },
           {
             path: '/userLibrary/:status',

@@ -6,11 +6,7 @@ import { useUserProfile } from '../../hooks/useUserProfile'
 import { Button } from '../button'
 import { DeleteAccountDialog } from './deleteAccountDialog'
 
-export function DeleteAccountSection({
-  onLeave,
-}: {
-  onLeave?: () => void
-}) {
+export function DeleteAccountSection() {
   const { UserProfileResponse } = useUserProfile()
   const { logout } = useAuth()
   const navigate = useNavigate()
@@ -28,7 +24,6 @@ export function DeleteAccountSection({
   }
 
   const handleReauth = async () => {
-    onLeave?.()
     await logout()
     navigate('/auth?tab=login', { replace: true })
   }
@@ -63,10 +58,7 @@ export function DeleteAccountSection({
         open={open}
         onOpenChange={handleOpenChange}
         confirmationText={confirmationText}
-        onConfirm={() => {
-          onLeave?.()
-          deleteAccount()
-        }}
+        onConfirm={deleteAccount}
         onEdit={resetError}
         onReauth={handleReauth}
         isLoading={isDeleting}
