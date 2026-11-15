@@ -3,6 +3,7 @@ import { USER_GAME_STATUS_ID as STATUS } from '../constants/gameStatus'
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants/messages'
 import type { GameCompletedAtResponse } from '../types/user'
 import { notify } from '../utils/notify'
+import { invalidateUserGames } from './invalidateUserGames'
 import { api } from './useApi'
 import { useAuth } from './useAuth'
 import { useGameStatus } from './useGameStatus'
@@ -51,8 +52,10 @@ export const useCompletedAt = (igdbId: string) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey })
-      queryClient.invalidateQueries({ queryKey: ['userGames', userId] })
-      notify.success(SUCCESS_MESSAGES.completedAtSaved)
+      invalidateUserGames(queryClient, userId)
+      notify.success(SUCCESS_MESSAGES.completedAtSaved, {
+        id: 'game-completed-at-feedback',
+      })
     },
     onError: (error, _variables, context) => {
       if (context?.previousData) {

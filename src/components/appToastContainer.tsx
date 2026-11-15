@@ -1,6 +1,7 @@
 import { Check, CircleAlert, Info, X } from 'lucide-react'
 import type { MouseEvent } from 'react'
 import { ToastContainer } from 'react-toastify'
+import { useMediaQuery } from '../hooks/useMediaQuery'
 import { focusRing } from '../styles/focus'
 
 const TYPE_STYLE = {
@@ -65,10 +66,14 @@ function NoticeIcon({ type }: { type?: string }) {
 }
 
 export function AppToastContainer() {
+  const compact = useMediaQuery('(max-width: 767px)')
+  const position = compact ? 'top-center' : 'bottom-center'
+
   return (
     <ToastContainer
+      key={position}
       theme="dark"
-      position="bottom-center"
+      position={position}
       autoClose={5000}
       limit={5}
       pauseOnHover

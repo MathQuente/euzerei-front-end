@@ -4,6 +4,7 @@ import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants/messages'
 import type { GameHoursResponse } from '../types/user'
 import { notify } from '../utils/notify'
 import { invalidateGameLists } from './invalidateGameLists'
+import { invalidateUserGames } from './invalidateUserGames'
 import { api } from './useApi'
 import { useAuth } from './useAuth'
 import { useGameStatus } from './useGameStatus'
@@ -48,10 +49,12 @@ export const useHoursPlayed = (igdbId: string) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey })
-      queryClient.invalidateQueries({ queryKey: ['userGames', userId] })
+      invalidateUserGames(queryClient, userId)
       queryClient.invalidateQueries({ queryKey: ['userProfile', userId] })
       invalidateGameLists(queryClient)
-      notify.success(SUCCESS_MESSAGES.hoursSaved)
+      notify.success(SUCCESS_MESSAGES.hoursSaved, {
+        id: 'game-hours-feedback',
+      })
     },
     onError: (error, _variables, context) => {
       if (context?.previousData) {

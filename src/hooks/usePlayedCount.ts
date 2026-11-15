@@ -4,6 +4,7 @@ import { ERROR_MESSAGES } from '../constants/messages'
 import type { GameStatsResponse } from '../types/user'
 import { notify } from '../utils/notify'
 import { invalidateGameLists } from './invalidateGameLists'
+import { invalidateUserGames } from './invalidateUserGames'
 import { api } from './useApi'
 import { useAuth } from './useAuth'
 import { useGameStatus } from './useGameStatus'
@@ -65,7 +66,7 @@ export const usePlayedCount = (igdbId: string) => {
       queryClient.invalidateQueries({
         queryKey: ['gamesStatus', userId, igdbId],
       })
-      queryClient.invalidateQueries({ queryKey: ['userGames', userId] })
+      invalidateUserGames(queryClient, userId)
       invalidateGameLists(queryClient)
     },
     onError: (error, _variables, context) => {

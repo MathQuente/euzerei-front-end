@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants/messages'
 import type { GameBase } from '../types/games'
 import { notify } from '../utils/notify'
+import { invalidateUserGames } from './invalidateUserGames'
 import { api } from './useApi'
 import { useAuth } from './useAuth'
 
@@ -24,7 +25,7 @@ export const useAddGame = (igdbId?: string) => {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['games'] })
-      queryClient.invalidateQueries({ queryKey: ['userGames', userId] })
+      invalidateUserGames(queryClient, userId)
       queryClient.invalidateQueries({
         queryKey: ['gamesStatus', userId, igdbId],
       })
@@ -81,7 +82,7 @@ export const useAddGame = (igdbId?: string) => {
       queryClient.invalidateQueries({ queryKey: ['games'] })
       queryClient.invalidateQueries({ queryKey: ['gamesStatus'] })
       queryClient.invalidateQueries({ queryKey: ['rating', userId, igdbId] })
-      queryClient.invalidateQueries({ queryKey: ['userGames', userId] })
+      invalidateUserGames(queryClient, userId)
       queryClient.invalidateQueries({ queryKey: ['userProfile', userId] })
       queryClient.invalidateQueries({ queryKey: ['gameSearch'] })
       queryClient.invalidateQueries({ queryKey: ['comingSoon'] })
@@ -109,7 +110,7 @@ export const useAddGame = (igdbId?: string) => {
     },
     onSuccess: () => {
       queryClient.removeQueries({ queryKey: ['gamesStatus', userId, igdbId] })
-      queryClient.invalidateQueries({ queryKey: ['userGames', userId] })
+      invalidateUserGames(queryClient, userId)
       queryClient.invalidateQueries({ queryKey: ['gamesStatus'] })
       notify.success(SUCCESS_MESSAGES.gameRemoved)
     },
@@ -122,7 +123,7 @@ export const useAddGame = (igdbId?: string) => {
       notify.failure(err, ERROR_MESSAGES.removeGame)
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['userGames', userId] })
+      invalidateUserGames(queryClient, userId)
       queryClient.invalidateQueries({ queryKey: ['gamesStatus'] })
       queryClient.invalidateQueries({ queryKey: ['rating', userId, igdbId] })
       queryClient.invalidateQueries({ queryKey: ['userProfile', userId] })

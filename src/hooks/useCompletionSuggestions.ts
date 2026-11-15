@@ -6,6 +6,7 @@ import type { LibraryPlatform } from '../types/platform'
 import type { CompletionSuggestion } from '../types/suggestion'
 import { getErrorMessage } from '../utils/getErrorMessage'
 import { notify } from '../utils/notify'
+import { invalidateUserGames } from './invalidateUserGames'
 import { api } from './useApi'
 import { useAuth } from './useAuth'
 
@@ -72,7 +73,7 @@ export const useCompletionSuggestions = (
   const invalidateGame = useCallback(
     (igdbId: number) => {
       const id = String(igdbId)
-      queryClient.invalidateQueries({ queryKey: ['userGames', userId] })
+      invalidateUserGames(queryClient, userId)
       queryClient.invalidateQueries({ queryKey: ['userProfile', userId] })
       queryClient.invalidateQueries({ queryKey: ['gamesStatus', userId, id] })
       queryClient.invalidateQueries({ queryKey: ['gameStats', userId, id] })
@@ -104,7 +105,8 @@ export const useCompletionSuggestions = (
     showToast = true
   ): ActionResult {
     const message = getErrorMessage(error, fallback)
-    if (showToast && !isConflict(error)) notify.error(message)
+    if (showToast && !isConflict(error))
+      notify.error(message, { announce: false })
     return { ok: false, message }
   }
 

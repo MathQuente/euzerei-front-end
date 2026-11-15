@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ERROR_MESSAGES } from '../constants/messages'
 import type { GameStatusResponse } from '../types/games'
 import { notify } from '../utils/notify'
+import { invalidateUserGames } from './invalidateUserGames'
 import { api } from './useApi'
 import { useAuth } from './useAuth'
 import { useGameStatus } from './useGameStatus'
@@ -35,7 +36,7 @@ export const useEndless = (igdbId: string | undefined) => {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey })
-      queryClient.invalidateQueries({ queryKey: ['userGames', userId] })
+      invalidateUserGames(queryClient, userId)
       queryClient.invalidateQueries({ queryKey: ['userProfile', userId] })
     },
   })

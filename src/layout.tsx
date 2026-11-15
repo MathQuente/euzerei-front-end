@@ -10,6 +10,7 @@ import { AppToastContainer } from './components/appToastContainer'
 import { EmailVerificationNotice } from './components/emailVerificationNotice'
 import { Footer } from './components/footer'
 import { SideBar } from './components/sideBar'
+import { GameModalProvider } from './contexts/gameModal/gameModalProvider'
 import { isCanonicalReplace } from './hooks/useCanonicalGameUrl'
 import { useFocusOnRouteChange } from './hooks/useFocusOnRouteChange'
 import { parsePage } from './utils/parsePage'
@@ -45,14 +46,16 @@ export function Layout() {
   }, [pathname])
 
   return (
-    <div className="flex flex-col min-h-screen bg-dark-bg mx-auto w-full max-w-[1920px] overflow-x-clip px-4 sm:px-6 lg:px-10 2xl:px-16 pt-4 pb-8">
-      <SideBar />
-      <EmailVerificationNotice />
-      <main className="flex min-w-0 flex-1 flex-col">
-        <Outlet />
-      </main>
-      <Footer />
-      <AppToastContainer />
-    </div>
+    <GameModalProvider>
+      <div className="flex flex-col min-h-screen bg-dark-bg mx-auto w-full max-w-[1920px] overflow-x-clip px-4 sm:px-6 lg:px-10 2xl:px-16 pt-4 pb-8">
+        <SideBar />
+        <EmailVerificationNotice />
+        <main className="flex min-w-0 flex-1 flex-col">
+          <Outlet />
+        </main>
+        <Footer />
+        <AppToastContainer />
+      </div>
+    </GameModalProvider>
   )
 }

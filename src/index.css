@@ -19,3 +19,9 @@ main[tabindex="-1"]:focus {
   margin-inline-end: 0 !important;
   width: auto !important;
 }
+
+@media (max-width: 480px) {
+  .app-toasts.Toastify__toast-container {
+    padding: 0.5rem 0.5rem 0;
+  }
+}

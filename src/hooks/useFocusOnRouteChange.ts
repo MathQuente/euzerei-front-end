@@ -15,7 +15,7 @@ function focusTarget(el: HTMLElement) {
   el.focus({ preventScroll: true })
 }
 
-function focusMainHeading(allowMainFallback: boolean) {
+export function focusMainHeading(allowMainFallback: boolean) {
   const h1 = document.querySelector<HTMLElement>('main h1')
   if (h1) {
     focusTarget(h1)

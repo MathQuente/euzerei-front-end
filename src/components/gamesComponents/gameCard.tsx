@@ -11,12 +11,11 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import { twMerge } from 'tailwind-merge'
+import { useGameModal } from '../../hooks/useGameModal'
 import type { GameCardProps } from '../../interfaces/games'
 import { focusRing } from '../../styles/focus'
 import { hiResCover } from '../../utils/hiResCover'
 import { getLibraryPlatform } from '../../utils/libraryPlatforms'
-import { GameInfo } from './gameInfo'
-import { GameModal } from './gameModal'
 
 export const LIBRARY_STATUS_BADGES: Record<
   string,
@@ -129,7 +128,7 @@ export function GameCard({
   enableModal,
   interactive = true,
 }: GameCardProps) {
-  const [open, setOpen] = useState(false)
+  const openGame = useGameModal()
   const [loadedSrc, setLoadedSrc] = useState<string | null>(null)
   const [failedSrc, setFailedSrc] = useState<string | null>(null)
   const coverSrc = game?.coverUrl ? hiResCover(game.coverUrl) : null
@@ -318,7 +317,10 @@ export function GameCard({
         {interactive ? (
           <button
             type="button"
-            onClick={() => enableModal && setOpen(true)}
+            data-game-id={game?.igdbId}
+            onClick={event =>
+              enableModal && game && openGame(game, event.currentTarget)
+            }
             className={cardClassName}
           >
             {cardContent}
@@ -327,12 +329,6 @@ export function GameCard({
           <div className={cardClassName}>{cardContent}</div>
         )}
       </div>
-
-      {enableModal && (
-        <GameModal open={open} onOpenChange={setOpen}>
-          <GameInfo game={game} onClose={() => setOpen(false)} />
-        </GameModal>
-      )}
     </>
   )
 }

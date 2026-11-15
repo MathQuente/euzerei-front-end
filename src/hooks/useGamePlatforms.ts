@@ -7,6 +7,7 @@ import type {
   UserGamePlatformsResponse,
 } from '../types/platform'
 import { notify } from '../utils/notify'
+import { invalidateUserGames } from './invalidateUserGames'
 import { api } from './useApi'
 import { useAuth } from './useAuth'
 
@@ -26,7 +27,7 @@ export const useGamePlatforms = (igdbId: string, enabled: boolean) => {
   const onChanged = (next: UserGamePlatformsResponse) => {
     queryClient.setQueryData(queryKey, next)
     queryClient.invalidateQueries({ queryKey })
-    queryClient.invalidateQueries({ queryKey: ['userGames', userId] })
+    invalidateUserGames(queryClient, userId)
     queryClient.invalidateQueries({ queryKey: ['userProfile', userId] })
     queryClient.invalidateQueries({ queryKey: ['gameHours', userId, igdbId] })
     queryClient.invalidateQueries({

@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants/messages'
 import type { ImportStatusResponse } from '../types/import'
 import { notify } from '../utils/notify'
+import { invalidateUserGames } from './invalidateUserGames'
 import { useAuth } from './useAuth'
 
 const POLLING_STATUSES = ['waiting', 'active', 'delayed']
@@ -67,7 +68,7 @@ export const usePlatformImport = <TResult>(
     mutationFn: (accountId?: string) => config.disconnect(accountId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userProfile', userId] })
-      queryClient.invalidateQueries({ queryKey: ['userGames', userId] })
+      invalidateUserGames(queryClient, userId)
       queryClient.invalidateQueries({ queryKey: ['games'] })
       queryClient.invalidateQueries({ queryKey: ['gamePlatforms', userId] })
       queryClient.invalidateQueries({ queryKey: ['gameHours', userId] })
@@ -91,7 +92,7 @@ export const usePlatformImport = <TResult>(
   })
 
   const refreshAfterImport = () => {
-    queryClient.invalidateQueries({ queryKey: ['userGames', userId] })
+    invalidateUserGames(queryClient, userId)
     queryClient.invalidateQueries({ queryKey: ['userProfile', userId] })
     queryClient.invalidateQueries({ queryKey: ['games'] })
     queryClient.invalidateQueries({ queryKey: ['gamePlatforms', userId] })

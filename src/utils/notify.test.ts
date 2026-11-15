@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const toastMock = vi.hoisted(() => {
   const fn = {
@@ -85,5 +85,68 @@ describe('notify', () => {
     notify.error('Algo deu errado. Tente de novo.')
     const options = toastMock.error.mock.calls[0][1] as object
     expect(Object.keys(options)).toEqual(['role'])
+  })
+})
+
+describe('notify live region', () => {
+  function stubPage(rootHidden: string | null) {
+    const regions = {
+      'notify-live-polite': { textContent: '' },
+      'notify-live-assertive': { textContent: '' },
+    }
+    vi.stubGlobal('document', {
+      querySelector: (selector: string) =>
+        selector === '.Toastify'
+          ? { closest: () => (rootHidden === 'true' ? {} : null) }
+          : null,
+      getElementById: (id: string) =>
+        regions[id as keyof typeof regions] ?? null,
+    })
+    vi.stubGlobal('window', {
+      setTimeout: (callback: () => void) => {
+        callback()
+        return 0
+      },
+    })
+    return regions
+  }
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('repeats a text message in the polite region while a dialog hides the toast container', () => {
+    const regions = stubPage('true')
+    notify.success('Status atualizado.')
+    expect(regions['notify-live-polite'].textContent).toBe('Status atualizado.')
+    expect(regions['notify-live-assertive'].textContent).toBe('')
+  })
+
+  it('repeats errors in the assertive region', () => {
+    const regions = stubPage('true')
+    notify.error('Algo deu errado. Tente de novo.')
+    expect(regions['notify-live-assertive'].textContent).toBe(
+      'Algo deu errado. Tente de novo.'
+    )
+  })
+
+  it('stays silent when the toast container is not hidden, because the toast is already announced', () => {
+    const regions = stubPage(null)
+    notify.success('Status atualizado.')
+    expect(regions['notify-live-polite'].textContent).toBe('')
+  })
+
+  it('does not repeat a message when the caller already announces it', () => {
+    const regions = stubPage('true')
+    notify.success('Marcado como Jogado.', { announce: false })
+    notify.error('Não foi possível dispensar a sugestão.', { announce: false })
+    expect(regions['notify-live-polite'].textContent).toBe('')
+    expect(regions['notify-live-assertive'].textContent).toBe('')
+  })
+
+  it('ignores content that is not plain text', () => {
+    const regions = stubPage('true')
+    notify.success(() => null)
+    expect(regions['notify-live-polite'].textContent).toBe('')
   })
 })

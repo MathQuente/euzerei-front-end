@@ -6,6 +6,7 @@ import type {
 } from '../types/rating'
 import { notify } from '../utils/notify'
 import { invalidateGameLists } from './invalidateGameLists'
+import { invalidateUserGames } from './invalidateUserGames'
 import { api } from './useApi'
 import { useAuth } from './useAuth'
 
@@ -77,7 +78,7 @@ export const useRating = (igdbId: string | undefined) => {
       queryClient.invalidateQueries({
         queryKey: ['gamesStatus', userId, igdbId],
       })
-      queryClient.invalidateQueries({ queryKey: ['userGames', userId] })
+      invalidateUserGames(queryClient, userId)
       invalidateGameLists(queryClient)
       queryClient.invalidateQueries({ queryKey: ['userProfile', userId] })
     },
@@ -108,7 +109,7 @@ export const useRating = (igdbId: string | undefined) => {
       queryClient.invalidateQueries({
         queryKey: ['gamesStatus', userId, igdbId],
       })
-      queryClient.invalidateQueries({ queryKey: ['userGames', userId] })
+      invalidateUserGames(queryClient, userId)
       invalidateGameLists(queryClient)
       queryClient.invalidateQueries({ queryKey: ['userProfile', userId] })
     },

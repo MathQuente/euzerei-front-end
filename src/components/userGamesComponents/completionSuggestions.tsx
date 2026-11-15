@@ -234,7 +234,9 @@ export function CompletionSuggestionsBlock({
     }
     setLive(SUCCESS_MESSAGES.markedAsPlayed(suggestion.name))
     if (!result.canUndo) {
-      notify.success(SUCCESS_MESSAGES.markedAsPlayed(suggestion.name))
+      notify.success(SUCCESS_MESSAGES.markedAsPlayed(suggestion.name), {
+        announce: false,
+      })
       return
     }
     notify.success(

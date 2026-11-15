@@ -3,6 +3,7 @@ import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants/messages'
 import type { GameStatusResponse } from '../types/games'
 import { notify } from '../utils/notify'
 import { invalidateGameLists } from './invalidateGameLists'
+import { invalidateUserGames } from './invalidateUserGames'
 import { api } from './useApi'
 import { useAuth } from './useAuth'
 
@@ -44,7 +45,7 @@ export const useGameStatus = (igdbId: string | undefined) => {
       queryClient.invalidateQueries({
         queryKey: ['gamePlatforms', userId, igdbId],
       })
-      queryClient.invalidateQueries({ queryKey: ['userGames', userId] })
+      invalidateUserGames(queryClient, userId)
       queryClient.invalidateQueries({ queryKey: ['rating', userId, igdbId] })
       queryClient.invalidateQueries({ queryKey: ['ratings', igdbId] })
       queryClient.invalidateQueries({
@@ -52,7 +53,9 @@ export const useGameStatus = (igdbId: string | undefined) => {
           String(query.queryKey[0]) === igdbId &&
           query.queryKey[2] === 'averageRating',
       })
-      notify.success(SUCCESS_MESSAGES.statusUpdated)
+      notify.success(SUCCESS_MESSAGES.statusUpdated, {
+        id: 'game-status-feedback',
+      })
     },
     onError: error => {
       notify.failure(error, ERROR_MESSAGES.updateStatus)
