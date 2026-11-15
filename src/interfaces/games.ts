@@ -57,6 +57,7 @@ export interface GameListProps {
   onFilterChange?: (filter: GameStatusEnum | '') => void
   isUserLibrary?: boolean
   emptyState?: ReactNode
+  isChangingPage?: boolean
 }
 
 export interface GameListSectionProps extends ComponentProps<'div'> {
@@ -87,10 +88,6 @@ export interface RatingAverageProps {
   game: GameCardData | undefined
   isForGamePage?: boolean
   justAverage?: boolean
-}
-
-export interface RatingChartProps {
-  GameResponse: GameResponse
 }
 
 export interface DetailsProps {

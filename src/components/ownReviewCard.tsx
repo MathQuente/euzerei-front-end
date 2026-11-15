@@ -7,11 +7,12 @@ import { usePlayedCount } from '../hooks/usePlayedCount'
 import { useRating } from '../hooks/useRating'
 import { useReview } from '../hooks/useReview'
 import { useReviewPermission } from '../hooks/useReviewPermission'
-import type { GameStatusEnum } from '../types/games'
+import type { GameCardData, GameStatusEnum } from '../types/games'
 import type { CommunityReview } from '../types/review'
 import { Button } from './button'
 import { CommunityReviewCard } from './communityReviewCard'
 import { ConfirmDialog } from './confirmDialog'
+import { OwnRatingEntry } from './ownRatingEntry'
 import { ReviewEditor } from './reviewEditor'
 import { ReviewRequirement } from './reviewRequirement'
 import { StatusLink } from './statusMessage'
@@ -20,17 +21,17 @@ const lockedPanel =
   'bg-dark-bg-light border border-dashed border-dark-border rounded-lg p-4 flex flex-col gap-3'
 
 const editingPanel =
-  'bg-dark-bg-lighter border border-primary-light rounded-lg p-4 flex flex-col gap-3'
+  'bg-dark-bg-lighter border border-dark-border rounded-lg p-4 flex flex-col gap-3'
 
 export function OwnReviewCard({
   igdbId,
-  gameName,
-  releaseDate,
+  game,
 }: {
   igdbId: string
-  gameName: string
-  releaseDate?: number | null
+  game: GameCardData
 }) {
+  const gameName = game.name
+  const releaseDate = game.releaseDate
   const { user } = useAuth()
   const { review, isLoading, saveReview, deleteReview, isSaving, isDeleting } =
     useReview(igdbId)
@@ -78,13 +79,17 @@ export function OwnReviewCard({
     return (
       <section aria-labelledby="own-review-title" className={lockedPanel}>
         <h2 id="own-review-title" className="text-sm font-semibold text-white">
-          Sua resenha
+          Sua nota e sua resenha
         </h2>
+        <OwnRatingEntry game={game} signedIn={false} />
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p id={loginNoticeId} className="text-sm text-gray-400">
-            Entre na sua conta para escrever uma resenha de {gameName}.
+            Entre na sua conta para avaliar e escrever uma resenha de {gameName}
+            .
           </p>
-          <StatusLink to="/auth?tab=login">Entrar para escrever</StatusLink>
+          <StatusLink to="/auth?tab=login">
+            Entrar para avaliar e escrever
+          </StatusLink>
         </div>
         <ReviewEditor
           initialText=""
@@ -113,6 +118,7 @@ export function OwnReviewCard({
           >
             Para escrever sua resenha de {gameName}
           </h2>
+          <OwnRatingEntry game={game} signedIn />
           <ReviewRequirement
             reason={blockedReason}
             variant="picker"
@@ -128,8 +134,9 @@ export function OwnReviewCard({
     return (
       <section aria-labelledby="own-review-title" className={editingPanel}>
         <h2 id="own-review-title" className="text-sm font-semibold text-white">
-          Sua resenha
+          Sua nota e sua resenha
         </h2>
+        <OwnRatingEntry game={game} signedIn />
         <p className="text-sm text-gray-400">
           Sua nota, suas horas e as vezes que zerou aparecem junto.
         </p>
@@ -174,7 +181,7 @@ export function OwnReviewCard({
     <section aria-labelledby="own-review-title" className={editingPanel}>
       <div className="flex items-center justify-between gap-3">
         <h2 id="own-review-title" className="text-sm font-semibold text-white">
-          Sua resenha
+          Sua nota e sua resenha
         </h2>
         {!editing && (
           <div className="flex items-center gap-2">
@@ -197,6 +204,8 @@ export function OwnReviewCard({
           </div>
         )}
       </div>
+
+      <OwnRatingEntry game={game} signedIn />
 
       {editing ? (
         <ReviewEditor

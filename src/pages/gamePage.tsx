@@ -178,7 +178,7 @@ export function GamePage() {
                 Média geral
               </p>
               <RatingAverage game={game} justAverage />
-              <RatingChart GameResponse={GameResponse} />
+              <RatingChart igdbId={game.igdbId.toString()} />
             </div>
 
             <PlayersInfo GameResponse={GameResponse} />

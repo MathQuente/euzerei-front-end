@@ -5,8 +5,19 @@ import type {
   RatingsDistributionResponse,
 } from '../types/rating'
 import { getErrorMessage } from '../utils/getErrorMessage'
+import { invalidateGameLists } from './invalidateGameLists'
 import { api } from './useApi'
 import { useAuth } from './useAuth'
+
+const RATING_TOAST_ID = 'rating-feedback'
+
+function notifyRating(message: string) {
+  if (toast.isActive(RATING_TOAST_ID)) {
+    toast.update(RATING_TOAST_ID, { render: message })
+  } else {
+    toast.success(message, { toastId: RATING_TOAST_ID })
+  }
+}
 
 const getRatingQueryKey = (userId: string, igdbId: string | undefined) => [
   'rating',
@@ -57,6 +68,8 @@ export const useRating = (igdbId: string | undefined) => {
         toast.success('Jogo adicionado como Jogando')
       } else if (response?.data?.promotedToPlayed) {
         toast.success('Avaliação salva. Jogo marcado como Jogado.')
+      } else {
+        notifyRating('Nota salva.')
       }
     },
     onError: (err, _, context) => {
@@ -69,11 +82,7 @@ export const useRating = (igdbId: string | undefined) => {
         queryKey: ['gamesStatus', userId, igdbId],
       })
       queryClient.invalidateQueries({ queryKey: ['userGames', userId] })
-      queryClient.invalidateQueries({ queryKey: ['games'] })
-      queryClient.invalidateQueries({ queryKey: ['gameSearch'] })
-      queryClient.invalidateQueries({ queryKey: ['comingSoon'] })
-      queryClient.invalidateQueries({ queryKey: ['gamesFeatured'] })
-      queryClient.invalidateQueries({ queryKey: ['similarGames'] })
+      invalidateGameLists(queryClient)
       queryClient.invalidateQueries({ queryKey: ['userProfile', userId] })
     },
   })
@@ -87,6 +96,7 @@ export const useRating = (igdbId: string | undefined) => {
       return { previous }
     },
     onSuccess: () => {
+      notifyRating('Nota removida.')
       queryClient.invalidateQueries({ queryKey: ['rating', userId, igdbId] })
       queryClient.invalidateQueries({ queryKey: ['ratings', igdbId] })
       queryClient.invalidateQueries({
@@ -102,6 +112,9 @@ export const useRating = (igdbId: string | undefined) => {
       queryClient.invalidateQueries({
         queryKey: ['gamesStatus', userId, igdbId],
       })
+      queryClient.invalidateQueries({ queryKey: ['userGames', userId] })
+      invalidateGameLists(queryClient)
+      queryClient.invalidateQueries({ queryKey: ['userProfile', userId] })
     },
   })
 

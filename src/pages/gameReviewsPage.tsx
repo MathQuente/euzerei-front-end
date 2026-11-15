@@ -151,90 +151,98 @@ export function GameReviewsPage() {
 
       <ReviewSummary igdbId={igdbId} />
 
-      {game && (
-        <OwnReviewCard
-          igdbId={igdbId}
-          gameName={game.name}
-          releaseDate={game.releaseDate}
-        />
-      )}
+      {game && <OwnReviewCard igdbId={igdbId} game={game} />}
 
-      <div className="flex flex-col gap-3">
-        {isLoading ? (
-          <div className="flex flex-col gap-3">
-            {Array.from({ length: 3 }, (_, i) => `sk${i}`).map(k => (
-              <div
-                key={k}
-                className="h-32 rounded-lg border border-dark-border bg-dark-bg-light animate-pulse"
-              />
-            ))}
-          </div>
-        ) : isError ? (
-          // biome-ignore lint/a11y/useSemanticElements: role="alert" explícito, não há elemento nativo equivalente (<output> é status, não alert)
-          <div
-            role="alert"
-            className="flex items-center justify-between gap-4 rounded-lg border border-dark-border bg-dark-bg-light px-4 py-3"
-          >
-            <div>
-              <p className="text-red-400 text-sm">
-                Não foi possível carregar as resenhas
+      <section
+        aria-labelledby="community-reviews-title"
+        className="mt-3 flex flex-col gap-4"
+      >
+        <h2
+          id="community-reviews-title"
+          className="flex items-center gap-4 text-center text-[13px] font-normal uppercase tracking-[0.08em] text-gray-400 before:h-px before:flex-1 before:bg-dark-border after:h-px after:flex-1 after:bg-dark-border"
+        >
+          Resenhas da comunidade
+        </h2>
+        <div className="flex flex-col gap-3">
+          {isLoading ? (
+            <div className="flex flex-col gap-3">
+              {Array.from({ length: 3 }, (_, i) => `sk${i}`).map(k => (
+                <div
+                  key={k}
+                  className="h-32 rounded-lg border border-dark-border bg-dark-bg-light animate-pulse"
+                />
+              ))}
+            </div>
+          ) : isError ? (
+            // biome-ignore lint/a11y/useSemanticElements: role="alert" explícito, não há elemento nativo equivalente (<output> é status, não alert)
+            <div
+              role="alert"
+              className="flex items-center justify-between gap-4 rounded-lg border border-dark-border bg-dark-bg-light px-4 py-3"
+            >
+              <div>
+                <p className="text-red-400 text-sm">
+                  Não foi possível carregar as resenhas
+                </p>
+                <p className="text-gray-400 text-xs">
+                  Verifique a conexão e tente de novo.
+                </p>
+              </div>
+              <Button variant="secondary" size="md" onClick={() => refetch()}>
+                Tentar novamente
+              </Button>
+            </div>
+          ) : total === 0 ? (
+            <div className="flex flex-col items-center gap-1 py-4 text-center">
+              <p className="text-sm font-medium text-gray-200">
+                Ninguém publicou uma resenha desse jogo.
               </p>
-              <p className="text-gray-400 text-xs">
-                Verifique a conexão e tente de novo.
+              <p className="text-sm text-gray-400">
+                Quando alguém publicar, aparece aqui. A sua pode ser a primeira.
               </p>
             </div>
-            <Button variant="secondary" size="md" onClick={() => refetch()}>
-              Tentar novamente
-            </Button>
-          </div>
-        ) : total === 0 ? (
-          <StatusMessage
-            variant="empty"
-            title="Nenhuma resenha pública ainda"
-            description="Ninguém publicou uma resenha desse jogo."
-          />
-        ) : others.length === 0 ? (
-          <>
-            <p className="text-sm text-gray-400">
-              {page === 1
-                ? 'Ninguém mais publicou uma resenha desse jogo.'
-                : 'Não há outras resenhas nesta página.'}
-            </p>
-            {totalPages > 1 && (
+          ) : others.length === 0 ? (
+            <>
+              <p className="text-sm text-gray-400">
+                {page === 1
+                  ? 'Ninguém mais publicou uma resenha desse jogo.'
+                  : 'Não há outras resenhas nesta página.'}
+              </p>
+              {totalPages > 1 && (
+                <Pagination
+                  currentPage={page}
+                  totalPages={totalPages}
+                  totalItems={othersTotal}
+                  itemsPerPage={0}
+                  onPageChange={handlePageChange}
+                />
+              )}
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-gray-400">
+                {othersTotal} {othersTotal === 1 ? 'resenha' : 'resenhas'}
+                {hasOwn ? ' de outras pessoas' : ''}
+              </p>
+              <div ref={listRef} className="flex flex-col gap-3 scroll-mt-6">
+                {others.map(review => (
+                  <CommunityReviewCard
+                    key={review.userId}
+                    review={review}
+                    expandable
+                  />
+                ))}
+              </div>
               <Pagination
                 currentPage={page}
                 totalPages={totalPages}
                 totalItems={othersTotal}
-                itemsPerPage={0}
+                itemsPerPage={others.length}
                 onPageChange={handlePageChange}
               />
-            )}
-          </>
-        ) : (
-          <>
-            <p className="text-sm text-gray-400">
-              {othersTotal} {othersTotal === 1 ? 'resenha' : 'resenhas'}
-              {hasOwn ? ' de outras pessoas' : ''}
-            </p>
-            <div ref={listRef} className="flex flex-col gap-3 scroll-mt-6">
-              {others.map(review => (
-                <CommunityReviewCard
-                  key={review.userId}
-                  review={review}
-                  expandable
-                />
-              ))}
-            </div>
-            <Pagination
-              currentPage={page}
-              totalPages={totalPages}
-              totalItems={othersTotal}
-              itemsPerPage={others.length}
-              onPageChange={handlePageChange}
-            />
-          </>
-        )}
-      </div>
+            </>
+          )}
+        </div>
+      </section>
     </div>
   )
 }
