@@ -28,6 +28,7 @@ export function ConfirmDialog({
   children?: ReactNode
 }) {
   const contentRef = useRef<HTMLDivElement>(null)
+  const returnFocusRef = useRef<HTMLElement | null>(null)
 
   const handleOpenChange = (next: boolean) => {
     if (lockWhileLoading && isLoading) return
@@ -42,9 +43,21 @@ export function ConfirmDialog({
           ref={contentRef}
           onOpenAutoFocus={event => {
             event.preventDefault()
+            const opener = document.activeElement
+            returnFocusRef.current =
+              opener instanceof HTMLElement && opener !== document.body
+                ? opener
+                : null
             contentRef.current
               ?.querySelector<HTMLButtonElement>('[data-cancel]')
               ?.focus()
+          }}
+          onCloseAutoFocus={event => {
+            const opener = returnFocusRef.current
+            returnFocusRef.current = null
+            if (!opener?.isConnected) return
+            event.preventDefault()
+            opener.focus({ preventScroll: true })
           }}
           className="w-[calc(100vw-2rem)] max-w-[380px] fixed bg-dark-bg-lighter text-white top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-lg z-confirm-content p-5 flex flex-col gap-4"
         >
