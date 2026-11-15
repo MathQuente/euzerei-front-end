@@ -86,11 +86,11 @@ const router = createBrowserRouter([
             element: <ComingSoonPage />,
           },
           {
-            path: '/games/:igdbId',
+            path: '/games/:gameRef',
             element: <GamePage />,
           },
           {
-            path: '/games/:igdbId/reviews',
+            path: '/games/:gameRef/reviews',
             element: <GameReviewsPage />,
           },
           {

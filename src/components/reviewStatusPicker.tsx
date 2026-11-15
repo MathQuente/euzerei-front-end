@@ -5,6 +5,7 @@ import { USER_GAME_STATUS_ID as STATUS } from '../constants/gameStatus'
 import { useAddGame } from '../hooks/useAddGame'
 import { useGameStatus } from '../hooks/useGameStatus'
 import { focusRing } from '../styles/focus'
+import { gamePath } from '../utils/gamePath'
 
 const OPTIONS: { statusId: number; icon: LucideIcon; label: string }[] = [
   { statusId: STATUS.PLAYED, icon: Gamepad2, label: 'Jogado' },
@@ -15,11 +16,13 @@ const OPTIONS: { statusId: number; icon: LucideIcon; label: string }[] = [
 
 export function ReviewStatusPicker({
   igdbId,
+  slug,
   inLibrary,
   inBacklog = false,
   onPicked,
 }: {
   igdbId: string
+  slug?: string | null
   inLibrary: boolean
   inBacklog?: boolean
   onPicked?: () => void
@@ -79,7 +82,7 @@ export function ReviewStatusPicker({
             Se você já jogou e quer manter na fila, registre horas ou uma
             finalização em{' '}
             <Link
-              to={`/games/${igdbId}#biblioteca`}
+              to={gamePath({ igdbId, slug }, { hash: '#biblioteca' })}
               className={`text-primary-link hover:text-white transition-colors rounded-sm ${focusRing}`}
             >
               Minha biblioteca

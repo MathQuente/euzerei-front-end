@@ -10,12 +10,13 @@ import 'react-toastify/dist/ReactToastify.css'
 import { EmailVerificationNotice } from './components/emailVerificationNotice'
 import { Footer } from './components/footer'
 import { SideBar } from './components/sideBar'
+import { isCanonicalReplace } from './hooks/useCanonicalGameUrl'
 import { useFocusOnRouteChange } from './hooks/useFocusOnRouteChange'
 import { parsePage } from './utils/parsePage'
 
 export function Layout() {
   useFocusOnRouteChange()
-  const { pathname, hash, search } = useLocation()
+  const { pathname, hash, search, state } = useLocation()
   const navigationType = useNavigationType()
   const navigate = useNavigate()
 
@@ -35,7 +36,12 @@ export function Layout() {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: só a troca de pathname rola ao topo; hash e navigationType são lidos na hora e, como dependências, rolariam também ao mudar só ?page= ou o hash
   useEffect(() => {
-    if (navigationType !== 'POP' && !hash) window.scrollTo(0, 0)
+    if (
+      navigationType !== 'POP' &&
+      !hash &&
+      !isCanonicalReplace(navigationType, state)
+    )
+      window.scrollTo(0, 0)
   }, [pathname])
 
   return (

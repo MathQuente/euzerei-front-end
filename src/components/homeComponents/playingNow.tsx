@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import type { UserGameEntry } from '../../types/games'
+import { gamePath } from '../../utils/gamePath'
 import { formatHours } from '../../utils/hours'
 import { getLibraryPlatform } from '../../utils/libraryPlatforms'
 import { GameCard } from '../gamesComponents/gameCard'
@@ -77,7 +78,7 @@ export function PlayingNow({
       {shown.length === 1 && (
         <div className="mt-4 flex items-end gap-4 lg:gap-6">
           <Link
-            to={`/games/${encodeURIComponent(shown[0].igdbId)}`}
+            to={gamePath(shown[0])}
             className={`w-28 flex-none sm:w-36 lg:w-44 ${coverLink}`}
           >
             <GameCard game={shown[0]} size="medium" interactive={false} />
@@ -102,10 +103,7 @@ export function PlayingNow({
               key={game.igdbId}
               className={`min-w-0 lg:w-40 xl:w-44 ${EXTRA_VISIBILITY[index]}`}
             >
-              <Link
-                to={`/games/${encodeURIComponent(game.igdbId)}`}
-                className={coverLink}
-              >
+              <Link to={gamePath(game)} className={coverLink}>
                 <GameCard game={game} size="medium" interactive={false} />
               </Link>
               <p className="mt-2 line-clamp-2 text-sm font-semibold leading-snug text-white lg:text-base">

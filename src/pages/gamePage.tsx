@@ -18,8 +18,10 @@ import { SectionHeading } from '../components/sectionHeading'
 import { SimilarGamesSlider } from '../components/similarGamesSlider'
 import { StatusLink, StatusMessage } from '../components/statusMessage'
 import { useAuth } from '../hooks/useAuth'
+import { useCanonicalGameUrl } from '../hooks/useCanonicalGameUrl'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useGame } from '../hooks/useGame'
+import { useGameRef } from '../hooks/useGameRef'
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion'
 import { focusRing } from '../styles/focus'
 import { hiResCover } from '../utils/hiResCover'
@@ -27,19 +29,18 @@ import { formatReleaseDate } from '../utils/releaseDate'
 
 export function GamePage() {
   const { user } = useAuth()
-  const { igdbId } = useParams<{ igdbId: string }>()
+  const { gameRef } = useParams<{ gameRef: string }>()
   const { hash } = useLocation()
-  const {
-    GameResponse,
-    SimilarGames,
-    isValidId,
-    isNotFound,
-    isLoadFailed,
-    refetch,
-  } = useGame(igdbId)
+  const ref = useGameRef(gameRef)
+  const igdbId = ref.igdbId
+  const { GameResponse, SimilarGames, isNotFound, isLoadFailed, refetch } =
+    useGame(igdbId)
   const isLoaded = Boolean(GameResponse)
+  useCanonicalGameUrl(GameResponse?.game)
+  const showNotFound = ref.isNotFound || isNotFound
+  const showLoadFailed = ref.isFailed || isLoadFailed
   useDocumentTitle(
-    isLoadFailed || !isValidId || isNotFound
+    showLoadFailed || showNotFound
       ? undefined
       : (GameResponse?.game.name ?? 'Jogo')
   )
@@ -52,7 +53,7 @@ export function GamePage() {
     })
   }, [hash, isLoaded, prefersReducedMotion])
 
-  if (isLoadFailed) {
+  if (showLoadFailed) {
     return (
       <>
         <BackButton className="mt-4" />
@@ -62,7 +63,11 @@ export function GamePage() {
           title="Não foi possível carregar o jogo"
           description="A conexão falhou ou o servidor não respondeu. Tente de novo em instantes."
           primaryAction={
-            <Button variant="secondary" size="md" onClick={() => refetch()}>
+            <Button
+              variant="secondary"
+              size="md"
+              onClick={() => (ref.isFailed ? ref.refetch() : refetch())}
+            >
               Tentar novamente
             </Button>
           }
@@ -71,7 +76,7 @@ export function GamePage() {
     )
   }
 
-  if (!isValidId || isNotFound) {
+  if (showNotFound) {
     return (
       <>
         <BackButton className="mt-4" />
@@ -261,7 +266,7 @@ export function GamePage() {
             </div>
           )}
 
-          <CommunityReviewsSection igdbId={igdbId} />
+          <CommunityReviewsSection igdbId={igdbId} slug={game.slug} />
 
           <Details GameResponse={GameResponse} />
 

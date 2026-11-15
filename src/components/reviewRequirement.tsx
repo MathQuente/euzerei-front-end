@@ -7,6 +7,7 @@ export function ReviewRequirement({
   reason,
   variant,
   igdbId,
+  slug,
   inLibrary,
   inBacklog = false,
   onPicked,
@@ -14,6 +15,7 @@ export function ReviewRequirement({
   reason: ReviewBlockedReason
   variant: 'link' | 'picker'
   igdbId: string
+  slug?: string | null
   inLibrary: boolean
   inBacklog?: boolean
   onPicked?: () => void
@@ -31,6 +33,7 @@ export function ReviewRequirement({
     return (
       <ReviewStatusPicker
         igdbId={igdbId}
+        slug={slug}
         inLibrary={inLibrary}
         inBacklog={inBacklog}
         onPicked={onPicked}

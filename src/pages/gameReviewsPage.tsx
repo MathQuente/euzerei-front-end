@@ -16,21 +16,26 @@ import { ReviewSummary } from '../components/reviewSummary'
 import { StatusLink, StatusMessage } from '../components/statusMessage'
 import { api } from '../hooks/useApi'
 import { useAuth } from '../hooks/useAuth'
+import { useCanonicalGameUrl } from '../hooks/useCanonicalGameUrl'
 import { useCommunityReviews } from '../hooks/useCommunityReviews'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { DETAIL_STALE_MS } from '../hooks/useGame'
+import { useGameRef } from '../hooks/useGameRef'
 import { useReview } from '../hooks/useReview'
 import { focusRing } from '../styles/focus'
 import type { GameResponse } from '../types/games'
+import { gamePath } from '../utils/gamePath'
 import { hiResCover } from '../utils/hiResCover'
-import { isValidIgdbId } from '../utils/isValidIgdbId'
 import { parsePage } from '../utils/parsePage'
 
 const PAGE_SIZE = 10
 
 export function GameReviewsPage() {
-  const { igdbId } = useParams<{ igdbId: string }>()
+  const { gameRef } = useParams<{ gameRef: string }>()
   const { user } = useAuth()
-  const isValidId = isValidIgdbId(igdbId)
+  const ref = useGameRef(gameRef)
+  const igdbId = ref.igdbId
+  const isValidId = igdbId !== undefined
   const listRef = useRef<HTMLDivElement>(null)
   const navigationType = useNavigationType()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -54,9 +59,11 @@ export function GameReviewsPage() {
   const { data: gameData, error: gameError } = useQuery<GameResponse>({
     queryKey: ['game', igdbId],
     queryFn: () => api.getGame(igdbId),
+    staleTime: DETAIL_STALE_MS,
     enabled: isValidId,
   })
   const game = gameData?.game
+  useCanonicalGameUrl(game, { reviews: true })
 
   const { review: ownReview } = useReview(isValidId ? igdbId : undefined)
 
@@ -85,14 +92,14 @@ export function GameReviewsPage() {
     isAxiosError(gameError) && gameError.response?.status === 404
 
   useDocumentTitle(
-    !isValidId || isGameNotFound
+    ref.isNotFound || isGameNotFound
       ? undefined
       : game
         ? `Resenhas de ${game.name}`
         : 'Resenhas da comunidade'
   )
 
-  if (!isValidId || isGameNotFound) {
+  if (ref.isNotFound || isGameNotFound) {
     return (
       <>
         <BackButton className="mt-4" />
@@ -103,6 +110,34 @@ export function GameReviewsPage() {
           primaryAction={<StatusLink to="/games">Ver catálogo</StatusLink>}
         />
       </>
+    )
+  }
+
+  if (ref.isFailed) {
+    return (
+      <>
+        <BackButton className="mt-4" />
+        <StatusMessage
+          variant="error"
+          icon="offline"
+          title="Não foi possível carregar o jogo"
+          description="A conexão falhou ou o servidor não respondeu. Tente de novo em instantes."
+          primaryAction={
+            <Button variant="secondary" size="md" onClick={() => ref.refetch()}>
+              Tentar novamente
+            </Button>
+          }
+        />
+      </>
+    )
+  }
+
+  if (igdbId === undefined) {
+    return (
+      <div className="w-full max-w-[960px] mx-auto flex flex-col gap-5">
+        <BackButton className="mt-4" />
+        <div className="h-40 rounded-lg border border-dark-border bg-dark-bg-light animate-pulse" />
+      </div>
     )
   }
 
@@ -136,7 +171,7 @@ export function GameReviewsPage() {
           {game ? (
             <p className="text-sm text-gray-400">
               <Link
-                to={`/games/${igdbId}`}
+                to={gamePath(game)}
                 className={`text-primary-link hover:text-white transition-colors rounded-sm ${focusRing}`}
               >
                 {game.name}

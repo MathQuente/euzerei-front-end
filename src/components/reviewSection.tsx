@@ -38,6 +38,7 @@ export function ReviewSection({ game }: { game: GameCardData }) {
           reason={blockedReason}
           variant="link"
           igdbId={igdbId}
+          slug={game.slug}
           inLibrary={inLibrary}
           inBacklog={inBacklog}
         />

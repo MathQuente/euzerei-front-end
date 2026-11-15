@@ -9,6 +9,7 @@ import type {
   GameToDisplayResponse,
   UserGameEntry,
 } from '../../types/games'
+import { gamePath } from '../../utils/gamePath'
 import { Button } from '../button'
 import { GameCard } from '../gamesComponents/gameCard'
 import { coverLink, sectionTitle, textLink } from './styles'
@@ -74,7 +75,7 @@ function Suggestion({
       className={`mt-4 flex items-end gap-4 lg:gap-6 ${swapped ? SWAP_IN : ''}`}
     >
       <Link
-        to={`/games/${encodeURIComponent(game.igdbId)}`}
+        to={gamePath(game)}
         className={`w-28 flex-none sm:w-36 lg:w-44 ${coverLink}`}
       >
         <GameCard game={game} size="medium" interactive={false} />
@@ -202,7 +203,7 @@ export function NextUp({
                   className="min-w-0 max-w-full lg:flex-none"
                 >
                   <Link
-                    to={`/games/${encodeURIComponent(game.igdbId)}`}
+                    to={gamePath(game)}
                     className={`group flex w-fit max-w-full items-center gap-3 rounded-lg px-2 py-1 transition-colors hover:bg-dark-bg-light active:bg-dark-bg-lighter ${focusRing}`}
                   >
                     <span className="flex-none">

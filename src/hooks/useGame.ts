@@ -4,6 +4,8 @@ import type { GameResponse, SimilarGamesResponse } from '../types/games'
 import { isValidIgdbId } from '../utils/isValidIgdbId'
 import { api } from './useApi'
 
+export const DETAIL_STALE_MS = 30_000
+
 export const useGame = (igdbId: string | undefined) => {
   const isValidId = isValidIgdbId(igdbId)
 
@@ -15,6 +17,7 @@ export const useGame = (igdbId: string | undefined) => {
   } = useQuery<GameResponse>({
     queryKey: ['game', igdbId],
     queryFn: async () => api.getGame(igdbId),
+    staleTime: DETAIL_STALE_MS,
     enabled: isValidId,
   })
 

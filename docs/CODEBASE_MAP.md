@@ -97,7 +97,7 @@ src/
   pages/                     one file per route
   schemas/                   zod schemas (login/signup/profile)
   types/                     domain types (games/user/rating/sidebar)
-  utils/                     helpers; `platformConsoles.ts` mirrors the back end console × platform map; `releaseDate.ts` formats IGDB release dates in UTC (IGDB sends midnight UTC, local formatting shows the previous day in Brazil); `platformLabel.ts` shortens platform names (PC, PS5, Xbox Series...)
+  utils/                     helpers; `gamePath.ts` builds every game link and parses the `:gameRef` param; `platformConsoles.ts` mirrors the back end console × platform map; `releaseDate.ts` formats IGDB release dates in UTC (IGDB sends midnight UTC, local formatting shows the previous day in Brazil); `platformLabel.ts` shortens platform names (PC, PS5, Xbox Series...)
 docs/                        this map
 ```
 
@@ -113,7 +113,7 @@ All routes are children of one `<Layout/>` (persistent `SideBar` + `ToastContain
 | `/search/:query` | `SearchResults` | `pages/searchResults.tsx` | No |
 | `/games` | `Games` | `pages/games.tsx` | No |
 | `/games/comingSoon` | `ComingSoonPage` | `pages/comingSoonPage.tsx` | No |
-| `/games/:igdbId` | `GamePage` | `pages/gamePage.tsx` | No (interactive parts hidden if logged out) |
+| `/games/:gameRef` | `GamePage` | `pages/gamePage.tsx` | No (interactive parts hidden if logged out). `:gameRef` is a slug (`/games/the-witcher-3-wild-hunt`) or a numeric id (`/games/1942`, old links); see Non-obvious behaviour. `/games/:gameRef/reviews` is `GameReviewsPage`. |
 | `/roulette` | `RouletteWheel` | `pages/rouletteWheel.tsx` | No (but needs `user.id` internally — see Gotchas) |
 | `/termos` | `TermsPage` | `pages/termsPage.tsx` | No (linked from the footer "O projeto" column and from the sign-up checkbox label) |
 | `/privacidade` | `PrivacyPage` | `pages/privacyPage.tsx` | No (same) |
@@ -160,6 +160,8 @@ Interconnection: `GameCard(enableModal=true)` owns local `open` state, lazily mo
 | Hook | Purpose | Query keys | Notes |
 |---|---|---|---|
 | `invalidateGameLists.ts` | Not a hook — `invalidateGameLists(queryClient)` invalidates the catalog lists only: `games`, `gameSearch`, `comingSoon`, `gamesFeatured`, `similarGames`. It does not touch `userGames` or `userProfile`; callers invalidate those themselves. Called by `useGameStatus`, `useRating`, `usePlayedCount` and `useHoursPlayed` so the catalog lists reflect a status/rating change. | n/a | Add a new list query key to `GAME_LIST_QUERY_KEYS` there. |
+| `useGameRef.ts` | Turns the `:gameRef` route param (slug or id) into the numeric id string the other hooks use; resolves a slug through `GET /games/slug/:slug`. | `['gameBySlug', slug]` (also seeds `['game', id]`) | Returns `igdbId`, `isNotFound`, `isResolving`, `isFailed`, `refetch`. |
+| `useCanonicalGameUrl.ts` | Replaces the address with `/games/<slug>[/reviews]` once the detail has a slug; exports `isCanonicalNavigation` for the scroll and focus effects. | n/a | See Non-obvious behaviour. |
 | `useApi.ts` | Not a hook — exports `api` (axios wrapper), also called directly by `sideBar.tsx`/`rouletteWheel.tsx`, bypassing hook layer. | n/a | Sort-field mapping gotcha, see below. |
 | `useGames.ts` | Catalog: paged, infinite (search), coming-soon, home-featured. | `['games',...]`, `['gamesInfinite',...]`, `['comingSoon',...]`, `['gamesFeatured']` (home: trending, most rated, recent releases; the counts come from the backend) | `keepPreviousData` on paging/sort. |
 | `useGamePlatforms.ts` | Per-game platform rows (`platform` + `console`, one row per console). `addPlatform/updatePlatform/removePlatform` take `(platform, console, ...)` and hit `/users/platforms/:igdbId/:platform/:console`; the response replaces the cache. | `['gamePlatforms', userId, igdbId]` | `PUT` with a known console adopts an existing `UNKNOWN` row of the same platform (no new row). Console × platform map mirrors the back end in `utils/platformConsoles.ts`. |
@@ -284,9 +286,10 @@ sequenceDiagram
 | `npm run lint` / `lint:fix` | `biome lint src` / with `--write` (safe fixes only). |
 | `npm run format` / `format:check` | `biome format --write src` / read-only. |
 | `npm run check` / `check:fix` | `biome check src` (format + lint + import order) / with `--write`. |
-| `npm run verify` | `typecheck` then `check`; run before committing. Exits 0 with no errors and no warnings. |
+| `npm run test` | `vitest run` (vitest 3, since the project is on Vite 5; vitest 4 needs Vite 6). `vitest.config.ts` is separate from `vite.config.ts` so tests do not load the CSP plugin. Tests live next to the code as `src/**/*.test.ts` (node environment, so only pure utilities are tested; there are no component tests). |
+| `npm run verify` | `typecheck`, then `check`, then `test`; run before committing. Exits 0 with no errors and no warnings. |
 
-There is no test runner. Biome is the only linter and formatter; ESLint and its plugins were removed from `devDependencies` (they had no config), so an `eslint-disable` comment would do nothing.
+The only tests are the pure utilities (`utils/gamePath.test.ts`). Biome is the only linter and formatter; ESLint and its plugins were removed from `devDependencies` (they had no config), so an `eslint-disable` comment would do nothing.
 
 ## Conventions
 
@@ -378,6 +381,7 @@ Reasons that used to live in code comments (the project keeps source files comme
 - `biome-ignore` comments carry a reason and stay in the code. Effects that list a value only as a trigger use the per-dependency form (`useExhaustiveDependencies(pathname)`); a hook with several diagnostics (`layout.tsx`) uses one whole-rule comment. In JSX the comment goes inside the opening tag, before the attribute whose line precedes the flagged one (Biome starts the diagnostic at the end of the previous attribute line), not above the element. Explicit `role="alert"`, `"status"`, `"img"` and `"search"` keep their `biome-ignore` for `useSemanticElements`.
 
 **Routing, scroll and errors**
+- **Game URLs use the slug** (`/games/<slug>`, `/games/<slug>/reviews`). The back end gives every cached game a unique `slug` (`lib` `games_cache.slug`); a game not cached yet comes with `slug: null` and its link falls back to the id. Rules: (1) every link is built by `gamePath(game, { reviews, search, hash })` in `utils/gamePath.ts`, never by hand; (2) the route param is parsed once at the page edge: `useGameRef(param)` (`hooks/useGameRef.ts`) uses `parseGameRef` (`id` = `^[1-9]\d{0,9}$`, `slug` = letters, digits and single dashes, not only digits, up to 100 chars, lower-cased; anything else is `invalid` and shows "Jogo não encontrado") and returns the numeric id **as a string**, which is what goes down to `useGame`, `useReview`, `useCommunityReviews`, `ReviewSummary` and `OwnReviewCard`, so the cache keys (`['game', id]`, `useRating`, `useGameStatus`) are the ones their mutations invalidate. A slug is resolved with `GET /games/slug/:slug`, and the response is written to `['game', id]` so `useGame` does not fetch again; (3) `useCanonicalGameUrl(game, { reviews })` replaces the URL once the detail arrives and has a `slug` (`navigate(..., { replace: true, state: { canonical: true } })`, keeping `search` and `hash`, so `?page=` and `#biblioteca` survive). It only runs when the path differs, so a list and a detail that disagree cost one replace, not a loop. `layout.tsx` (scroll to top) and `useFocusOnRouteChange` ignore a navigation whose state is `canonical`. `/games/comingSoon` is a static route and wins over `:gameRef`; React Router matches case-insensitively, so a game whose slug is `comingsoon` would hit it (none exists; the back end does not reserve it). The back end must have the migration and `backfill:slugs` before this front is deployed.
 - The app is on `react-router-dom` 7.18.5 and still imports from `react-router-dom` (the package is kept in v7, and `RouterProvider`/`createBrowserRouter` resolve from it), so the 50 imports did not change; the v6 `future` flags became the default and `main.tsx` has none. Redirect targets that come from the user go through `utils/safeRedirectPath.ts` (rejects `//` and `\`), which is what keeps a stored `redirectAfterLogin` from leaving the app. `sessionStorage` is per origin: the OAuth callback returns to `localhost`, so open the app on `localhost`, not `127.0.0.1`, when testing the redirect after login.
 - `layout.tsx` and `pages/gameReviewsPage.tsx`: the router keeps the scroll when changing page. A new page starts at the top; back/forward (POP) and anchor links (`#biblioteca`) are left as they are. Coming from "Ver todas" at the bottom of the game page, the reviews page goes to the top, but on browser back the restored scroll stays.
 - `pages/userProfilePage.tsx`: the back end answers 400 for an id that is not a UUID and 404 for a UUID that does not exist; both show the not-found screen.

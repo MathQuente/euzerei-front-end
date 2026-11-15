@@ -9,6 +9,7 @@ export enum GameStatusEnum {
 
 export interface GameCardData {
   igdbId: number
+  slug?: string | null
   name: string
   coverUrl: string | null
   releaseDate?: number | null
@@ -101,7 +102,12 @@ export interface TotalPerStatus {
 }
 
 export interface GameToDisplayResponse {
-  game: { igdbId: number; name: string; coverUrl: string | null } | null
+  game: {
+    igdbId: number
+    slug?: string | null
+    name: string
+    coverUrl: string | null
+  } | null
   message: string
 }
 

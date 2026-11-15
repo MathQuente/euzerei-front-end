@@ -123,6 +123,7 @@ export function OwnReviewCard({
             reason={blockedReason}
             variant="picker"
             igdbId={igdbId}
+            slug={game.slug}
             inLibrary={inLibrary}
             inBacklog={inBacklog}
             onPicked={() => setEditing(true)}

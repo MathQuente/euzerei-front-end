@@ -10,6 +10,7 @@ import type { GameInfoProps } from '../../interfaces/games'
 import { focusRing } from '../../styles/focus'
 import type { GameResponse } from '../../types/games'
 import { endlessControl } from '../../utils/endlessAvailability'
+import { gamePath } from '../../utils/gamePath'
 import { hiResCover } from '../../utils/hiResCover'
 import {
   daysUntilRelease,
@@ -28,7 +29,7 @@ export function GameInfo({ game, onClose }: GameInfoProps) {
   const { user } = useAuth()
   const navigate = useNavigate()
   const igdbId = game?.igdbId?.toString()
-  const gamePath = `/games/${igdbId}`
+  const detailPath = game ? gamePath(game) : ''
 
   const { data: details, isLoading: isDetailsLoading } = useQuery<GameResponse>(
     {
@@ -56,7 +57,7 @@ export function GameInfo({ game, onClose }: GameInfoProps) {
 
   function goToDetails() {
     onClose()
-    navigate(gamePath)
+    navigate(detailPath)
   }
 
   const summaryBlock = summary ? (

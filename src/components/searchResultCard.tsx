@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { focusRing } from '../styles/focus'
 import type { GameBase } from '../types/games'
+import { gamePath } from '../utils/gamePath'
 import { releaseYear } from '../utils/releaseDate'
 import { GameCard } from './gamesComponents/gameCard'
 
@@ -10,10 +11,7 @@ export function SearchResultCard({ game }: { game: GameBase }) {
   return (
     <li className="flex min-w-0 flex-col gap-1.5">
       <GameCard game={game} size="medium" enableModal />
-      <Link
-        to={`/games/${encodeURIComponent(game.igdbId)}`}
-        className={titleLink}
-      >
+      <Link to={gamePath(game)} className={titleLink}>
         {game.name}
       </Link>
       {game.releaseDate && (

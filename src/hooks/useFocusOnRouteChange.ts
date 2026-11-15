@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigationType } from 'react-router-dom'
+import { isCanonicalReplace } from './useCanonicalGameUrl'
 
 function isEditing(el: Element | null) {
   return (
@@ -28,10 +29,12 @@ function focusMainHeading(allowMainFallback: boolean) {
 }
 
 export function useFocusOnRouteChange() {
-  const { pathname } = useLocation()
+  const { pathname, state } = useLocation()
+  const navigationType = useNavigationType()
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies(pathname): pathname só dispara o efeito, o foco é refeito a cada troca de rota
+  // biome-ignore lint/correctness/useExhaustiveDependencies: só a troca de pathname refoca; state e navigationType são lidos na hora e, como dependências, refocariam ao mudar só ?page= depois de um replace canônico
   useEffect(() => {
+    if (isCanonicalReplace(navigationType, state)) return
     let retry = 0
     const first = requestAnimationFrame(() => {
       if (isEditing(document.activeElement)) return

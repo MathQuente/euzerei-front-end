@@ -307,6 +307,10 @@ export const api = {
     )
     return response.data
   },
+  getGameBySlug: async (slug: string) => {
+    const response = await http.get(`/games/slug/${encodeURIComponent(slug)}`)
+    return response.data
+  },
   getGameStatus: async (igdbId: string | undefined) => {
     const response = await http.get(`/users/gameStatus/${igdbId}`, {})
     return response.data

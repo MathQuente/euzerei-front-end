@@ -2,6 +2,7 @@ import type { LibraryPlatform } from './platform'
 
 export interface CompletionSuggestion {
   igdbId: number
+  slug?: string | null
   name: string
   coverUrl: string | null
   platform: LibraryPlatform

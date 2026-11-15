@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useCommunityReviews } from '../hooks/useCommunityReviews'
 import { focusRing } from '../styles/focus'
+import { gamePath } from '../utils/gamePath'
 import { CommunityReviewCard } from './communityReviewCard'
 import { SectionHeading } from './sectionHeading'
 
@@ -8,14 +9,18 @@ const PREVIEW_LIMIT = 3
 
 export function CommunityReviewsSection({
   igdbId,
+  slug,
 }: {
   igdbId: string | undefined
+  slug?: string | null
 }) {
   const { reviews, total, isLoading } = useCommunityReviews(
     igdbId,
     0,
     PREVIEW_LIMIT
   )
+
+  if (igdbId === undefined) return null
 
   if (isLoading) {
     return (
@@ -30,7 +35,7 @@ export function CommunityReviewsSection({
       <div className="flex items-center justify-between mb-4">
         <SectionHeading className="mb-0">Resenhas da comunidade</SectionHeading>
         <Link
-          to={`/games/${igdbId}/reviews`}
+          to={gamePath({ igdbId, slug }, { reviews: true })}
           className={`text-xs text-gray-400 hover:text-primary transition-colors ${focusRing} rounded-sm`}
         >
           Ver todas

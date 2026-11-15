@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import { twMerge } from 'tailwind-merge'
 import { focusRing } from '../../styles/focus'
 import type { GameCardData } from '../../types/games'
+import { gamePath } from '../../utils/gamePath'
 import { GameCard } from '../gamesComponents/gameCard'
 import { coverLink } from './styles'
 
@@ -79,10 +80,7 @@ export function CoverRow<T extends GameCardData>({
               key={game.igdbId}
               className={twMerge('w-28 flex-none sm:w-40', itemClassName)}
             >
-              <Link
-                to={`/games/${encodeURIComponent(game.igdbId)}`}
-                className={coverLink}
-              >
+              <Link to={gamePath(game)} className={coverLink}>
                 <GameCard game={game} size="medium" interactive={false} />
                 <p className="mt-2 line-clamp-2 text-sm leading-snug text-white">
                   {game.name}

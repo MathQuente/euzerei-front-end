@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useRating } from '../../hooks/useRating'
 import type { SectionType } from '../../interfaces/games'
 import type { GameBase } from '../../types/games'
+import { gamePath } from '../../utils/gamePath'
 import { shortPlatforms } from '../../utils/platformLabel'
 import {
   daysUntilRelease,
@@ -188,8 +189,6 @@ function FeaturedCountdown({ game }: { game: GameBase }) {
     </p>
   )
 }
-
-const gamePath = (game: GameBase) => `/games/${encodeURIComponent(game.igdbId)}`
 
 export function GameRow({
   game,

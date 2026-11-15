@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion'
 import type { SimilarGamesSliderProps } from '../interfaces/games'
 import { focusRing } from '../styles/focus'
+import { gamePath } from '../utils/gamePath'
 import { GameCard } from './gamesComponents/gameCard'
 import { SectionHeading } from './sectionHeading'
 
@@ -41,7 +42,7 @@ export function SimilarGamesSlider({ SimilarGames }: SimilarGamesSliderProps) {
           {games.map(game => (
             <div key={game.igdbId} className="flex-none w-32 pl-3">
               <Link
-                to={`/games/${game.igdbId}`}
+                to={gamePath(game)}
                 className={`block rounded-lg ${focusRing}`}
               >
                 <GameCard game={game} size="compact" interactive={false} />

@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { DlcAndOriginalGameAreaProps } from '../interfaces/games'
 import { focusRing } from '../styles/focus'
+import { gamePath } from '../utils/gamePath'
 import { getGameTag } from './gamesComponents/gameCard'
 import { Pagination } from './pagination'
 import { SectionHeading } from './sectionHeading'
@@ -29,7 +30,7 @@ export function DlcAndOriginalGameArea({
         <div className="bg-dark-bg-light border border-dark-border rounded-lg p-5">
           <SectionHeading icon={Crown}>Jogo Original</SectionHeading>
           <Link
-            to={`/games/${game.parentGame.igdbId}`}
+            to={gamePath(game.parentGame)}
             className={`flex items-center gap-4 p-3 bg-dark-bg-lighter border border-dark-border rounded-lg hover:border-primary/50 transition-colors group ${focusRing}`}
           >
             {game.parentGame.coverUrl ? (
@@ -57,7 +58,7 @@ export function DlcAndOriginalGameArea({
           <div className="flex flex-col gap-2">
             {pagedDlcs.map(dlc => (
               <Link
-                to={`/games/${dlc.igdbId}`}
+                to={gamePath(dlc)}
                 key={dlc.igdbId}
                 className={`flex items-center gap-4 p-3 bg-dark-bg-lighter border border-dark-border rounded-lg hover:border-primary/50 transition-colors group ${focusRing}`}
               >
