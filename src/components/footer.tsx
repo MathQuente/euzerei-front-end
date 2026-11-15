@@ -38,7 +38,7 @@ export function Footer() {
       <div className="grid grid-cols-2 gap-x-8 gap-y-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] lg:gap-x-12">
         <div className="col-span-2 min-w-0 lg:col-span-1">
           <img src={logo} alt="EuZerei" className="h-6 w-auto" />
-          <p className="mt-4 flex flex-col gap-1 text-xs text-gray-400 lg:flex-row lg:flex-wrap lg:gap-x-6">
+          <p className="mt-4 flex flex-col gap-1 text-xs text-gray-400">
             <span>© {new Date().getFullYear()} EuZerei</span>
             <span>Um projeto pessoal em desenvolvimento contínuo.</span>
             <span>Capas e dados de jogos fornecidos pela IGDB.</span>
