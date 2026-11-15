@@ -42,8 +42,14 @@ function formatWhen(timestamp: number) {
   return `${day}, ${time}`
 }
 
-function Count({ children }: { children: number }) {
-  return <b className="font-bold text-white tabular-nums">{children}</b>
+function Count({
+  children,
+  className = 'text-white',
+}: {
+  children: number
+  className?: string
+}) {
+  return <b className={`font-bold tabular-nums ${className}`}>{children}</b>
 }
 
 export function ImportResultSummary({
@@ -223,7 +229,7 @@ export function ImportResultSummary({
         </p>
         <div className="flex flex-wrap items-center gap-2">
           <span className="inline-flex items-baseline gap-1.5 rounded-full border border-green-400/30 bg-green-400/10 px-2.5 py-1 text-xs text-gray-200">
-            <b className="font-bold text-green-400 tabular-nums">{imported}</b>
+            <Count className="text-green-400">{imported}</Count>
             {plural(imported, 'jogo novo', 'jogos novos')}
           </span>
           {missing > 0 && (

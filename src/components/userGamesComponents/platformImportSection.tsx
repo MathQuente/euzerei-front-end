@@ -169,6 +169,7 @@ export function PlatformImportSection<TResult>({
   const resultRef = useRef<HTMLOutputElement>(null)
   const restoreRef = useRef<HTMLButtonElement>(null)
   const focusAfterToggle = useRef<'restore' | 'first' | null>(null)
+  const skipMenuRefocus = useRef(false)
   const [hideAnnouncement, setHideAnnouncement] = useState('')
   const isFirstStatusLoad = useRef(true)
 
@@ -260,6 +261,7 @@ export function PlatformImportSection<TResult>({
   }, [showHiddenRow])
 
   function hideResult() {
+    skipMenuRefocus.current = true
     focusAfterToggle.current = 'restore'
     setHideAnnouncement('Resultado da última importação oculto.')
     hiddenResult.hide()
@@ -392,26 +394,24 @@ export function PlatformImportSection<TResult>({
     hiddenResult.canHide
   const canAddFromMenu =
     hasAccountList && maxAccounts > 1 && canAddAccount && !addingAccount
-  const hasMenu = Boolean(connectedId) && !isImporting
+  const hasMenu = Boolean(connectedId)
+
+  const primaryButtonProps = {
+    type: 'button' as const,
+    variant: 'primary' as const,
+    size: 'md' as const,
+    className: 'text-sm [@media(max-width:480px)]:w-full',
+  }
 
   const primaryAction =
     connectedId && !isImporting ? (
       showViewLibrary ? (
-        <Button
-          type="button"
-          variant="primary"
-          size="md"
-          className="text-sm [@media(max-width:480px)]:w-full"
-          onClick={onViewLibrary}
-        >
+        <Button {...primaryButtonProps} onClick={onViewLibrary}>
           Ver na biblioteca
         </Button>
       ) : !isOnCooldown ? (
         <Button
-          type="button"
-          variant="primary"
-          size="md"
-          className="text-sm [@media(max-width:480px)]:w-full"
+          {...primaryButtonProps}
           onClick={handleStartImport}
           loading={isStarting}
         >
@@ -422,10 +422,7 @@ export function PlatformImportSection<TResult>({
       ) : null
     ) : !connectedId && redirectsAway ? (
       <Button
-        type="button"
-        variant="primary"
-        size="md"
-        className="text-sm [@media(max-width:480px)]:w-full"
+        {...primaryButtonProps}
         onClick={handleConnect}
         loading={isConnectBusy}
         disabled={isConnectBusy}
@@ -437,13 +434,16 @@ export function PlatformImportSection<TResult>({
   const menuItemClass =
     'flex w-full cursor-pointer select-none flex-col items-start gap-0.5 rounded-md px-2.5 py-2 text-left text-[13.5px] text-gray-200 outline-none data-[highlighted]:bg-dark-bg-lighter data-[disabled]:cursor-not-allowed data-[disabled]:opacity-55 max-sm:min-h-11'
 
+  const destructiveItemClass = `${menuItemClass} text-red-300 data-[highlighted]:bg-red-400/10`
+
   const menu = hasMenu ? (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
         <button
           type="button"
           aria-label={`Mais ações de ${label}`}
-          className={`grid size-9 shrink-0 place-items-center rounded-lg border border-transparent text-gray-300 transition-colors hover:border-dark-border hover:bg-dark-bg-lighter hover:text-white data-[state=open]:border-dark-border data-[state=open]:bg-dark-bg-lighter max-sm:size-11 ${focusRing}`}
+          disabled={isImporting}
+          className={`grid size-9 shrink-0 place-items-center rounded-lg border border-transparent text-gray-300 transition-colors disabled:cursor-not-allowed disabled:opacity-40 hover:border-dark-border hover:bg-dark-bg-lighter hover:text-white data-[state=open]:border-dark-border data-[state=open]:bg-dark-bg-lighter max-sm:size-11 ${focusRing}`}
         >
           <MoreVertical className="size-[18px]" aria-hidden="true" />
         </button>
@@ -451,12 +451,19 @@ export function PlatformImportSection<TResult>({
       <DropdownMenu.Portal>
         <DropdownMenu.Content
           align="end"
+          onCloseAutoFocus={event => {
+            if (skipMenuRefocus.current) {
+              event.preventDefault()
+              skipMenuRefocus.current = false
+            }
+          }}
           sideOffset={6}
           className="z-50 w-[min(20rem,calc(100vw-2rem))] rounded-xl border border-dark-border bg-dark-bg-light p-1.5 shadow-xl"
         >
           {canAddFromMenu && (
             <DropdownMenu.Item
               className={menuItemClass}
+              disabled={isConnectBusy}
               onSelect={() =>
                 redirectsAway ? handleConnect() : setAddingAccount(true)
               }
@@ -489,7 +496,7 @@ export function PlatformImportSection<TResult>({
             accountList.map(account => (
               <DropdownMenu.Item
                 key={account.id}
-                className={`${menuItemClass} text-red-300 data-[highlighted]:bg-red-400/10`}
+                className={destructiveItemClass}
                 onSelect={() => setDisconnectTarget(account)}
               >
                 Desconectar {account.name}
@@ -497,7 +504,7 @@ export function PlatformImportSection<TResult>({
             ))
           ) : (
             <DropdownMenu.Item
-              className={`${menuItemClass} text-red-300 data-[highlighted]:bg-red-400/10`}
+              className={destructiveItemClass}
               onSelect={askDisconnect}
             >
               Desconectar {connectedName ?? connectedId ?? label}
