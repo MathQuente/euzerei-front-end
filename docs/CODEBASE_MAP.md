@@ -10,7 +10,7 @@ total_tokens: 39969
 
 ## System Overview
 
-React 18 + Vite + TypeScript + TailwindCSS SPA for "Lib" — personal game-library tracker, IGDB-backed catalog + per-user status/rating/completion tracking. Backend: separate Fastify+Prisma+Postgres repo (`lib`), reached via `/api` (Vite dev proxy → `localhost:3333`). State: TanStack Query v5 for all server state, React Context only for auth. Styling: Tailwind, custom dark-theme tokens, `tailwind-merge` for conditional classes. Forms: `react-hook-form` + `zod`. Routing: `react-router-dom` v6 `createBrowserRouter`. No test files anywhere.
+React 18 + Vite + TypeScript + TailwindCSS SPA for "Lib" — personal game-library tracker, IGDB-backed catalog + per-user status/rating/completion tracking. Backend: separate Fastify+Prisma+Postgres repo (`lib`), reached via `/api` (Vite dev proxy → `localhost:3333`). State: TanStack Query v5 for all server state, React Context only for auth. Styling: Tailwind, custom dark-theme tokens, `tailwind-merge` for conditional classes. Forms: `react-hook-form` + `zod`. Routing: `react-router-dom` v7 (`^7.18.5`) `createBrowserRouter`. No test files anywhere.
 
 ```mermaid
 graph TD
@@ -159,8 +159,9 @@ Interconnection: `GameCard(enableModal=true)` owns local `open` state, lazily mo
 
 | Hook | Purpose | Query keys | Notes |
 |---|---|---|---|
+| `invalidateGameLists.ts` | Not a hook — `invalidateGameLists(queryClient)` invalidates the catalog lists only: `games`, `gameSearch`, `comingSoon`, `gamesFeatured`, `similarGames`. It does not touch `userGames` or `userProfile`; callers invalidate those themselves. Called by `useGameStatus`, `useRating`, `usePlayedCount` and `useHoursPlayed` so the catalog lists reflect a status/rating change. | n/a | Add a new list query key to `GAME_LIST_QUERY_KEYS` there. |
 | `useApi.ts` | Not a hook — exports `api` (axios wrapper), also called directly by `sideBar.tsx`/`rouletteWheel.tsx`, bypassing hook layer. | n/a | Sort-field mapping gotcha, see below. |
-| `useGames.ts` | Catalog: paged, infinite (search), coming-soon, home-featured. | `['games',...]`, `['gamesInfinite',...]`, `['comingSoon',...]`, `['gamesFeatured']` | `keepPreviousData` on paging/sort. |
+| `useGames.ts` | Catalog: paged, infinite (search), coming-soon, home-featured. | `['games',...]`, `['gamesInfinite',...]`, `['comingSoon',...]`, `['gamesFeatured']` (home: trending, most rated, recent releases; the counts come from the backend) | `keepPreviousData` on paging/sort. |
 | `useGamePlatforms.ts` | Per-game platform rows (`platform` + `console`, one row per console). `addPlatform/updatePlatform/removePlatform` take `(platform, console, ...)` and hit `/users/platforms/:igdbId/:platform/:console`; the response replaces the cache. | `['gamePlatforms', userId, igdbId]` | `PUT` with a known console adopts an existing `UNKNOWN` row of the same platform (no new row). Console × platform map mirrors the back end in `utils/platformConsoles.ts`. |
 | `useCompletionSuggestions.ts` | "Looks finished" suggestions per import platform (Steam only today). Query + accept/dismiss/undo; accepted rows are kept in local state because the back end drops the game from the list once it becomes Played, so Undo only lives while the screen is open. Accept/undo invalidate library, profile and per-game caches. | `['completionSuggestions', userId, platform]` | Invalidated by `refreshAfterImport`. 409 becomes an inline row message. |
 | `useHiddenImportResult.ts` | Hides the last import result and the suggestions block until the next import finishes. Stores the import's `finishedAt` in `localStorage` (`importHidden:v1:{userId}:{platform}`) via `useSyncExternalStore`; falls back to memory when storage fails and notifies same-tab listeners itself (the `storage` event only reaches other tabs). | n/a | A new import changes `finishedAt`, so the result shows again. Browser-only, not synced. |
@@ -183,6 +184,8 @@ colors: {
 }
 ```
 
+Custom screens: `wide` is `min-width: 1792px` (a plain width, so `wide:` works); `nesthub` and `asus` are `raw` media queries (short viewports), and `raw` screens block `min-[]`/`max-[]` variants, so use container queries for width-dependent layout. Restart Vite after editing `tailwind.config.js`.
+
 Convention: components use `bg-dark-bg*`, `border-dark-border`, `text-primary(-light)`, `bg-primary`, `hover:bg-primary-hover` — no hardcoded hex in `className`, except where third-party libs need literal color values (MUI `Rating` `sx` in `ratingAverage.tsx`) and in `rouletteWheel.tsx` (least-polished page, ad-hoc hex + placeholder text — known, deliberately unfinished per project owner).
 
 ### Everything else
@@ -201,14 +204,15 @@ Convention: components use `bg-dark-bg*`, `border-dark-border`, `text-primary(-l
 | `gameListPage.tsx` | Composes `SortControls`+`GamesGrid`+`Pagination`; manages URL query params via manual `URL`/`history.pushState` (not `useSearchParams`, unlike `authentication.tsx`). |
 | `gameListSection.tsx` | Home page's 3 list sections: from `lg` one `FeaturedGameRow` (first game) plus `GameRow`s (numbered for trending/rated), horizontal `CoverRow` below. `RatedScore` (in `homeComponents/gameListRows.tsx`) calls `useRating` per game (N+1 pattern). Release dates and platform labels come from `utils/releaseDate.ts` and `utils/platformLabel.ts`. |
 | `footer.tsx` | Site footer rendered by `layout.tsx` on every page; account links depend on login state. |
-| `homeComponents/` | Home blocks: `coverWall` (CSS-animated cover rows, logged out), `loggedOutHero`, `playingNow` (cover, name and hours; no status button or marker, the status changes on the game page), `nextUp` (backlog suggestion + queue; while the backend suggestion is loading it shows a same-size skeleton, because the library answers first and the pinned game would otherwise jump from the first queued game to the suggested one; "Outra sugestão" remounts the pair with a short fade, `animate-swap-in`, off under reduced motion, and not on first load), `librarySummary`, `coverRow` (horizontal cover strip), `styles` (shared title/link classes). |
+| `homeComponents/` | Home blocks: `coverWall` (CSS-animated cover rows, logged out), `loggedOutHero`, `playingNow` (cover, name and hours; no status button or marker, the status changes on the game page), `nextUp` (backlog suggestion + queue; while the backend suggestion is loading it shows a same-size skeleton, because the library answers first and the pinned game would otherwise jump from the first queued game to the suggested one; "Outra sugestão" remounts the pair with a short fade, `animate-swap-in`, off under reduced motion, and not on first load), `librarySummary`, `coverRow` (Embla carousel of covers: drag-free, `containScroll: 'trimSnaps'`, prev/next arrows from `sm` that fade out at the ends; generic over `GameCardData` with an optional `renderMeta`), `styles` (shared title/link classes). |
 | `iconButton.tsx` | Icon-only button base for pagination. |
 | `pagination.tsx` | First/prev/next/last + "showing X of Y". |
 | `platformDiv.tsx` | Platform pill, heuristic console-vs-PC icon by name substring. |
 | `playedCount.tsx` | +/- "times completed" widget. |
 | `playersInfo.tsx` | Per-status user counts + ratings count. |
 | `ratingAverage.tsx` | Dual-layer MUI `Rating` (readonly + interactive hover) + remove button. |
-| `ratingChart.tsx` | HTML/CSS histogram of 10 half-star bins; hidden below 6 ratings (total only), hover/focus readout. |
+| `ratingChart.tsx` | HTML/CSS histogram of 10 half-star bins; below 6 ratings it shows ten dashed ghost bars (decorative, `aria-hidden`) plus a "missing N ratings" message instead of the real bars; hover/focus readout from 6 up. |
+| `ownRatingEntry.tsx` | The "Sua nota" box inside `ownReviewCard.tsx` (reviews page): `RatingAverage` stars for a signed-in user, disabled stars with "Entre para avaliar" when signed out. A released game rated while outside the library shows the hint that it will be added as Jogando. |
 | `searchBar.tsx` | Route-synced search input (`/search/:query`), autofocus + cursor-to-end. |
 | `sectionHeading.tsx` | Reusable heading, colored dot + optional icon. |
 | `sideBar.tsx` | Desktop nav + mobile drawer; calls `api.logout()` directly rather than via `useAuth()`. |
