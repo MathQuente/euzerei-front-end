@@ -113,9 +113,9 @@ export const useUserProfile = (options?: UseUserProfileOptions) => {
 
       return { previousProfile }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey })
+    onSuccess: async () => {
       notify.success(SUCCESS_MESSAGES.profileSaved)
+      await queryClient.invalidateQueries({ queryKey })
       options?.onUpdateSuccess?.()
     },
     onError: (error, _variables, context) => {

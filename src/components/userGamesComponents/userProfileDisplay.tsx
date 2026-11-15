@@ -6,20 +6,16 @@ import { useFollowers } from '../../hooks/useFollowers'
 import { useFollowing } from '../../hooks/useFollowing'
 import { useUserProfile } from '../../hooks/useUserProfile'
 import type { FollowSummary } from '../../types/follow'
-import { Button, buttonClasses } from '../button'
+import { buttonClasses } from '../button'
 import { IconButton } from '../iconButton'
 import { ProfileHeader } from '../libraryComponents/profileHeader'
 import { UserListModal } from '../userListModal'
-import { DeleteAccountSection } from './deleteAccountSection'
-import { UserProfileForm } from './userProfileForm'
-import { UserProfileModal } from './userProfileModal'
 
 export function UserProfileDisplay({
   showImport = false,
 }: {
   showImport?: boolean
 }) {
-  const [isOpen, setIsOpen] = useState(false)
   const [followersModalOpen, setFollowersModalOpen] = useState(false)
   const [followingModalOpen, setFollowingModalOpen] = useState(false)
   const { UserProfileResponse, isLoading, isError } = useUserProfile()
@@ -66,24 +62,15 @@ export function UserProfileDisplay({
                 Importar jogos
               </Link>
             )}
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => setIsOpen(true)}
+            <Link
+              to="/conta"
+              className={buttonClasses({ variant: 'secondary' })}
             >
               Editar perfil
-            </Button>
+            </Link>
           </>
         }
       />
-
-      <UserProfileModal open={isOpen} onOpenChange={setIsOpen}>
-        <UserProfileForm
-          afterSave={() => setIsOpen(false)}
-          onCancel={() => setIsOpen(false)}
-        />
-        <DeleteAccountSection />
-      </UserProfileModal>
 
       <UserListModal
         open={followersModalOpen}

@@ -10,6 +10,7 @@ import { AuthProvider } from './contexts/auth/authProvider'
 import { RequireAuth } from './contexts/auth/requireAuth'
 import { Layout } from './layout'
 import { AboutPage } from './pages/aboutPage'
+import { AccountPage } from './pages/accountPage'
 import { Authentication } from './pages/authentication'
 import { ComingSoonPage } from './pages/comingSoonPage'
 import { ContactPage } from './pages/contactPage'
@@ -103,6 +104,14 @@ const router = createBrowserRouter([
             element: (
               <RequireAuth>
                 <UserLibrary />
+              </RequireAuth>
+            ),
+          },
+          {
+            path: '/conta',
+            element: (
+              <RequireAuth>
+                <AccountPage />
               </RequireAuth>
             ),
           },

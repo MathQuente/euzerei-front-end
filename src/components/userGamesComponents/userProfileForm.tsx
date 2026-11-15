@@ -1,25 +1,28 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import type { FieldValues } from 'react-hook-form'
-import type { z } from 'zod'
-
 import { Camera, X } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import type { FieldValues } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
+import type { z } from 'zod'
 import userProfilePictureDefault from '../../assets/Default_pfp.svg.png'
-
 import { useUserProfile } from '../../hooks/useUserProfile'
-import type { UserGamesFormProps } from '../../interfaces/user'
 import { updateProfileSchema } from '../../schemas/profileSchema'
-import { fieldFocus, focusRing } from '../../styles/focus'
+import { fieldFocus, focusRing, focusRingWithin } from '../../styles/focus'
 import { buildProfileUpdate } from '../../utils/profileUpdate'
-import { Button } from '../button'
+import { Button, buttonClasses } from '../button'
 
 type ProfileForm = z.infer<typeof updateProfileSchema>
 
-export function UserProfileForm({ afterSave, onCancel }: UserGamesFormProps) {
+const IMAGE_ACCEPT = 'image/png,image/jpeg,image/gif'
+const fileButton = `${buttonClasses({ variant: 'secondary' })} cursor-pointer gap-1.5 bg-dark-bg/70 ${focusRingWithin}`
+
+export function UserProfileForm({
+  onDirtyChange,
+}: {
+  onDirtyChange?: (dirty: boolean) => void
+}) {
   const [profilePicturePreview, setProfilePicturePreview] = useState('')
   const [userBannerPreview, setUserBannerPreview] = useState('')
-  const [hasExistingBanner, setHasExistingBanner] = useState(false)
   const [shouldRemoveBanner, setShouldRemoveBanner] = useState(false)
   const [hasChanges, setHasChanges] = useState(false)
 
@@ -31,16 +34,14 @@ export function UserProfileForm({ afterSave, onCancel }: UserGamesFormProps) {
 
   const { UserProfileResponse, updateUserProfile, isUpdatingProfile } =
     useUserProfile({
-      onUpdateSuccess: () => {
-        setHasChanges(false)
-        afterSave()
-      },
+      onUpdateSuccess: () => resetEdits(),
       removeUserBanner: shouldRemoveBanner,
     })
 
   const {
     register: registerField,
     setValue,
+    getValues,
     handleSubmit,
     watch,
     formState: { errors },
@@ -48,34 +49,37 @@ export function UserProfileForm({ afterSave, onCancel }: UserGamesFormProps) {
     resolver: zodResolver(updateProfileSchema),
   })
 
-  const watchedValues = watch()
+  const watchedUserName = watch('userName')
+  const originalNameRef = useRef('')
 
   useEffect(() => {
-    if (UserProfileResponse?.user.userBanner) {
-      setHasExistingBanner(true)
-    }
     if (UserProfileResponse?.user) {
-      setValue('userName', UserProfileResponse.user.userName || '')
+      const serverName = UserProfileResponse.user.userName || ''
+      const typed = getValues('userName')
+      if (!typed || typed === originalNameRef.current) {
+        setValue('userName', serverName)
+      }
+      originalNameRef.current = serverName
       setOriginalValues({
         userName: UserProfileResponse.user.userName || '',
         profilePicture: UserProfileResponse.user.profilePicture || '',
         userBanner: UserProfileResponse.user.userBanner || '',
       })
     }
-  }, [UserProfileResponse?.user, setValue])
+  }, [UserProfileResponse?.user, setValue, getValues])
 
   useEffect(() => {
     if (!UserProfileResponse?.user) return
     const hasUserNameChanged =
-      (watchedValues.userName || '') !== originalValues.userName
-    const hasAnyChanges =
+      (watchedUserName || '') !== originalValues.userName
+    setHasChanges(
       hasUserNameChanged ||
-      !!profilePicturePreview ||
-      !!userBannerPreview ||
-      shouldRemoveBanner
-    setHasChanges(hasAnyChanges)
+        !!profilePicturePreview ||
+        !!userBannerPreview ||
+        shouldRemoveBanner
+    )
   }, [
-    watchedValues,
+    watchedUserName,
     profilePicturePreview,
     userBannerPreview,
     shouldRemoveBanner,
@@ -83,23 +87,13 @@ export function UserProfileForm({ afterSave, onCancel }: UserGamesFormProps) {
     UserProfileResponse?.user,
   ])
 
-  async function onSubmit(data: FieldValues) {
-    if (!hasChanges) return
-
-    const updateData = buildProfileUpdate(
-      data,
-      originalValues.userName,
-      shouldRemoveBanner
-    )
-
-    if (Object.keys(updateData).length > 0) {
-      updateUserProfile(updateData)
-    }
-  }
+  useEffect(() => {
+    onDirtyChange?.(hasChanges)
+  }, [hasChanges, onDirtyChange])
 
   useEffect(() => {
     return () => {
-      if (userBannerPreview?.startsWith('blob:')) {
+      if (userBannerPreview.startsWith('blob:')) {
         URL.revokeObjectURL(userBannerPreview)
       }
     }
@@ -107,11 +101,29 @@ export function UserProfileForm({ afterSave, onCancel }: UserGamesFormProps) {
 
   useEffect(() => {
     return () => {
-      if (profilePicturePreview?.startsWith('blob:')) {
+      if (profilePicturePreview.startsWith('blob:')) {
         URL.revokeObjectURL(profilePicturePreview)
       }
     }
   }, [profilePicturePreview])
+
+  function resetEdits() {
+    setProfilePicturePreview('')
+    setUserBannerPreview('')
+    setShouldRemoveBanner(false)
+    setValue('profilePicture', undefined)
+    setValue('userBanner', undefined)
+  }
+
+  async function onSubmit(data: FieldValues) {
+    if (!hasChanges) return
+    const updateData = buildProfileUpdate(
+      data,
+      originalValues.userName,
+      shouldRemoveBanner
+    )
+    if (Object.keys(updateData).length > 0) updateUserProfile(updateData)
+  }
 
   const handleBannerChange = (e: FieldValues) => {
     const file = e.target.files?.[0]
@@ -124,23 +136,15 @@ export function UserProfileForm({ afterSave, onCancel }: UserGamesFormProps) {
   const handleRemoveBanner = () => {
     if (userBannerPreview) {
       setUserBannerPreview('')
-      setValue('userBanner', null)
+      setValue('userBanner', undefined)
       return
     }
     setShouldRemoveBanner(true)
-    setHasExistingBanner(false)
   }
 
-  const handleCancel = () => {
-    setProfilePicturePreview('')
-    setUserBannerPreview('')
-    setShouldRemoveBanner(false)
-    setHasExistingBanner(!!UserProfileResponse?.user.userBanner)
-    setHasChanges(false)
+  const handleDiscard = () => {
+    resetEdits()
     setValue('userName', UserProfileResponse?.user?.userName || '')
-    setValue('profilePicture', null)
-    setValue('userBanner', null)
-    onCancel?.()
   }
 
   const bannerSrc =
@@ -152,117 +156,132 @@ export function UserProfileForm({ afterSave, onCancel }: UserGamesFormProps) {
     UserProfileResponse?.user?.profilePicture ||
     userProfilePictureDefault
 
+  const showRemoveBanner =
+    (Boolean(UserProfileResponse?.user?.userBanner) && !shouldRemoveBanner) ||
+    Boolean(userBannerPreview)
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="relative">
-        <div className="relative h-28 group">
-          {bannerSrc ? (
-            <img
-              src={bannerSrc}
-              alt="Banner"
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full bg-dark-border" />
-          )}
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      aria-labelledby="profile-title"
+      className="overflow-hidden rounded-xl border border-dark-border bg-dark-bg-darker"
+    >
+      <div className="px-5 pt-4">
+        <h2 id="profile-title" className="text-base font-semibold text-white">
+          Perfil
+        </h2>
+        <p className="mt-0.5 text-sm text-gray-400">
+          Como as outras pessoas veem você.
+        </p>
+      </div>
 
-          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity flex items-center justify-center gap-2">
-            <label
-              className="cursor-pointer rounded-lg has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary-light"
-              title="Trocar banner"
-            >
-              <input
-                type="file"
-                accept="image/*"
-                className="sr-only"
-                aria-label="Trocar banner"
-                {...registerField('userBanner', {
-                  onChange: handleBannerChange,
-                })}
-              />
-              <div className="p-2 rounded-lg bg-dark-bg-light/80 border border-dark-border text-gray-300 hover:text-white transition-colors">
-                <Camera size={18} />
-              </div>
-            </label>
-
-            {(hasExistingBanner || userBannerPreview) && (
-              <button
-                type="button"
-                onClick={handleRemoveBanner}
-                className={`p-2 rounded-lg bg-red-900/60 border border-red-800 text-red-300 hover:text-white transition-colors ${focusRing}`}
-                title="Remover banner"
-                aria-label="Remover banner"
-              >
-                <X size={18} />
-              </button>
-            )}
-          </div>
-        </div>
-
-        <div className="absolute left-6 bottom-0 translate-y-1/2">
-          <label
-            className="group relative block size-14 rounded-full border-2 border-primary bg-dark-bg overflow-hidden cursor-pointer has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary-light"
-            title="Trocar foto de perfil"
-          >
-            <img
-              src={profilePicSrc}
-              alt="Foto de perfil"
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
-              <Camera size={16} className="text-white" />
-            </div>
+      <div className="relative mt-3.5 h-32 bg-dark-border">
+        {bannerSrc && (
+          <img
+            src={bannerSrc}
+            alt="Banner"
+            className="size-full object-cover"
+          />
+        )}
+        <div className="absolute right-3 bottom-3 flex gap-2">
+          <label className={fileButton}>
+            <Camera className="size-4" aria-hidden="true" />
+            Trocar banner
             <input
               type="file"
-              accept="image/*"
+              accept={IMAGE_ACCEPT}
               className="sr-only"
-              aria-label="Trocar foto de perfil"
-              {...registerField('profilePicture', {
-                onChange: e => {
-                  const file = e.target.files?.[0]
-                  if (file) setProfilePicturePreview(URL.createObjectURL(file))
-                },
+              {...registerField('userBanner', {
+                onChange: handleBannerChange,
               })}
             />
           </label>
-          {errors.profilePicture && (
-            <span className="text-red-500 text-xs mt-1 block">
-              Foto de perfil: {errors.profilePicture.message}
-            </span>
-          )}
-          {errors.userBanner && (
-            <span className="text-red-500 text-xs mt-1 block">
-              Banner: {errors.userBanner.message}
-            </span>
+          {showRemoveBanner && (
+            <button
+              type="button"
+              onClick={handleRemoveBanner}
+              aria-label="Remover banner"
+              className={`${buttonClasses({ variant: 'secondary' })} bg-dark-bg/70 px-2.5 ${focusRing}`}
+            >
+              <X className="size-4" aria-hidden="true" />
+            </button>
           )}
         </div>
       </div>
 
-      <div className="px-6 pt-12 pb-6 flex flex-col gap-2">
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="userName" className="text-sm text-gray-400">
-            Username
+      <div className="relative ml-5 -mt-10 size-[84px]">
+        <img
+          src={profilePicSrc}
+          alt="Foto de perfil"
+          className="size-full rounded-full border-[3px] border-dark-bg-darker bg-dark-bg object-cover"
+        />
+        <label
+          className={`absolute -right-2 -bottom-1 grid size-9 cursor-pointer place-items-center rounded-full border border-dark-border bg-dark-bg-light text-gray-200 hover:text-white max-sm:size-11 ${focusRingWithin}`}
+          title="Trocar foto de perfil"
+        >
+          <Camera className="size-4" aria-hidden="true" />
+          <span className="sr-only">Trocar foto de perfil</span>
+          <input
+            type="file"
+            accept={IMAGE_ACCEPT}
+            className="sr-only"
+            {...registerField('profilePicture', {
+              onChange: e => {
+                const file = e.target.files?.[0]
+                if (file) setProfilePicturePreview(URL.createObjectURL(file))
+              },
+            })}
+          />
+        </label>
+      </div>
+
+      <div className="flex flex-col gap-3.5 px-5 pt-3.5 pb-5">
+        <p className="text-xs text-gray-400">PNG, JPEG ou GIF, até 3 MB.</p>
+        {errors.profilePicture && (
+          <output className="block text-xs text-red-300">
+            Foto de perfil: {errors.profilePicture.message}
+          </output>
+        )}
+        {errors.userBanner && (
+          <output className="block text-xs text-red-300">
+            Banner: {errors.userBanner.message}
+          </output>
+        )}
+
+        <div>
+          <label
+            htmlFor="userName"
+            className="mb-1.5 block text-sm text-gray-400"
+          >
+            Nome de usuário
           </label>
           <input
             id="userName"
             type="text"
-            placeholder={UserProfileResponse?.user?.userName}
-            className={`bg-dark-bg-darker text-white placeholder-gray-500 rounded-lg block w-full text-sm py-3 px-3 border border-dark-border ${fieldFocus} transition-colors duration-150`}
+            aria-invalid={errors.userName ? true : undefined}
+            aria-describedby="userName-hint"
+            className={`block min-h-11 w-full rounded-lg border bg-dark-bg px-3 text-sm text-white placeholder-gray-500 transition-colors duration-150 ${
+              errors.userName ? 'border-red-400' : 'border-dark-border'
+            } ${fieldFocus}`}
             {...registerField('userName')}
           />
-          <span className="text-red-500 text-xs min-h-[1rem]">
-            {errors.userName?.message ?? ' '}
-          </span>
+          <p
+            id="userName-hint"
+            className={`mt-1.5 text-xs ${errors.userName ? 'text-red-300' : 'text-gray-400'}`}
+          >
+            {errors.userName?.message ??
+              '1 a 30 caracteres. Fica do jeito que você digitar.'}
+          </p>
         </div>
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-dark-border">
+        <div className="flex flex-wrap justify-end gap-2.5 border-t border-dark-border pt-3.5 max-sm:[&>button]:flex-1">
           <Button
             type="button"
             variant="secondary"
-            onClick={handleCancel}
-            disabled={isUpdatingProfile}
+            onClick={handleDiscard}
+            disabled={!hasChanges || isUpdatingProfile}
           >
-            Cancelar
+            Descartar
           </Button>
           <Button
             variant="primary"

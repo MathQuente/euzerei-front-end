@@ -1,6 +1,9 @@
 export const focusRing =
   'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light'
 
+export const focusRingWithin =
+  'has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary-light'
+
 export const fieldFocus =
   'outline-none focus-visible:border-primary-light focus-visible:ring-1 focus-visible:ring-primary-light'
 

@@ -6,7 +6,11 @@ import { useUserProfile } from '../../hooks/useUserProfile'
 import { Button } from '../button'
 import { DeleteAccountDialog } from './deleteAccountDialog'
 
-export function DeleteAccountSection() {
+export function DeleteAccountSection({
+  onLeave,
+}: {
+  onLeave?: () => void
+}) {
   const { UserProfileResponse } = useUserProfile()
   const { logout } = useAuth()
   const navigate = useNavigate()
@@ -24,6 +28,7 @@ export function DeleteAccountSection() {
   }
 
   const handleReauth = async () => {
+    onLeave?.()
     await logout()
     navigate('/auth?tab=login', { replace: true })
   }
@@ -31,16 +36,25 @@ export function DeleteAccountSection() {
   return (
     <section
       aria-labelledby="delete-account-title"
-      className="mx-6 mb-6 pt-6 border-t border-dark-border flex flex-col gap-3"
+      className="flex flex-col gap-3 rounded-xl border border-red-400/30 bg-dark-bg-darker p-5"
     >
-      <h2 id="delete-account-title" className="text-white font-semibold">
+      <h2
+        id="delete-account-title"
+        className="text-base font-semibold text-red-200"
+      >
         Excluir conta
       </h2>
       <p className="text-sm text-gray-400">
-        Apaga sua conta e seus dados de forma definitiva.
+        Isso apaga sua biblioteca, avaliações, resenhas, seguidores e contas
+        vinculadas, e não dá para desfazer.
       </p>
       <div>
-        <Button type="button" variant="danger" onClick={() => setOpen(true)}>
+        <Button
+          type="button"
+          variant="secondary"
+          className="border-red-400/45 text-red-300 hover:text-red-200"
+          onClick={() => setOpen(true)}
+        >
           Excluir minha conta
         </Button>
       </div>
@@ -49,7 +63,10 @@ export function DeleteAccountSection() {
         open={open}
         onOpenChange={handleOpenChange}
         confirmationText={confirmationText}
-        onConfirm={deleteAccount}
+        onConfirm={() => {
+          onLeave?.()
+          deleteAccount()
+        }}
         onEdit={resetError}
         onReauth={handleReauth}
         isLoading={isDeleting}
