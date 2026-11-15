@@ -6,14 +6,19 @@ import {
   Library,
   Pause,
   Play,
+  RotateCcw,
   Star,
-  Trophy,
 } from 'lucide-react'
 import { useState } from 'react'
 import { twMerge } from 'tailwind-merge'
 import { useGameModal } from '../../hooks/useGameModal'
 import type { GameCardProps } from '../../interfaces/games'
 import { focusRing } from '../../styles/focus'
+import {
+  cardSummary,
+  formatRating,
+  replayBadgeCount,
+} from '../../utils/cardBadges'
 import { hiResCover } from '../../utils/hiResCover'
 import { getLibraryPlatform } from '../../utils/libraryPlatforms'
 
@@ -61,12 +66,8 @@ export const LIBRARY_STATUS_BADGES: Record<
 
 const MAX_CARD_PLATFORMS = 3
 
-const RATING_FORMAT = new Intl.NumberFormat('pt-BR', {
-  maximumFractionDigits: 1,
-})
-
-const badgeClass =
-  'inline-flex items-center gap-0.5 px-1 py-0.5 sm:px-1.5 rounded-full bg-dark-bg/90 border border-dark-border text-[8px] sm:text-[10px] font-medium text-gray-200'
+const capsuleClass =
+  'inline-flex h-5 items-stretch overflow-hidden rounded-full border border-dark-border bg-dark-bg/90 shadow-sm shadow-black/40 sm:h-6 [&>*+*]:border-l [&>*+*]:border-dark-border'
 
 const sizes = {
   small: 'w-14 h-16',
@@ -141,14 +142,11 @@ export function GameCard({
       : null
 
   const showRating = !bare && game?.rating != null
-  const ratingText =
-    game?.rating != null ? RATING_FORMAT.format(game.rating) : ''
+  const ratingText = game?.rating != null ? formatRating(game.rating) : ''
   const showEndless = !bare && game?.endless === true
-  const completions = game?.completions ?? 0
-  const showReplayBadge =
-    !bare &&
-    completions > 0 &&
-    (game?.status === 'PLAYING' || game?.status === 'BACKLOG')
+  const replayCount = bare
+    ? null
+    : replayBadgeCount(game?.status, game?.completions)
   const statusBadge =
     !bare && game?.status ? LIBRARY_STATUS_BADGES[game.status] : undefined
   const accentColor = statusBadge?.iconColor ?? 'text-primary'
@@ -160,11 +158,22 @@ export function GameCard({
   const visiblePlatforms = playedOn.slice(0, MAX_CARD_PLATFORMS)
   const hiddenPlatformCount = playedOn.length - visiblePlatforms.length
 
+  const summaryText = bare
+    ? ''
+    : cardSummary({
+        tag,
+        statusLabel: statusBadge?.label,
+        rating: showRating ? game?.rating : null,
+        completions: replayCount ? game?.completions : 0,
+        endless: showEndless,
+        platforms: playedOn.map(platform => platform.label),
+      })
+
   const lifts = !bare
   const cardClassName = twMerge(
     'group relative rounded-lg overflow-hidden',
     lifts &&
-      'hover:ring-1 ring-primary/40 transition-transform duration-200 hover:scale-[1.02]',
+      'hover:ring-1 ring-primary/40 transition-transform duration-200 hover:scale-[1.02] [container-type:inline-size]',
     interactive && focusRing,
     size === 'medium' ? 'block w-full' : sizes[size]
   )
@@ -178,89 +187,96 @@ export function GameCard({
         />
       )}
 
-      {tag && (
-        <span
-          className={`absolute top-1.5 left-1.5 truncate z-10 ${showReplayBadge ? 'max-w-[calc(100%-4.5rem)]' : 'max-w-[calc(100%-2.5rem)]'} px-1 py-0.5 sm:px-1.5 rounded bg-dark-bg/90 border border-dark-border text-[8px] sm:text-[10px] font-medium text-gray-300`}
+      {(tag || statusBadge) && (
+        <div
+          className="absolute left-1.5 right-2 top-2 z-10 flex items-start gap-1"
+          aria-hidden="true"
         >
-          {tag}
-        </span>
-      )}
-
-      {showReplayBadge && (
-        <span
-          className="absolute top-1.5 right-[26px] sm:right-[30px] z-10 inline-flex items-center justify-center size-4 sm:size-5 rounded-full bg-dark-bg/90 border border-dark-border"
-          title={`Zerado ${completions}×`}
-          aria-label={`Já zerado ${completions} ${completions === 1 ? 'vez' : 'vezes'}`}
-        >
-          <Trophy
-            className="size-3 sm:size-3.5 overflow-visible text-primary-light"
-            strokeWidth={2.5}
-            aria-hidden="true"
-          />
-        </span>
-      )}
-
-      {statusBadge && (
-        <span
-          className="absolute top-2 right-2 z-10 inline-flex items-center justify-center size-5 sm:size-6 rounded-full bg-dark-bg/90 border border-dark-border shadow-sm shadow-black/40"
-          title={statusBadge.label}
-          aria-label={statusBadge.label}
-        >
-          <statusBadge.icon
-            className={`size-3 sm:size-3.5 overflow-visible ${statusBadge.iconColor}`}
-            strokeWidth={2.5}
-            aria-hidden="true"
-          />
-        </span>
-      )}
-
-      {(showRating || showEndless) && (
-        <div className="absolute bottom-2 left-2 z-10 flex items-center gap-1">
-          {showRating && (
-            <span
-              className={`h-5 sm:h-6 gap-1 px-1.5 sm:px-2 text-[9px] sm:text-[11px] leading-none shadow-sm shadow-black/40 ${badgeClass}`}
-              title="Nota"
-              aria-label={`Nota: ${ratingText}`}
-            >
-              <Star
-                className={`size-2.5 sm:size-3 overflow-visible fill-current ${accentColor}`}
-                aria-hidden="true"
-              />
-              <span aria-hidden="true">{ratingText}</span>
-            </span>
-          )}
-          {showEndless && (
-            <span
-              className="inline-flex items-center justify-center size-5 sm:size-6 rounded-full bg-dark-bg/90 border border-dark-border shadow-sm shadow-black/40"
-              title="Infinito"
-              aria-label="Infinito"
-            >
-              <InfinityIcon
-                className="size-2 sm:size-2.5 text-primary-light"
-                aria-hidden="true"
-              />
+          <span className="min-w-0">
+            {tag && (
+              <span className="block max-w-full truncate rounded border border-dark-border bg-dark-bg/90 px-1 py-0.5 text-[8px] font-medium text-gray-300 sm:px-1.5 sm:text-[10px]">
+                {tag}
+              </span>
+            )}
+          </span>
+          {statusBadge && (
+            <span className={`ml-auto ${capsuleClass}`}>
+              {replayCount && (
+                <span
+                  className="inline-flex items-center gap-0.5 px-1.5 text-[10px] font-bold tabular-nums text-gray-100 sm:px-2"
+                  title={`Zerado ${game?.completions}×`}
+                >
+                  <RotateCcw
+                    className="size-3 overflow-visible text-primary-light sm:size-3.5"
+                    strokeWidth={2.5}
+                  />
+                  {replayCount}
+                </span>
+              )}
+              <span
+                className="inline-flex aspect-square items-center justify-center"
+                title={statusBadge.label}
+              >
+                <statusBadge.icon
+                  className={`size-3 overflow-visible sm:size-3.5 ${statusBadge.iconColor}`}
+                  strokeWidth={2.5}
+                />
+              </span>
             </span>
           )}
         </div>
       )}
 
-      {visiblePlatforms.length > 0 && (
-        <span
-          className={`absolute bottom-2 right-2 z-10 h-5 sm:h-6 gap-1 px-1.5 sm:px-2 text-[9px] sm:text-[11px] leading-none shadow-sm shadow-black/40 ${badgeClass}`}
-          title={playedOn.map(p => p.label).join(', ')}
-          aria-label={`Jogado em: ${playedOn.map(p => p.label).join(', ')}`}
+      {(showRating || showEndless || visiblePlatforms.length > 0) && (
+        <div
+          className="absolute bottom-2 left-2 z-10 max-w-[calc(100%-1rem)]"
+          aria-hidden="true"
         >
-          {visiblePlatforms.map(({ value, icon: Icon }) => (
-            <Icon
-              key={value}
-              className="size-2.5 sm:size-3 shrink-0 overflow-visible text-gray-200"
-              aria-hidden
-            />
-          ))}
-          {hiddenPlatformCount > 0 && (
-            <span aria-hidden="true">+{hiddenPlatformCount}</span>
-          )}
-        </span>
+          <span className={capsuleClass}>
+            {showRating && (
+              <span
+                className="inline-flex items-center gap-1 px-1.5 text-[9px] font-medium leading-none text-gray-200 sm:px-2 sm:text-[11px]"
+                title="Nota"
+              >
+                <Star
+                  className={`size-2.5 overflow-visible fill-current sm:size-3 ${accentColor}`}
+                />
+                {ratingText}
+              </span>
+            )}
+            {showEndless && (
+              <span
+                className="inline-flex items-center px-1.5 sm:px-2"
+                title="Infinito"
+              >
+                <InfinityIcon className="size-2.5 text-primary-light sm:size-3" />
+              </span>
+            )}
+            {visiblePlatforms.length > 0 && (
+              <span
+                className="inline-flex items-center gap-1 px-1.5 text-[9px] font-medium leading-none text-gray-200 sm:px-2 sm:text-[11px]"
+                title={playedOn.map(platform => platform.label).join(', ')}
+              >
+                {visiblePlatforms.map(({ value, icon: Icon }, index) => (
+                  <Icon
+                    key={value}
+                    className={`size-2.5 shrink-0 overflow-visible text-gray-200 sm:size-3 ${index > 0 ? 'hidden [@container(min-width:160px)]:block' : ''}`}
+                  />
+                ))}
+                {playedOn.length > 1 && (
+                  <span className="[@container(min-width:160px)]:hidden">
+                    +{playedOn.length - 1}
+                  </span>
+                )}
+                {hiddenPlatformCount > 0 && (
+                  <span className="hidden [@container(min-width:160px)]:inline">
+                    +{hiddenPlatformCount}
+                  </span>
+                )}
+              </span>
+            )}
+          </span>
+        </div>
       )}
 
       {coverSrc && !coverFailed ? (
@@ -283,7 +299,7 @@ export function GameCard({
             )}
             src={coverSrc}
             loading="lazy"
-            alt={`${game?.name} banner`}
+            alt={game?.name ?? ''}
             onLoad={() => setLoadedSrc(coverSrc)}
             onError={() => setFailedSrc(coverSrc)}
           />
@@ -295,14 +311,20 @@ export function GameCard({
             'rounded-lg bg-dark-bg-lighter flex items-center justify-center'
           )}
         >
+          <span className="sr-only">{game?.name}</span>
           <span className="text-gray-400 text-xs text-center px-1">
             Sem capa
           </span>
         </div>
       )}
 
+      {summaryText && <span className="sr-only">, {summaryText}</span>}
+
       {!bare && (
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+        >
           <span className="text-white font-semibold text-center px-3 text-sm md:text-base translate-y-2 group-hover:translate-y-0 transition-transform duration-200 drop-shadow-lg">
             {game?.name}
           </span>
