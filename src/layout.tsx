@@ -5,8 +5,8 @@ import {
   useNavigate,
   useNavigationType,
 } from 'react-router-dom'
-import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import { AppToastContainer } from './components/appToastContainer'
 import { EmailVerificationNotice } from './components/emailVerificationNotice'
 import { Footer } from './components/footer'
 import { SideBar } from './components/sideBar'
@@ -52,7 +52,7 @@ export function Layout() {
         <Outlet />
       </main>
       <Footer />
-      <ToastContainer theme="dark" />
+      <AppToastContainer />
     </div>
   )
 }

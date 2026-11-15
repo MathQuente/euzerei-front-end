@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants/messages'
 import type { GetReviewResponse } from '../types/review'
-import { getErrorMessage } from '../utils/getErrorMessage'
+import { notify } from '../utils/notify'
 import { api } from './useApi'
 import { useAuth } from './useAuth'
 
@@ -38,10 +38,10 @@ export const useReview = (igdbId: string | undefined) => {
       queryClient.setQueryData<GetReviewResponse>(queryKey, {
         review: data.review,
       })
-      toast.success('Resenha salva com sucesso 👌')
+      notify.success(SUCCESS_MESSAGES.reviewSaved)
     },
     onError: err => {
-      toast.error(getErrorMessage(err, 'Erro ao salvar resenha'))
+      notify.failure(err, ERROR_MESSAGES.saveReview)
     },
   })
 
@@ -52,10 +52,10 @@ export const useReview = (igdbId: string | undefined) => {
         queryKey: ['communityReviews', igdbId],
       })
       queryClient.setQueryData<GetReviewResponse>(queryKey, { review: null })
-      toast.success('Resenha removida com sucesso 👌')
+      notify.success(SUCCESS_MESSAGES.reviewRemoved)
     },
     onError: err => {
-      toast.error(getErrorMessage(err, 'Erro ao remover resenha'))
+      notify.failure(err, ERROR_MESSAGES.removeReview)
     },
   })
 

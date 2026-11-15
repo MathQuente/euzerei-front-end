@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants/messages'
 import type { GameBase } from '../types/games'
-import { getErrorMessage } from '../utils/getErrorMessage'
+import { notify } from '../utils/notify'
 import { api } from './useApi'
 import { useAuth } from './useAuth'
 
@@ -17,10 +17,10 @@ export const useAddGame = (igdbId?: string) => {
       queryClient.invalidateQueries({
         queryKey: ['gamesStatus', userId, igdbId],
       })
-      toast.success('Jogo adicionado com sucesso 👌')
+      notify.success(SUCCESS_MESSAGES.gameAdded)
     },
     onError: error => {
-      toast.error(getErrorMessage(error, 'Erro ao adicionar jogo.'))
+      notify.failure(error, ERROR_MESSAGES.addGame)
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['games'] })
@@ -63,7 +63,7 @@ export const useAddGame = (igdbId?: string) => {
     onSuccess: () => {
       queryClient.removeQueries({ queryKey: ['gamesStatus', userId, igdbId] })
       queryClient.invalidateQueries({ queryKey: ['gameStats', userId, igdbId] })
-      toast.success('Jogo removido com sucesso 👌')
+      notify.success(SUCCESS_MESSAGES.gameRemoved)
     },
     onError: (err, _variables, context) => {
       queryClient.setQueryData(['games'], context?.previousGames)
@@ -75,7 +75,7 @@ export const useAddGame = (igdbId?: string) => {
         ['rating', userId, igdbId],
         context?.previousRating
       )
-      toast.error(getErrorMessage(err, 'Erro ao remover jogo.'))
+      notify.failure(err, ERROR_MESSAGES.removeGame)
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['games'] })
@@ -111,7 +111,7 @@ export const useAddGame = (igdbId?: string) => {
       queryClient.removeQueries({ queryKey: ['gamesStatus', userId, igdbId] })
       queryClient.invalidateQueries({ queryKey: ['userGames', userId] })
       queryClient.invalidateQueries({ queryKey: ['gamesStatus'] })
-      toast.success('Jogo removido com sucesso 👌')
+      notify.success(SUCCESS_MESSAGES.gameRemoved)
     },
     onError: (err, _variables, context) => {
       queryClient.setQueryData(['userGames', userId], context?.previousGames)
@@ -119,7 +119,7 @@ export const useAddGame = (igdbId?: string) => {
         ['gamesStatus', userId, igdbId],
         context?.previousGameStatus
       )
-      toast.error(getErrorMessage(err, 'Erro ao remover jogo.'))
+      notify.failure(err, ERROR_MESSAGES.removeGame)
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['userGames', userId] })

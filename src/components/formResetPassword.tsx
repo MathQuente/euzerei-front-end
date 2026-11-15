@@ -2,8 +2,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Lock } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify'
 import type { z } from 'zod'
+import { SUCCESS_MESSAGES } from '../constants/messages'
+import { notify } from '../utils/notify'
 
 import { api } from '../hooks/useApi'
 import { resetPasswordSchema } from '../schemas/resetPasswordSchema'
@@ -27,7 +28,7 @@ export function FormResetPassword({ token }: { token: string }) {
     const result = await api.resetPassword(token, data.password)
     if (!result) return
 
-    toast.success('Senha redefinida com sucesso 👌')
+    notify.success(SUCCESS_MESSAGES.passwordReset)
     navigate('/auth?tab=login', { replace: true })
   }
 

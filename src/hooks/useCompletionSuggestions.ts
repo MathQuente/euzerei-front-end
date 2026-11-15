@@ -1,10 +1,11 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { toast } from 'react-toastify'
+import { ERROR_MESSAGES } from '../constants/messages'
 import type { LibraryPlatform } from '../types/platform'
 import type { CompletionSuggestion } from '../types/suggestion'
 import { getErrorMessage } from '../utils/getErrorMessage'
+import { notify } from '../utils/notify'
 import { api } from './useApi'
 import { useAuth } from './useAuth'
 
@@ -103,7 +104,7 @@ export const useCompletionSuggestions = (
     showToast = true
   ): ActionResult {
     const message = getErrorMessage(error, fallback)
-    if (showToast && !isConflict(error)) toast.error(message)
+    if (showToast && !isConflict(error)) notify.error(message)
     return { ok: false, message }
   }
 
@@ -138,7 +139,7 @@ export const useCompletionSuggestions = (
         invalidateGame(suggestion.igdbId)
         return { ok: true, canUndo: result.canUndo }
       } catch (error) {
-        const outcome = failure(error, 'Erro ao marcar como Jogado.')
+        const outcome = failure(error, ERROR_MESSAGES.markAsPlayed)
         if (isConflict(error)) {
           markStale(suggestion, `${outcome.message} Atualizamos a lista.`)
         }
@@ -154,7 +155,7 @@ export const useCompletionSuggestions = (
         invalidateSuggestions()
         return { ok: true }
       } catch (error) {
-        const outcome = failure(error, 'Erro ao dispensar a sugestão.')
+        const outcome = failure(error, ERROR_MESSAGES.dismissSuggestion)
         if (isConflict(error)) {
           markStale(suggestion, `${outcome.message} Atualizamos a lista.`)
         } else {
@@ -176,7 +177,7 @@ export const useCompletionSuggestions = (
         invalidateGame(igdbId)
         return { ok: true }
       } catch (error) {
-        const outcome = failure(error, 'Erro ao desfazer.', false)
+        const outcome = failure(error, ERROR_MESSAGES.undoSuggestion, false)
         setResolved(current => {
           const row = current[igdbId]
           if (!row || row.kind !== 'accepted') return current

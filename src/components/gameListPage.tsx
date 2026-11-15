@@ -1,8 +1,9 @@
 import { type ChangeEvent, useEffect, useRef, useState } from 'react'
-import { toast } from 'react-toastify'
+import { INFO_MESSAGES } from '../constants/messages'
 import type { GameListProps, SortField, SortOrder } from '../interfaces/games'
 import type { GameStatusEnum } from '../types/games'
 import { pushListState } from '../utils/listHistory'
+import { notify } from '../utils/notify'
 import { parsePage } from '../utils/parsePage'
 import { GamesGrid } from './gamesComponents/gamesGrid'
 import { Pagination } from './pagination'
@@ -65,8 +66,8 @@ export function GameListPage({
       url.searchParams.set('page', String(totalPages))
       window.history.replaceState(window.history.state, '', url)
       setPage(totalPages)
-      toast.info(`A página ${safePage} não existe. Mostrando a última.`, {
-        toastId: 'page-out-of-range',
+      notify.info(INFO_MESSAGES.pageOutOfRange(safePage), {
+        id: 'page-out-of-range',
       })
     }
   }, [safeTotal, safePage, totalPages, setPage])

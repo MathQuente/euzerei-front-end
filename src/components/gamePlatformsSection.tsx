@@ -1,7 +1,7 @@
 import { ChevronRight, Minus, Plus, Trash2 } from 'lucide-react'
 import { useEffect, useId, useState } from 'react'
-import { toast } from 'react-toastify'
 import { USER_GAME_STATUS_ID as STATUS } from '../constants/gameStatus'
+import { INFO_MESSAGES } from '../constants/messages'
 import { focusRing, inlineFieldFocus } from '../styles/focus'
 import type {
   LibraryPlatform,
@@ -20,6 +20,7 @@ import {
   getAvailableLibraryPlatforms,
   getLibraryPlatform,
 } from '../utils/libraryPlatforms'
+import { notify } from '../utils/notify'
 import {
   consoleGroupsFor,
   consoleLabel,
@@ -487,9 +488,7 @@ export function GamePlatformsSection({
           p => p.platform === platform && p.console === 'UNKNOWN'
         )
       if (adopted) {
-        toast.info(
-          `O registro sem console virou ${consoleLabel(gameConsole)}; nenhuma plataforma nova foi criada.`
-        )
+        notify.info(INFO_MESSAGES.platformAdopted(consoleLabel(gameConsole)))
       }
     } catch {}
   }

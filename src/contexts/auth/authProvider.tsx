@@ -1,9 +1,10 @@
 import { isAxiosError } from 'axios'
 import { useEffect, useRef, useState } from 'react'
-import { toast } from 'react-toastify'
+import { INFO_MESSAGES } from '../../constants/messages'
 import { SESSION_ENDED_EVENT, api } from '../../hooks/useApi'
 import type { User } from '../../types/user'
 import { getErrorMessage } from '../../utils/getErrorMessage'
+import { notify } from '../../utils/notify'
 import { AuthContext } from './authContext'
 
 export function AuthProvider({ children }: { children: JSX.Element }) {
@@ -102,7 +103,7 @@ export function AuthProvider({ children }: { children: JSX.Element }) {
     const handleSessionEnded = () => {
       if (!userRef.current) return
       setUser(null)
-      toast.info('Sua sessão terminou. Entre novamente.')
+      notify.info(INFO_MESSAGES.sessionEnded)
     }
 
     window.addEventListener(SESSION_ENDED_EVENT, handleSessionEnded)

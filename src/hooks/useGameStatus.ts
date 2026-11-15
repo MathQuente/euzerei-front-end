@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants/messages'
 import type { GameStatusResponse } from '../types/games'
-import { getErrorMessage } from '../utils/getErrorMessage'
+import { notify } from '../utils/notify'
 import { invalidateGameLists } from './invalidateGameLists'
 import { api } from './useApi'
 import { useAuth } from './useAuth'
@@ -52,10 +52,10 @@ export const useGameStatus = (igdbId: string | undefined) => {
           String(query.queryKey[0]) === igdbId &&
           query.queryKey[2] === 'averageRating',
       })
-      toast.success('Status do jogo atualizado com sucesso 👌')
+      notify.success(SUCCESS_MESSAGES.statusUpdated)
     },
     onError: error => {
-      toast.error(getErrorMessage(error, 'Erro ao atualizar status.'))
+      notify.failure(error, ERROR_MESSAGES.updateStatus)
     },
     onSettled: () => {
       invalidateGameLists(queryClient)

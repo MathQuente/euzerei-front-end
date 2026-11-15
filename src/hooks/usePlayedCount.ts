@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
 import { USER_GAME_STATUS_ID as STATUS } from '../constants/gameStatus'
+import { ERROR_MESSAGES } from '../constants/messages'
 import type { GameStatsResponse } from '../types/user'
-import { getErrorMessage } from '../utils/getErrorMessage'
+import { notify } from '../utils/notify'
 import { invalidateGameLists } from './invalidateGameLists'
 import { api } from './useApi'
 import { useAuth } from './useAuth'
@@ -72,7 +72,7 @@ export const usePlayedCount = (igdbId: string) => {
       if (context?.previousData) {
         queryClient.setQueryData(queryKey, context.previousData)
       }
-      toast.error(getErrorMessage(error, 'Erro ao atualizar contagem.'))
+      notify.failure(error, ERROR_MESSAGES.updatePlayedCount)
     },
   })
 

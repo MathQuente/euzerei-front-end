@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
-import { toast } from 'react-toastify'
 import { BackButton } from '../components/backButton'
 import { GameListPage } from '../components/gameListPage'
+import { INFO_MESSAGES } from '../constants/messages'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useUserGames } from '../hooks/useUserGames'
 import type { SortField, SortOrder } from '../interfaces/games'
 import { GameStatusEnum } from '../types/games'
 import type { GameListData } from '../types/games'
+import { notify } from '../utils/notify'
 import { parsePage } from '../utils/parsePage'
 
 const ITEMS_PER_PAGE = 48
@@ -129,12 +130,9 @@ export function UserGamesPageByStatus() {
 
   useEffect(() => {
     if (isInvalidStatus) {
-      toast.info(
-        'Essa seção da biblioteca não existe. Mostrando toda a sua biblioteca.',
-        {
-          toastId: 'invalid-library-status',
-        }
-      )
+      notify.info(INFO_MESSAGES.invalidLibrarySection, {
+        id: 'invalid-library-status',
+      })
     }
   }, [isInvalidStatus])
 

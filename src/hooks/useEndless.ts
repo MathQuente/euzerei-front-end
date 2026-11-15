@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
+import { ERROR_MESSAGES } from '../constants/messages'
 import type { GameStatusResponse } from '../types/games'
-import { getErrorMessage } from '../utils/getErrorMessage'
+import { notify } from '../utils/notify'
 import { api } from './useApi'
 import { useAuth } from './useAuth'
 import { useGameStatus } from './useGameStatus'
@@ -31,7 +31,7 @@ export const useEndless = (igdbId: string | undefined) => {
       if (context?.previous) {
         queryClient.setQueryData(queryKey, context.previous)
       }
-      toast.error(getErrorMessage(error, 'Erro ao atualizar a marca Infinito.'))
+      notify.failure(error, ERROR_MESSAGES.updateEndless)
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey })

@@ -1,7 +1,7 @@
 import { isAxiosError } from 'axios'
 import { useCallback, useEffect, useState } from 'react'
-import { toast } from 'react-toastify'
-import { getErrorMessage } from '../utils/getErrorMessage'
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants/messages'
+import { notify } from '../utils/notify'
 import { api } from './useApi'
 import { useAuth } from './useAuth'
 
@@ -76,13 +76,11 @@ export function useResendVerification() {
     try {
       await api.resendVerification()
       startCooldown(userId, COOLDOWN_SECONDS)
-      toast.success(`Enviamos um novo link para ${user?.email}.`)
+      notify.success(SUCCESS_MESSAGES.verificationLinkSent(user?.email))
     } catch (error) {
       const wait = retryAfterSeconds(error)
       if (wait) startCooldown(userId, wait)
-      toast.error(
-        getErrorMessage(error, 'Não foi possível enviar o email agora.')
-      )
+      notify.failure(error, ERROR_MESSAGES.sendEmail)
     } finally {
       requestInFlight = false
       window.dispatchEvent(new Event(STATE_EVENT))

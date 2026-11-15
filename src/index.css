@@ -14,3 +14,8 @@ h1[tabindex="-1"]:focus,
 main[tabindex="-1"]:focus {
   outline: none;
 }
+
+.app-toasts .Toastify__toast-icon {
+  margin-inline-end: 0 !important;
+  width: auto !important;
+}

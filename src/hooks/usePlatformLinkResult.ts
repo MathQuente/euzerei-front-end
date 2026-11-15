@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { toast } from 'react-toastify'
+import { notify } from '../utils/notify'
 
 interface LinkMessage {
   type: 'success' | 'error'
@@ -10,7 +10,7 @@ interface LinkMessage {
 
 const PLATFORMS: Record<string, Record<string, LinkMessage>> = {
   steam: {
-    connected: { type: 'success', text: 'Steam conectada com sucesso 👌' },
+    connected: { type: 'success', text: 'Steam conectada.' },
     taken: {
       type: 'error',
       text: 'Este perfil da Steam já está vinculado a outra conta.',
@@ -25,7 +25,7 @@ const PLATFORMS: Record<string, Record<string, LinkMessage>> = {
     },
   },
   xbox: {
-    connected: { type: 'success', text: 'Xbox conectado com sucesso 👌' },
+    connected: { type: 'success', text: 'Xbox conectado.' },
     taken: {
       type: 'error',
       text: 'Este perfil do Xbox já está vinculado a outra conta.',
@@ -61,8 +61,8 @@ export function usePlatformLinkResult() {
       const messages = PLATFORMS[platform]
       if (!messages) return
       const message = messages[result] ?? messages.failed
-      toast[message.type](message.text, {
-        toastId: `platform-link-${platform}-${result}`,
+      notify[message.type](message.text, {
+        id: `platform-link-${platform}-${result}`,
       })
       if (result === 'connected') {
         queryClient.invalidateQueries({ queryKey: ['userProfile'] })

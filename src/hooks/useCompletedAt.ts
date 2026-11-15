@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
 import { USER_GAME_STATUS_ID as STATUS } from '../constants/gameStatus'
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants/messages'
 import type { GameCompletedAtResponse } from '../types/user'
-import { getErrorMessage } from '../utils/getErrorMessage'
+import { notify } from '../utils/notify'
 import { api } from './useApi'
 import { useAuth } from './useAuth'
 import { useGameStatus } from './useGameStatus'
@@ -52,15 +52,13 @@ export const useCompletedAt = (igdbId: string) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey })
       queryClient.invalidateQueries({ queryKey: ['userGames', userId] })
-      toast.success('Data de finalização atualizada com sucesso 👌')
+      notify.success(SUCCESS_MESSAGES.completedAtSaved)
     },
     onError: (error, _variables, context) => {
       if (context?.previousData) {
         queryClient.setQueryData(queryKey, context.previousData)
       }
-      toast.error(
-        getErrorMessage(error, 'Erro ao atualizar a data de finalização.')
-      )
+      notify.failure(error, ERROR_MESSAGES.saveCompletedAt)
     },
   })
 

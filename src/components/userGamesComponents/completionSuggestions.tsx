@@ -1,6 +1,6 @@
 import { Check, ChevronRight, TriangleAlert, Undo2 } from 'lucide-react'
 import { useEffect, useId, useRef, useState } from 'react'
-import { toast } from 'react-toastify'
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../constants/messages'
 import {
   type SuggestionRow,
   useCompletionSuggestions,
@@ -9,6 +9,7 @@ import { focusRing } from '../../styles/focus'
 import type { LibraryPlatform } from '../../types/platform'
 import type { CompletionSuggestion } from '../../types/suggestion'
 import { formatHours } from '../../utils/hours'
+import { notify } from '../../utils/notify'
 import { Button } from '../button'
 
 const UNDO_TOAST_MS = 10000
@@ -228,18 +229,18 @@ export function CompletionSuggestionsBlock({
   async function handleAccept(suggestion: CompletionSuggestion) {
     const result = await accept(suggestion)
     if (!result.ok) {
-      setLive(result.message ?? 'Não foi possível marcar como Jogado.')
+      setLive(result.message ?? ERROR_MESSAGES.markAsPlayed)
       return
     }
-    setLive(`${suggestion.name} marcado como Jogado.`)
+    setLive(SUCCESS_MESSAGES.markedAsPlayed(suggestion.name))
     if (!result.canUndo) {
-      toast.success(`Marcado como Jogado: ${suggestion.name}`)
+      notify.success(SUCCESS_MESSAGES.markedAsPlayed(suggestion.name))
       return
     }
-    toast.success(
+    notify.success(
       ({ closeToast }) => (
         <div className="flex items-center justify-between gap-3">
-          <span>Marcado como Jogado: {suggestion.name}</span>
+          <span>{SUCCESS_MESSAGES.markedAsPlayed(suggestion.name)}</span>
           <button
             type="button"
             onClick={() => {

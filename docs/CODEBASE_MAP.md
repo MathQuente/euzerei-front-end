@@ -16,7 +16,7 @@ React 18 + Vite + TypeScript + TailwindCSS SPA for "Lib" — personal game-libra
 graph TD
   subgraph Entry
     main[main.tsx: createBrowserRouter + QueryClientProvider + AuthProvider]
-    layout[layout.tsx: SideBar + EmailVerificationNotice + Outlet + Footer + ToastContainer]
+    layout[layout.tsx: SideBar + EmailVerificationNotice + Outlet + Footer + AppToastContainer]
   end
 
   subgraph Pages
@@ -103,7 +103,7 @@ docs/                        this map
 
 ## Full Routing Map
 
-All routes are children of one `<Layout/>` (persistent `SideBar` + `ToastContainer`, via `<Outlet/>`).
+All routes are children of one `<Layout/>` (persistent `SideBar` + `AppToastContainer`, via `<Outlet/>`).
 
 | Path | Component | File | Auth-gated? |
 |---|---|---|---|
@@ -273,7 +273,7 @@ sequenceDiagram
         UGS->>QC: invalidate gamesStatus, gameStats, userGames
     end
 
-    QC-->>GF: refetch -> re-render active button + toast.success
+    QC-->>GF: refetch -> re-render active button (no success toast; only errors notify)
 ```
 
 ## Commands
@@ -382,6 +382,7 @@ Reasons that used to live in code comments (the project keeps source files comme
 
 **Routing, scroll and errors**
 - **Game URLs use the slug** (`/games/<slug>`, `/games/<slug>/reviews`). The back end gives every cached game a unique `slug` (`lib` `games_cache.slug`); a game not cached yet comes with `slug: null` and its link falls back to the id. Rules: (1) every link is built by `gamePath(game, { reviews, search, hash })` in `utils/gamePath.ts`, never by hand; (2) the route param is parsed once at the page edge: `useGameRef(param)` (`hooks/useGameRef.ts`) uses `parseGameRef` (`id` = `^[1-9]\d{0,9}$`, `slug` = letters, digits and single dashes, not only digits, up to 100 chars, lower-cased; anything else is `invalid` and shows "Jogo não encontrado") and returns the numeric id **as a string**, which is what goes down to `useGame`, `useReview`, `useCommunityReviews`, `ReviewSummary` and `OwnReviewCard`, so the cache keys (`['game', id]`, `useRating`, `useGameStatus`) are the ones their mutations invalidate. A slug is resolved with `GET /games/slug/:slug`, and the response is written to `['game', id]` so `useGame` does not fetch again; (3) `useCanonicalGameUrl(game, { reviews })` replaces the URL once the detail arrives and has a `slug` (`navigate(..., { replace: true, state: { canonical: true } })`, keeping `search` and `hash`, so `?page=` and `#biblioteca` survive). It only runs when the path differs, so a list and a detail that disagree cost one replace, not a loop. `layout.tsx` (scroll to top) and `useFocusOnRouteChange` ignore a navigation whose state is `canonical`. `/games/comingSoon` is a static route and wins over `:gameRef`; React Router matches case-insensitively, so a game whose slug is `comingsoon` would hit it (none exists; the back end does not reserve it). The back end must have the migration and `backfill:slugs` before this front is deployed.
+- **Toasts go through `notify`** (`utils/notify.ts`), never `toast.*` directly; all texts live in `constants/messages.ts` (`SUCCESS_MESSAGES`, `ERROR_MESSAGES`, `INFO_MESSAGES`, with `cannot(action)` building "Não foi possível … Tente de novo."). Rules: no emoji, one short sentence with a period, and a success toast for every action that saves or removes something ("Status atualizado.", "Horas salvas.", "Data salva.", "Nota salva.", "Resenha salva.", "Jogo adicionado.", "Jogo removido.", "{Plataforma} conectada."), plus the ones whose effect is not visible (the rating that adds or promotes a game, the Xbox console, copied list, verification link, account deletion, password reset, profile, undoable "marcado como Jogado"). Errors have their own text ("Não foi possível … Tente de novo."). `notify.failure(error, fallback)` shows the server message when `getErrorMessage` finds a specific one, otherwise the fallback. `notify.*(content, { id })` updates a toast that is already visible instead of stacking (rating feedback, login error, invalid library section, page out of range, platform link result). Success and info use `role="status"`, errors `role="alert"`. `AppToastContainer` (`components/appToastContainer.tsx`): bottom center, 5 s for every toast (the undo toast in `completionSuggestions.tsx` keeps its own 10 s), `limit` 5 (a low limit queues the next toast, and the 10 s undo toast would wait), pause on hover and on focus loss, a left stripe and icon by type, and a close button named "Fechar aviso". Library gotchas: a function `toastClassName` **replaces** the default classes, so the base `Toastify__toast…` classes are repeated in it; the stripe color needs `!` because `!border-dark-border` would win; a Tailwind arbitrary variant with `__` in the class name does not work (underscores become spaces), so the icon margin reset is plain CSS in `index.css`, scoped by the `app-toasts` class of the container. The OAuth error texts (`OAUTH_ERROR_MESSAGES`) are looked up with `hasOwnProperty`, because the `error` query param is user-controlled and `constructor` would otherwise hit `Object.prototype`. Server messages (`lib`) were not changed: they are already full sentences.
 - The app is on `react-router-dom` 7.18.5 and still imports from `react-router-dom` (the package is kept in v7, and `RouterProvider`/`createBrowserRouter` resolve from it), so the 50 imports did not change; the v6 `future` flags became the default and `main.tsx` has none. Redirect targets that come from the user go through `utils/safeRedirectPath.ts` (rejects `//` and `\`), which is what keeps a stored `redirectAfterLogin` from leaving the app. `sessionStorage` is per origin: the OAuth callback returns to `localhost`, so open the app on `localhost`, not `127.0.0.1`, when testing the redirect after login.
 - `layout.tsx` and `pages/gameReviewsPage.tsx`: the router keeps the scroll when changing page. A new page starts at the top; back/forward (POP) and anchor links (`#biblioteca`) are left as they are. Coming from "Ver todas" at the bottom of the game page, the reviews page goes to the top, but on browser back the restored scroll stays.
 - `pages/userProfilePage.tsx`: the back end answers 400 for an id that is not a UUID and 404 for a UUID that does not exist; both show the not-found screen.

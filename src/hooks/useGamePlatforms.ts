@@ -1,12 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
+import { ERROR_MESSAGES } from '../constants/messages'
 import type {
   LibraryPlatform,
   PlatformConsole,
   UserGamePlatformPatch,
   UserGamePlatformsResponse,
 } from '../types/platform'
-import { getErrorMessage } from '../utils/getErrorMessage'
+import { notify } from '../utils/notify'
 import { api } from './useApi'
 import { useAuth } from './useAuth'
 
@@ -36,7 +36,7 @@ export const useGamePlatforms = (igdbId: string, enabled: boolean) => {
   }
 
   const onError = (fallback: string) => (error: unknown) => {
-    toast.error(getErrorMessage(error, fallback))
+    notify.failure(error, fallback)
   }
 
   const addPlatform = useMutation({
@@ -48,7 +48,7 @@ export const useGamePlatforms = (igdbId: string, enabled: boolean) => {
       gameConsole: PlatformConsole
     }) => api.addGamePlatform(igdbId, platform, gameConsole),
     onSuccess: onChanged,
-    onError: onError('Erro ao adicionar plataforma.'),
+    onError: onError(ERROR_MESSAGES.addPlatform),
   })
 
   const updatePlatform = useMutation({
@@ -62,7 +62,7 @@ export const useGamePlatforms = (igdbId: string, enabled: boolean) => {
       patch: UserGamePlatformPatch
     }) => api.updateGamePlatform(igdbId, platform, gameConsole, patch),
     onSuccess: onChanged,
-    onError: onError('Erro ao atualizar plataforma.'),
+    onError: onError(ERROR_MESSAGES.updatePlatform),
   })
 
   const removePlatform = useMutation({
@@ -74,7 +74,7 @@ export const useGamePlatforms = (igdbId: string, enabled: boolean) => {
       gameConsole: PlatformConsole
     }) => api.removeGamePlatform(igdbId, platform, gameConsole),
     onSuccess: onChanged,
-    onError: onError('Erro ao remover plataforma.'),
+    onError: onError(ERROR_MESSAGES.removePlatform),
   })
 
   return {

@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { toast } from 'react-toastify'
+import { ERROR_MESSAGES } from '../constants/messages'
 import type { SortField, SortOrder } from '../interfaces/games'
 import type {
   GetFollowersResponse,
@@ -39,7 +39,7 @@ import type {
   XboxPreferredConsole,
 } from '../types/user'
 import type { XboxImportStatusResponse } from '../types/xbox'
-import { getErrorMessage } from '../utils/getErrorMessage'
+import { notify } from '../utils/notify'
 
 export const SESSION_ENDED_EVENT = 'auth:session-ended'
 
@@ -90,15 +90,6 @@ async function openPlatformSignIn(path: string, expectedOrigin: string) {
 
 const LOGIN_ERROR_TOAST_ID = 'login-error'
 
-function showLoginError(message: string) {
-  if (toast.isActive(LOGIN_ERROR_TOAST_ID)) {
-    toast.update(LOGIN_ERROR_TOAST_ID, { render: message })
-    return
-  }
-
-  toast.error(message, { toastId: LOGIN_ERROR_TOAST_ID })
-}
-
 export const api = {
   login: async (email: string, password: string) => {
     try {
@@ -107,11 +98,13 @@ export const api = {
       return response.data
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        showLoginError(getErrorMessage(error, 'Não foi possível entrar.'))
+        notify.failure(error, ERROR_MESSAGES.signIn, {
+          id: LOGIN_ERROR_TOAST_ID,
+        })
         return
       }
 
-      showLoginError('Ocorreu um erro inesperado. 🤯')
+      notify.error(ERROR_MESSAGES.unexpected, { id: LOGIN_ERROR_TOAST_ID })
     }
   },
   signup: async (email: string, password: string, acceptedTerms: boolean) => {
@@ -129,12 +122,10 @@ export const api = {
       return response.data
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        toast.error(
-          getErrorMessage(error, 'Erro ao solicitar redefinição de senha.')
-        )
+        notify.failure(error, ERROR_MESSAGES.requestPasswordReset)
         return
       }
-      toast.error('Ocorreu um erro inesperado. 🤯')
+      notify.error(ERROR_MESSAGES.unexpected)
     }
   },
   isResetTokenValid: async (token: string) => {
@@ -153,10 +144,10 @@ export const api = {
       return response.data
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        toast.error(getErrorMessage(error, 'Erro ao redefinir a senha.'))
+        notify.failure(error, ERROR_MESSAGES.resetPassword)
         return
       }
-      toast.error('Ocorreu um erro inesperado. 🤯')
+      notify.error(ERROR_MESSAGES.unexpected)
     }
   },
   verifyEmail: async (token: string) => {

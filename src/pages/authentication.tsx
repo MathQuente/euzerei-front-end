@@ -1,23 +1,18 @@
 import * as Tabs from '@radix-ui/react-tabs'
 import { useEffect, useState } from 'react'
 import { Navigate, useSearchParams } from 'react-router-dom'
-import { toast } from 'react-toastify'
 import { FormLogin } from '../components/formLogin'
 import { FormSignUp } from '../components/formSignUp'
+import { ERROR_MESSAGES, OAUTH_ERROR_MESSAGES } from '../constants/messages'
 import { useAuth } from '../hooks/useAuth'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { focusRing } from '../styles/focus'
+import { notify } from '../utils/notify'
 
 const tabTrigger = `flex-1 py-3 text-sm font-semibold text-gray-400 border-b-2 border-transparent data-[state=active]:text-white data-[state=active]:border-primary transition-colors duration-150 uppercase tracking-wide ${focusRing}`
 
-const OAUTH_ERROR_MESSAGES: Record<string, string> = {
-  access_denied: 'Login cancelado.',
-  email_not_verified:
-    'O email dessa conta ainda não foi verificado no provedor. Verifique o email lá e tente de novo.',
-}
 const TERMS_REQUIRED_MESSAGE =
   'Ainda não existe conta para esse login. Marque a caixa abaixo e continue com Google ou Discord para criar uma.'
-const OAUTH_ERROR_FALLBACK = 'Não foi possível entrar. Tente novamente.'
 
 export function Authentication() {
   const { user } = useAuth()
@@ -42,7 +37,11 @@ export function Authentication() {
       setTermsNotice(true)
       next.set('tab', 'signUp')
     } else {
-      toast.error(OAUTH_ERROR_MESSAGES[oauthError] ?? OAUTH_ERROR_FALLBACK)
+      notify.error(
+        Object.prototype.hasOwnProperty.call(OAUTH_ERROR_MESSAGES, oauthError)
+          ? OAUTH_ERROR_MESSAGES[oauthError]
+          : ERROR_MESSAGES.signInFailed
+      )
     }
 
     setSearchParams(next, { replace: true })

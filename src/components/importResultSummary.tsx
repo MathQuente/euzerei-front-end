@@ -1,9 +1,10 @@
 import { ChevronRight } from 'lucide-react'
 import { type ReactNode, useId, useState } from 'react'
-import { toast } from 'react-toastify'
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants/messages'
 import { focusRing } from '../styles/focus'
 import type { ImportSectionResult } from '../types/import'
 import { groupNotFound } from '../utils/groupNotFound'
+import { notify } from '../utils/notify'
 import { Button } from './button'
 
 export interface ImportResultSection {
@@ -106,9 +107,9 @@ export function ImportResultSummary({
   async function copyList() {
     try {
       await navigator.clipboard.writeText(notFound.join('\n'))
-      toast.success('Lista copiada')
+      notify.success(SUCCESS_MESSAGES.listCopied)
     } catch {
-      toast.error('Não foi possível copiar a lista')
+      notify.error(ERROR_MESSAGES.copyList)
     }
   }
 

@@ -1,23 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants/messages'
 import type {
   RatingResponse,
   RatingsDistributionResponse,
 } from '../types/rating'
-import { getErrorMessage } from '../utils/getErrorMessage'
+import { notify } from '../utils/notify'
 import { invalidateGameLists } from './invalidateGameLists'
 import { api } from './useApi'
 import { useAuth } from './useAuth'
 
-const RATING_TOAST_ID = 'rating-feedback'
-
-function notifyRating(message: string) {
-  if (toast.isActive(RATING_TOAST_ID)) {
-    toast.update(RATING_TOAST_ID, { render: message })
-  } else {
-    toast.success(message, { toastId: RATING_TOAST_ID })
-  }
-}
+const RATING_NOTICE_ID = 'rating-feedback'
 
 const getRatingQueryKey = (userId: string, igdbId: string | undefined) => [
   'rating',
@@ -65,16 +57,20 @@ export const useRating = (igdbId: string | undefined) => {
       })
 
       if (response?.data?.addedAsPlaying) {
-        toast.success('Jogo adicionado como Jogando')
+        notify.success(SUCCESS_MESSAGES.ratingAddedAsPlaying, {
+          id: RATING_NOTICE_ID,
+        })
       } else if (response?.data?.promotedToPlayed) {
-        toast.success('Avaliação salva. Jogo marcado como Jogado.')
+        notify.success(SUCCESS_MESSAGES.ratingSavedAsPlayed, {
+          id: RATING_NOTICE_ID,
+        })
       } else {
-        notifyRating('Nota salva.')
+        notify.success(SUCCESS_MESSAGES.ratingSaved, { id: RATING_NOTICE_ID })
       }
     },
     onError: (err, _, context) => {
       queryClient.setQueryData(queryKey, context?.previous)
-      toast.error(getErrorMessage(err, 'Erro ao atualizar avaliação'))
+      notify.failure(err, ERROR_MESSAGES.saveRating)
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey })
@@ -96,7 +92,7 @@ export const useRating = (igdbId: string | undefined) => {
       return { previous }
     },
     onSuccess: () => {
-      notifyRating('Nota removida.')
+      notify.success(SUCCESS_MESSAGES.ratingRemoved, { id: RATING_NOTICE_ID })
       queryClient.invalidateQueries({ queryKey: ['rating', userId, igdbId] })
       queryClient.invalidateQueries({ queryKey: ['ratings', igdbId] })
       queryClient.invalidateQueries({
@@ -105,7 +101,7 @@ export const useRating = (igdbId: string | undefined) => {
     },
     onError: (err, _, context) => {
       queryClient.setQueryData(queryKey, context?.previous)
-      toast.error(getErrorMessage(err, 'Erro ao remover avaliação'))
+      notify.failure(err, ERROR_MESSAGES.removeRating)
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey })

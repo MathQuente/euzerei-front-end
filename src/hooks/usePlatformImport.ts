@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants/messages'
 import type { ImportStatusResponse } from '../types/import'
-import { getErrorMessage } from '../utils/getErrorMessage'
+import { notify } from '../utils/notify'
 import { useAuth } from './useAuth'
 
 const POLLING_STATUSES = ['waiting', 'active', 'delayed']
@@ -44,10 +44,10 @@ export const usePlatformImport = <TResult>(
     onSuccess: () => {
       if (config.redirectsAway) return
       queryClient.invalidateQueries({ queryKey: ['userProfile', userId] })
-      toast.success(`${config.label} conectada com sucesso 👌`)
+      notify.success(SUCCESS_MESSAGES.platformConnected(config.label))
     },
     onError: error => {
-      toast.error(getErrorMessage(error, `Erro ao conectar ${config.label}`))
+      notify.failure(error, ERROR_MESSAGES.connectPlatform(config.label))
     },
   })
 
@@ -59,7 +59,7 @@ export const usePlatformImport = <TResult>(
       return config.requestVerification(input)
     },
     onError: error => {
-      toast.error(getErrorMessage(error, `Erro ao conectar ${config.label}`))
+      notify.failure(error, ERROR_MESSAGES.connectPlatform(config.label))
     },
   })
 
@@ -73,10 +73,10 @@ export const usePlatformImport = <TResult>(
       queryClient.invalidateQueries({ queryKey: ['gameHours', userId] })
       queryClient.invalidateQueries({ queryKey: ['gameStats', userId] })
       queryClient.invalidateQueries({ queryKey })
-      toast.success(`${config.label} desconectada`)
+      notify.success(SUCCESS_MESSAGES.platformDisconnected(config.label))
     },
     onError: error => {
-      toast.error(getErrorMessage(error, `Erro ao desconectar ${config.label}`))
+      notify.failure(error, ERROR_MESSAGES.disconnectPlatform(config.label))
     },
   })
 
@@ -86,7 +86,7 @@ export const usePlatformImport = <TResult>(
       queryClient.invalidateQueries({ queryKey })
     },
     onError: error => {
-      toast.error(getErrorMessage(error, 'Erro ao iniciar a importação'))
+      notify.failure(error, ERROR_MESSAGES.startImport)
     },
   })
 

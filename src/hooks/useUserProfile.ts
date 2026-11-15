@@ -4,9 +4,9 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants/messages'
 import type { UpdateUserProfileData, UserProfileResponse } from '../types/user'
-import { getErrorMessage } from '../utils/getErrorMessage'
+import { notify } from '../utils/notify'
 import { api } from './useApi'
 import { useAuth } from './useAuth'
 
@@ -115,14 +115,14 @@ export const useUserProfile = (options?: UseUserProfileOptions) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey })
-      toast.success('Perfil atualizado com sucesso 👌')
+      notify.success(SUCCESS_MESSAGES.profileSaved)
       options?.onUpdateSuccess?.()
     },
     onError: (error, _variables, context) => {
       if (context?.previousProfile) {
         queryClient.setQueryData(queryKey, context.previousProfile)
       }
-      toast.error(getErrorMessage(error, 'Erro ao atualizar perfil.'))
+      notify.failure(error, ERROR_MESSAGES.saveProfile)
     },
     onSettled: () => {
       queryClient.invalidateQueries({

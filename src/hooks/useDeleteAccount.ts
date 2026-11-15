@@ -1,8 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify'
+import { SUCCESS_MESSAGES } from '../constants/messages'
 import { getErrorMessage } from '../utils/getErrorMessage'
+import { notify } from '../utils/notify'
 import { api, setAccountDeletionInProgress } from './useApi'
 import { useAuth } from './useAuth'
 
@@ -31,7 +32,7 @@ export function useDeleteAccount() {
       navigate('/', { replace: true })
       clearSession()
       queryClient.clear()
-      toast.success('Sua conta foi excluída.')
+      notify.success(SUCCESS_MESSAGES.accountDeleted)
     },
   })
 
