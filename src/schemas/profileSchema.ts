@@ -1,22 +1,11 @@
 import { z } from 'zod'
+import { userNameSchema } from './userNameSchema'
 
 const MAX_UPLOAD_SIZE = 1024 * 1024 * 3
 const ACCEPTED_FILE_TYPES = ['image/png', 'image/gif', 'image/jpeg']
 
 export const updateProfileSchema = z.object({
-  userName: z
-    .string()
-    .trim()
-    .min(1, { message: 'Campo vazio' })
-    .max(30, { message: 'O nome pode ter no máximo 30 caracteres' })
-    .transform(name => {
-      return name
-        .split(/\s+/)
-        .map(word => {
-          return word[0].toLocaleUpperCase().concat(word.substring(1))
-        })
-        .join(' ')
-    }),
+  userName: userNameSchema,
   profilePicture: z
     .instanceof(FileList)
     .optional()

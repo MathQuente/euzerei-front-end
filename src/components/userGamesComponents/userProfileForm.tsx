@@ -11,6 +11,7 @@ import { useUserProfile } from '../../hooks/useUserProfile'
 import type { UserGamesFormProps } from '../../interfaces/user'
 import { updateProfileSchema } from '../../schemas/profileSchema'
 import { fieldFocus, focusRing } from '../../styles/focus'
+import { buildProfileUpdate } from '../../utils/profileUpdate'
 import { Button } from '../button'
 
 type ProfileForm = z.infer<typeof updateProfileSchema>
@@ -85,23 +86,11 @@ export function UserProfileForm({ afterSave, onCancel }: UserGamesFormProps) {
   async function onSubmit(data: FieldValues) {
     if (!hasChanges) return
 
-    const updateData: {
-      userName?: string
-      profilePicture?: File
-      userBanner?: File | null
-    } = {}
-
-    if (data.userName && data.userName !== originalValues.userName) {
-      updateData.userName = data.userName
-    }
-    if (data.profilePicture) {
-      updateData.profilePicture = data.profilePicture
-    }
-    if (data.userBanner) {
-      updateData.userBanner = data.userBanner
-    } else if (shouldRemoveBanner) {
-      updateData.userBanner = null
-    }
+    const updateData = buildProfileUpdate(
+      data,
+      originalValues.userName,
+      shouldRemoveBanner
+    )
 
     if (Object.keys(updateData).length > 0) {
       updateUserProfile(updateData)

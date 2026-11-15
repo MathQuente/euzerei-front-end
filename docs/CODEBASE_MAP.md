@@ -228,7 +228,7 @@ Convention: components use `bg-dark-bg*`, `border-dark-border`, `text-primary(-l
 | `libraryComponents/emptyLibrary.tsx` | Whole-library empty state: import vs. add one by one. |
 | `libraryComponents/importGamesModal.tsx` | "Importar jogos" dialog reusing the Steam/PSN/Xbox import sections — the only place imports live now (removed from the edit-profile form). |
 | `userProfileDisplay.tsx` | Fetches own profile/followers, renders `ProfileHeader` + edit/followers/following modals. Optional `onImport` adds the "Importar jogos" action. |
-| `userProfileForm.tsx` | Profile-edit form, banner/avatar upload w/ preview, dirty-tracking. |
+| `userProfileForm.tsx` | Profile-edit form, banner/avatar upload w/ preview, dirty-tracking. The payload is built by `utils/profileUpdate.ts` (`buildProfileUpdate`: `userName` only when the typed name differs from the stored one) and the name rule is `schemas/userNameSchema.ts` (trim, 1 to 30 characters, **case kept as typed**; it used to capitalize every word, which renamed "miyeonstan" to "Miyeonstan" whenever only the photo or banner was saved). Do not test this form by uploading a photo with a real account: `UsersService.update` deletes the previous Cloudinary image when it is replaced. |
 | `userProfileModal.tsx` | Radix Dialog w/ **visible** title (contrast with `gameModal.tsx`'s hidden title). `title`/`description` props let `importGamesModal` reuse it. |
 
 ## Data Flow — Viewing a Game and Marking Status
