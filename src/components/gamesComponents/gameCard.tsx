@@ -130,6 +130,11 @@ export function GameCard({
   interactive = true,
 }: GameCardProps) {
   const [open, setOpen] = useState(false)
+  const [loadedSrc, setLoadedSrc] = useState<string | null>(null)
+  const [failedSrc, setFailedSrc] = useState<string | null>(null)
+  const coverSrc = game?.coverUrl ? hiResCover(game.coverUrl) : null
+  const coverLoaded = coverSrc !== null && loadedSrc === coverSrc
+  const coverFailed = coverSrc !== null && failedSrc === coverSrc
   const bare = size === 'small' || size === 'row' || size === 'feature'
   const tag =
     game && !bare
@@ -156,7 +161,7 @@ export function GameCard({
   const visiblePlatforms = playedOn.slice(0, MAX_CARD_PLATFORMS)
   const hiddenPlatformCount = playedOn.length - visiblePlatforms.length
 
-  const lifts = size !== 'row' && size !== 'feature'
+  const lifts = !bare
   const cardClassName = twMerge(
     'group relative rounded-lg overflow-hidden',
     lifts &&
@@ -259,17 +264,31 @@ export function GameCard({
         </span>
       )}
 
-      {game?.coverUrl ? (
-        <img
-          className={twMerge(
-            sizes[size],
-            'rounded-lg object-cover',
-            !bare && 'transition-opacity duration-200 group-hover:opacity-20'
+      {coverSrc && !coverFailed ? (
+        <>
+          {!coverLoaded && (
+            <div
+              className="absolute inset-0 animate-pulse rounded-lg bg-dark-bg-lighter motion-reduce:animate-none"
+              aria-hidden="true"
+            />
           )}
-          src={hiResCover(game.coverUrl)}
-          loading="lazy"
-          alt={`${game?.name} banner`}
-        />
+          <img
+            ref={el => {
+              if (el?.complete && el.naturalWidth > 0) setLoadedSrc(coverSrc)
+            }}
+            className={twMerge(
+              sizes[size],
+              'rounded-lg object-cover transition-opacity duration-200',
+              !coverLoaded && 'opacity-0',
+              !bare && coverLoaded && 'group-hover:opacity-20'
+            )}
+            src={coverSrc}
+            loading="lazy"
+            alt={`${game?.name} banner`}
+            onLoad={() => setLoadedSrc(coverSrc)}
+            onError={() => setFailedSrc(coverSrc)}
+          />
+        </>
       ) : (
         <div
           className={twMerge(

@@ -1,4 +1,4 @@
-import { type ChangeEvent, useEffect, useRef } from 'react'
+import { type ChangeEvent, useEffect, useRef, useState } from 'react'
 import { toast } from 'react-toastify'
 import type { GameListProps, SortField, SortOrder } from '../interfaces/games'
 import type { GameStatusEnum } from '../types/games'
@@ -7,6 +7,8 @@ import { parsePage } from '../utils/parsePage'
 import { GamesGrid } from './gamesComponents/gamesGrid'
 import { Pagination } from './pagination'
 import { SortControls } from './sorting'
+
+const CHANGING_PAGE_DELAY_MS = 200
 
 const SORT_FIELDS: SortField[] = [
   'name',
@@ -31,8 +33,22 @@ export function GameListPage({
   onFilterChange,
   isUserLibrary,
   emptyState,
+  isChangingPage = false,
 }: GameListProps) {
   const gamesArray = games.games
+
+  const [showChangingPage, setShowChangingPage] = useState(false)
+  useEffect(() => {
+    if (!isChangingPage) {
+      setShowChangingPage(false)
+      return
+    }
+    const timer = setTimeout(
+      () => setShowChangingPage(true),
+      CHANGING_PAGE_DELAY_MS
+    )
+    return () => clearTimeout(timer)
+  }, [isChangingPage])
 
   const safeTotal =
     typeof games.total === 'number' && !Number.isNaN(games.total)
@@ -145,7 +161,28 @@ export function GameListPage({
           ))}
         </div>
       ) : (
-        <GamesGrid games={gamesArray} emptyState={emptyState} />
+        <div className="relative" aria-busy={isChangingPage}>
+          {showChangingPage && (
+            <>
+              <div
+                className="absolute inset-x-0 top-0 z-20 h-0.5 animate-pulse rounded bg-primary-light motion-reduce:animate-none"
+                aria-hidden="true"
+              />
+              <output className="absolute left-1/2 top-4 z-20 -translate-x-1/2 rounded-full border border-dark-border bg-dark-bg-light px-3 py-1 text-xs text-gray-200 shadow-lg shadow-black/40">
+                Carregando página {safePage}…
+              </output>
+            </>
+          )}
+          <div
+            className={
+              showChangingPage
+                ? 'pointer-events-none opacity-50 saturate-50 transition-opacity duration-200'
+                : 'transition-opacity duration-200'
+            }
+          >
+            <GamesGrid games={gamesArray} emptyState={emptyState} />
+          </div>
+        </div>
       )}
 
       <Pagination
@@ -154,6 +191,7 @@ export function GameListPage({
         totalItems={safeTotal}
         itemsPerPage={gamesArray.length}
         onPageChange={setCurrentPage}
+        disabled={isChangingPage}
       />
     </div>
   )

@@ -29,7 +29,14 @@ export function Games() {
   })
 
   const LIMIT = 48
-  const { GamesResponse } = useGames(page, '', sortField, sortOrder, LIMIT)
+  const { GamesResponse, isChangingPage } = useGames(
+    page,
+    '',
+    sortField,
+    sortOrder,
+    LIMIT,
+    { prefetchNext: true }
+  )
 
   if (!GamesResponse) {
     return (
@@ -55,6 +62,7 @@ export function Games() {
         page={page}
         pageSize={LIMIT}
         setPage={setPage}
+        isChangingPage={isChangingPage}
         sortOrder={sortOrder}
         setSortOrder={setSortOrder}
         sortField={sortField}

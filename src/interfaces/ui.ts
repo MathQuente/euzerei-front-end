@@ -22,6 +22,7 @@ export interface PaginationProps {
   totalItems: number
   itemsPerPage: number
   onPageChange: (page: number) => void
+  disabled?: boolean
 }
 
 export interface AuthInputProps extends InputHTMLAttributes<HTMLInputElement> {

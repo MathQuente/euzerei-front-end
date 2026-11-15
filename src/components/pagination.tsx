@@ -13,6 +13,7 @@ export function Pagination({
   totalItems,
   itemsPerPage,
   onPageChange,
+  disabled = false,
 }: PaginationProps) {
   const displayedItems = Math.min(itemsPerPage, totalItems)
 
@@ -50,7 +51,7 @@ export function Pagination({
       <div className="flex gap-1.5">
         <IconButton
           onClick={goToFirstPage}
-          disabled={currentPage === 1}
+          disabled={disabled || currentPage === 1}
           title="Primeira página"
           aria-label="Primeira página"
         >
@@ -59,7 +60,7 @@ export function Pagination({
 
         <IconButton
           onClick={goToPreviousPage}
-          disabled={currentPage === 1}
+          disabled={disabled || currentPage === 1}
           title="Página anterior"
           aria-label="Página anterior"
         >
@@ -68,7 +69,7 @@ export function Pagination({
 
         <IconButton
           onClick={goToNextPage}
-          disabled={currentPage === totalPages}
+          disabled={disabled || currentPage === totalPages}
           title="Próxima página"
           aria-label="Próxima página"
         >
@@ -77,7 +78,7 @@ export function Pagination({
 
         <IconButton
           onClick={goToLastPage}
-          disabled={currentPage === totalPages}
+          disabled={disabled || currentPage === totalPages}
           title="Última página"
           aria-label="Última página"
         >
