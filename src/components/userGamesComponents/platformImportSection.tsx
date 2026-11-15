@@ -1,4 +1,5 @@
-import { EyeOff } from 'lucide-react'
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
+import { CircleAlert, MoreVertical, TriangleAlert } from 'lucide-react'
 import { type ReactNode, useEffect, useId, useRef, useState } from 'react'
 import {
   getImportMessage,
@@ -6,7 +7,7 @@ import {
 } from '../../constants/importMessages'
 import { useHiddenImportResult } from '../../hooks/useHiddenImportResult'
 import type { PlatformImport } from '../../hooks/usePlatformImport'
-import { fieldFocus } from '../../styles/focus'
+import { fieldFocus, focusRing } from '../../styles/focus'
 import type { ImportSectionResult } from '../../types/import'
 import type { LibraryPlatform } from '../../types/platform'
 import { Button } from '../button'
@@ -381,12 +382,143 @@ export function PlatformImportSection<TResult>({
     setDisconnectTarget(accountList[0] ?? { id: '', name: label })
   }
 
+  const canHideResult =
+    Boolean(connectedId) &&
+    !isImporting &&
+    status?.status === 'completed' &&
+    Boolean(status.result) &&
+    !showHiddenRow &&
+    !justFinished &&
+    hiddenResult.canHide
+  const canAddFromMenu =
+    hasAccountList && maxAccounts > 1 && canAddAccount && !addingAccount
+  const hasMenu = Boolean(connectedId) && !isImporting
+
+  const primaryAction =
+    connectedId && !isImporting ? (
+      showViewLibrary ? (
+        <Button
+          type="button"
+          variant="primary"
+          size="md"
+          className="text-sm [@media(max-width:480px)]:w-full"
+          onClick={onViewLibrary}
+        >
+          Ver na biblioteca
+        </Button>
+      ) : !isOnCooldown ? (
+        <Button
+          type="button"
+          variant="primary"
+          size="md"
+          className="text-sm [@media(max-width:480px)]:w-full"
+          onClick={handleStartImport}
+          loading={isStarting}
+        >
+          {status?.status === 'failed'
+            ? 'Tentar novamente'
+            : `Importar ${ofLabel}`}
+        </Button>
+      ) : null
+    ) : !connectedId && redirectsAway ? (
+      <Button
+        type="button"
+        variant="primary"
+        size="md"
+        className="text-sm [@media(max-width:480px)]:w-full"
+        onClick={handleConnect}
+        loading={isConnectBusy}
+        disabled={isConnectBusy}
+      >
+        {connectLabel ?? `Entrar com ${article} ${label}`}
+      </Button>
+    ) : null
+
+  const menuItemClass =
+    'flex w-full cursor-pointer select-none flex-col items-start gap-0.5 rounded-md px-2.5 py-2 text-left text-[13.5px] text-gray-200 outline-none data-[highlighted]:bg-dark-bg-lighter data-[disabled]:cursor-not-allowed data-[disabled]:opacity-55 max-sm:min-h-11'
+
+  const menu = hasMenu ? (
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger asChild>
+        <button
+          type="button"
+          aria-label={`Mais ações de ${label}`}
+          className={`grid size-9 shrink-0 place-items-center rounded-lg border border-transparent text-gray-300 transition-colors hover:border-dark-border hover:bg-dark-bg-lighter hover:text-white data-[state=open]:border-dark-border data-[state=open]:bg-dark-bg-lighter max-sm:size-11 ${focusRing}`}
+        >
+          <MoreVertical className="size-[18px]" aria-hidden="true" />
+        </button>
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content
+          align="end"
+          sideOffset={6}
+          className="z-50 w-[min(20rem,calc(100vw-2rem))] rounded-xl border border-dark-border bg-dark-bg-light p-1.5 shadow-xl"
+        >
+          {canAddFromMenu && (
+            <DropdownMenu.Item
+              className={menuItemClass}
+              onSelect={() =>
+                redirectsAway ? handleConnect() : setAddingAccount(true)
+              }
+            >
+              Adicionar outra conta
+              {addAccountHint && (
+                <span className="text-xs font-normal leading-snug text-gray-400">
+                  {addAccountHint}
+                </span>
+              )}
+            </DropdownMenu.Item>
+          )}
+          {isAtAccountLimit && (
+            <DropdownMenu.Item className={menuItemClass} disabled>
+              Adicionar outra conta
+              <span className="text-xs font-normal text-gray-400">
+                Limite de {maxAccounts} contas {label}.
+              </span>
+            </DropdownMenu.Item>
+          )}
+          {canHideResult && (
+            <DropdownMenu.Item className={menuItemClass} onSelect={hideResult}>
+              Ocultar até a próxima importação
+            </DropdownMenu.Item>
+          )}
+          {(canAddFromMenu || isAtAccountLimit || canHideResult) && (
+            <DropdownMenu.Separator className="mx-1 my-1.5 h-px bg-dark-border" />
+          )}
+          {hasAccountList && accountList.length > 0 ? (
+            accountList.map(account => (
+              <DropdownMenu.Item
+                key={account.id}
+                className={`${menuItemClass} text-red-300 data-[highlighted]:bg-red-400/10`}
+                onSelect={() => setDisconnectTarget(account)}
+              >
+                Desconectar {account.name}
+              </DropdownMenu.Item>
+            ))
+          ) : (
+            <DropdownMenu.Item
+              className={`${menuItemClass} text-red-300 data-[highlighted]:bg-red-400/10`}
+              onSelect={askDisconnect}
+            >
+              Desconectar {connectedName ?? connectedId ?? label}
+            </DropdownMenu.Item>
+          )}
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
+  ) : null
+
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-dark-border bg-dark-bg-darker px-3.5 py-3">
-      <div className="flex flex-col gap-1">
-        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-          <h2 className="text-sm font-normal text-white flex items-center gap-1.5">
-            {icon}
+    <section className="flex flex-col gap-3.5 rounded-xl border border-dark-border bg-dark-bg-darker p-4">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-3">
+        <span
+          className="grid size-10 shrink-0 place-items-center rounded-[10px] border border-dark-border bg-dark-bg-light"
+          aria-hidden="true"
+        >
+          {icon}
+        </span>
+        <div className="min-w-0 flex-1">
+          <h2 className="text-[15px] font-semibold leading-tight text-white">
             {label}
           </h2>
           <StatusPill
@@ -397,148 +529,142 @@ export function PlatformImportSection<TResult>({
             isImporting={isImporting}
           />
         </div>
-        <p className="text-xs text-gray-400">
-          {connectedId
-            ? accountList.length > 1
-              ? MULTI_ACCOUNT_DESCRIPTION
-              : CONNECTED_DESCRIPTION
-            : disconnectedDescription}
-        </p>
+        {primaryAction && (
+          <div className="[@media(max-width:480px)]:order-last [@media(max-width:480px)]:basis-full">
+            {primaryAction}
+          </div>
+        )}
+        {menu}
       </div>
 
-      <div className="flex flex-col gap-2">
-        {connectedId && hasAccountList && maxAccounts > 1 && (
-          <ul className="flex flex-col gap-1.5">
+      {(!connectedId || accountList.length > 1) && (
+        <p className="text-xs leading-relaxed text-gray-400">
+          {connectedId ? MULTI_ACCOUNT_DESCRIPTION : disconnectedDescription}
+        </p>
+      )}
+
+      {connectedId &&
+        hasAccountList &&
+        maxAccounts > 1 &&
+        (accountList.length > 1 ||
+          accountList.some(account => account.extra)) && (
+          <ul className="flex flex-col">
             {accountList.map(account => (
               <li
                 key={account.id}
-                className="flex flex-col gap-2 rounded-md border border-dark-border bg-dark-bg-light py-1.5 pl-2.5 pr-1.5"
+                className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 border-t border-dark-border py-2"
               >
-                <div className="flex items-center justify-between gap-2.5">
-                  <span className="min-w-0 break-words text-sm text-white">
-                    {account.name}
-                  </span>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    className="shrink-0 hover:text-white"
-                    onClick={() => setDisconnectTarget(account)}
-                    disabled={isImporting}
-                  >
-                    Desconectar
-                  </Button>
-                </div>
-                {account.extra && (
-                  <div className="pb-1 pr-1">{account.extra}</div>
-                )}
+                <span className="min-w-0 break-words text-[13.5px] font-medium text-white">
+                  {account.name}
+                </span>
+                {account.extra}
               </li>
             ))}
           </ul>
         )}
 
-        {wantsNewAccount && (
-          <div className="flex items-center gap-2">
-            {needsInput && (
-              <input
-                type="text"
-                placeholder={inputPlaceholder}
-                value={profileInput}
-                onChange={e => setProfileInput(e.target.value)}
-                maxLength={64}
-                aria-invalid={isInputInvalid || undefined}
-                aria-describedby={isInputInvalid ? inputHintId : undefined}
-                disabled={isConnectBusy || isAwaitingVerification}
-                className={`bg-dark-bg text-white placeholder-gray-500 rounded-lg block w-full text-sm py-2.5 px-3 border border-dark-border ${fieldFocus} transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed`}
-              />
-            )}
-            {!isAwaitingVerification && (
-              <Button
-                type="button"
-                variant="primary"
-                size="md"
-                className={
-                  needsInput
-                    ? 'px-3 py-1.5 text-sm shrink-0'
-                    : 'text-sm [@media(max-width:480px)]:w-full'
-                }
-                onClick={handleConnect}
-                disabled={
-                  (needsInput && (!trimmedInput || isInputInvalid)) ||
-                  isConnectBusy
-                }
-                loading={isConnectBusy}
-              >
-                {redirectsAway
-                  ? (connectLabel ?? `Entrar com ${article} ${label}`)
-                  : 'Conectar'}
-              </Button>
-            )}
-            {addingAccount && !isAwaitingVerification && (
-              <Button
-                type="button"
-                variant="secondary"
-                size="md"
-                className="px-3 py-1.5 text-sm shrink-0"
-                onClick={handleCancelAdding}
-                disabled={isConnectBusy}
-              >
-                Cancelar
-              </Button>
-            )}
-          </div>
-        )}
+      {wantsNewAccount && (needsInput || addingAccount) && (
+        <div className="flex items-center gap-2 max-[480px]:flex-col max-[480px]:items-stretch">
+          {needsInput && (
+            <input
+              type="text"
+              placeholder={inputPlaceholder}
+              aria-label={inputPlaceholder}
+              value={profileInput}
+              onChange={e => setProfileInput(e.target.value)}
+              maxLength={64}
+              aria-invalid={isInputInvalid || undefined}
+              aria-describedby={isInputInvalid ? inputHintId : undefined}
+              disabled={isConnectBusy || isAwaitingVerification}
+              className={`bg-dark-bg text-white placeholder-gray-500 rounded-lg block w-full text-sm py-2.5 px-3 border border-dark-border ${fieldFocus} transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed`}
+            />
+          )}
+          {!isAwaitingVerification && (
+            <Button
+              type="button"
+              variant="primary"
+              size="md"
+              className="px-3 py-1.5 text-sm shrink-0"
+              onClick={handleConnect}
+              disabled={
+                (needsInput && (!trimmedInput || isInputInvalid)) ||
+                isConnectBusy
+              }
+              loading={isConnectBusy}
+            >
+              {redirectsAway
+                ? (connectLabel ?? `Entrar com ${article} ${label}`)
+                : 'Conectar'}
+            </Button>
+          )}
+          {addingAccount && !isAwaitingVerification && (
+            <Button
+              type="button"
+              variant="secondary"
+              size="md"
+              className="px-3 py-1.5 text-sm shrink-0"
+              onClick={handleCancelAdding}
+              disabled={isConnectBusy}
+            >
+              Cancelar
+            </Button>
+          )}
+        </div>
+      )}
 
-        {isInputInvalid && (
-          <p id={inputHintId} className="text-xs text-gray-400">
-            {inputValidation?.message}
+      {isInputInvalid && (
+        <p id={inputHintId} className="text-xs text-red-300">
+          {inputValidation?.message}
+        </p>
+      )}
+
+      {isAwaitingVerification && (
+        <div className="flex flex-col gap-2.5 rounded-lg bg-primary/10 p-3">
+          <p className="text-xs leading-relaxed text-gray-300">
+            {verificationHint}
           </p>
-        )}
-
-        {isAwaitingVerification && (
-          <div className="flex flex-col gap-2 rounded-lg border border-dark-border bg-dark-bg px-3 py-2.5">
-            <p className="text-xs text-gray-300">{verificationHint}</p>
-            <code className="select-all self-start rounded bg-dark-bg-lighter px-2 py-1 text-sm text-white">
-              {verificationCode}
-            </code>
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="primary"
-                size="sm"
-                className="px-3 py-1.5 font-medium"
-                onClick={handleVerify}
-                disabled={isConnecting}
-                loading={isConnecting}
-              >
-                Verificar
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                className="px-3 py-1.5 font-medium"
-                onClick={handleCancelVerification}
-                disabled={isConnecting}
-              >
-                Cancelar
-              </Button>
-            </div>
+          <code className="select-all self-start rounded-md border border-dark-border bg-dark-bg px-3 py-1.5 text-lg tracking-wider text-white">
+            {verificationCode}
+          </code>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              className="px-3 py-1.5 font-medium"
+              onClick={handleVerify}
+              disabled={isConnecting}
+              loading={isConnecting}
+            >
+              Verificar
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="px-3 py-1.5 font-medium"
+              onClick={handleCancelVerification}
+              disabled={isConnecting}
+            >
+              Cancelar
+            </Button>
           </div>
-        )}
+        </div>
+      )}
 
-        <output className="sr-only">{hideAnnouncement}</output>
+      <output className="sr-only">{hideAnnouncement}</output>
 
-        <output
-          ref={resultRef}
-          tabIndex={-1}
-          className="flex flex-col gap-2 outline-none empty:hidden"
-        >
-          {connectedId &&
-            !isImporting &&
-            status?.status === 'completed' &&
-            status.result && (
-              <>
+      <output
+        ref={resultRef}
+        tabIndex={-1}
+        className="flex flex-col gap-2.5 outline-none empty:hidden"
+      >
+        {connectedId &&
+          !isImporting &&
+          status?.status === 'completed' &&
+          status.result && (
+            <>
+              <div className="flex flex-col gap-2.5 border-t border-dark-border pt-3.5">
                 {showHiddenRow ? (
                   <HiddenImportRow
                     ref={restoreRef}
@@ -554,188 +680,113 @@ export function PlatformImportSection<TResult>({
                     finishedAt={status.finishedAt}
                   />
                 )}
-                {!showHiddenRow &&
-                  (accountResults.length > 1 ||
-                    accountResults.some(
-                      account => account.warning || account.error
-                    )) && (
-                    <ul className="flex flex-col gap-1.5">
-                      {accountResults.map(account => (
-                        <li
-                          key={account.name}
-                          className={`flex flex-col gap-0.5 rounded-md border border-dark-border bg-dark-bg-light px-3 py-2 ${
-                            account.error
-                              ? 'border-l-4 border-l-red-400'
-                              : account.warning
-                                ? 'border-l-4 border-l-amber-400'
-                                : ''
-                          }`}
+              </div>
+              {!showHiddenRow &&
+                (accountResults.length > 1 ||
+                  accountResults.some(
+                    account => account.warning || account.error
+                  )) && (
+                  <ul className="flex flex-col">
+                    {accountResults.map(account => (
+                      <li
+                        key={account.name}
+                        className="flex flex-col gap-0.5 border-t border-dark-border py-2 text-xs"
+                      >
+                        <span className="text-primary-link">
+                          {account.name}
+                        </span>
+                        <span
+                          className={
+                            account.error ? 'text-red-300' : 'text-gray-300'
+                          }
                         >
-                          <span className="text-xs text-primary-light">
-                            {account.name}
+                          {account.error ??
+                            (account.result
+                              ? formatAccountResult(account.result)
+                              : '')}
+                        </span>
+                        {account.warning && (
+                          <span className="flex items-start gap-1.5 text-amber-400">
+                            <TriangleAlert
+                              className="mt-0.5 size-3.5 shrink-0"
+                              aria-hidden="true"
+                            />
+                            {account.warning}
                           </span>
-                          <span className="text-xs text-gray-300">
-                            {account.error ??
-                              (account.result
-                                ? formatAccountResult(account.result)
-                                : '')}
-                          </span>
-                          {account.warning && (
-                            <span className="text-xs text-amber-400">
-                              {account.warning}
-                            </span>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                {suggestionsPlatform && (
-                  <div hidden={showHiddenRow}>
-                    <CompletionSuggestionsBlock
-                      platform={suggestionsPlatform}
-                      variant={justFinished ? 'fresh' : 'last'}
-                      expectedCount={
-                        getResultSections(status.result)[0]?.result
-                          .suggestions ?? 0
-                      }
-                    />
-                  </div>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
                 )}
-                {!showHiddenRow && !justFinished && hiddenResult.canHide && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="min-h-11 self-start gap-1.5 text-[13px] text-gray-400 hover:text-white"
-                    onClick={hideResult}
-                  >
-                    <EyeOff className="size-4" aria-hidden="true" />
-                    Ocultar até a próxima importação
-                  </Button>
-                )}
-              </>
-            )}
-          {connectedId && !isImporting && status?.status === 'failed' && (
-            <div className="flex flex-col gap-1 rounded-md border border-dark-border border-l-red-400 border-l-4 bg-dark-bg-light px-3 py-2">
-              <p className="text-sm font-bold text-white">
+              {suggestionsPlatform && (
+                <div hidden={showHiddenRow}>
+                  <CompletionSuggestionsBlock
+                    platform={suggestionsPlatform}
+                    variant={justFinished ? 'fresh' : 'last'}
+                    expectedCount={
+                      getResultSections(status.result)[0]?.result.suggestions ??
+                      0
+                    }
+                  />
+                </div>
+              )}
+            </>
+          )}
+        {connectedId && !isImporting && status?.status === 'failed' && (
+          <div className="flex items-start gap-2.5 rounded-lg border border-red-400/30 bg-red-400/10 px-3 py-2.5">
+            <CircleAlert
+              className="mt-0.5 size-[18px] shrink-0 text-red-400"
+              aria-hidden="true"
+            />
+            <div>
+              <p className="text-[13.5px] font-semibold text-white">
                 Não foi possível importar {ofLabel}
               </p>
-              <p className="text-xs text-gray-300">
+              <p className="mt-0.5 text-xs text-gray-300">
                 {status.error ??
                   'Erro desconhecido ao importar sua biblioteca.'}
               </p>
             </div>
-          )}
-        </output>
-
-        {connectedId && !isImporting && (
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            {showViewLibrary ? (
-              <Button
-                type="button"
-                variant="primary"
-                size="md"
-                className="text-sm [@media(max-width:480px)]:w-full"
-                onClick={onViewLibrary}
-              >
-                Ver na biblioteca
-              </Button>
-            ) : (
-              !isOnCooldown && (
-                <Button
-                  type="button"
-                  variant="primary"
-                  size="md"
-                  className="text-sm [@media(max-width:480px)]:w-full"
-                  onClick={handleStartImport}
-                  loading={isStarting}
-                >
-                  {status?.status === 'failed'
-                    ? 'Tentar novamente'
-                    : `Importar ${ofLabel}`}
-                </Button>
-              )
-            )}
-            {isOnCooldown && (
-              <p className="text-xs text-gray-400">
-                Você pode importar de novo em {cooldownLabel}.
-              </p>
-            )}
-            {hasAccountList && maxAccounts > 1 ? (
-              <>
-                {canAddAccount && !addingAccount && (
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="md"
-                    className="text-sm hover:text-white [@media(max-width:480px)]:w-full"
-                    onClick={
-                      redirectsAway
-                        ? handleConnect
-                        : () => setAddingAccount(true)
-                    }
-                    loading={isConnectBusy}
-                    disabled={isConnectBusy}
-                  >
-                    Adicionar outra conta
-                  </Button>
-                )}
-                {isAtAccountLimit && (
-                  <p className="text-xs text-gray-400">
-                    Limite de {maxAccounts} contas {label}.
-                  </p>
-                )}
-                {canAddAccount && addAccountHint && (
-                  <p className="basis-full text-xs text-gray-400">
-                    {addAccountHint}
-                  </p>
-                )}
-              </>
-            ) : (
-              <Button
-                type="button"
-                variant="secondary"
-                size="md"
-                className="text-sm hover:text-white [@media(max-width:480px)]:w-full"
-                onClick={askDisconnect}
-              >
-                Desconectar
-              </Button>
-            )}
           </div>
         )}
+      </output>
 
-        {isImporting && (
-          <div
-            ref={progressRef}
-            tabIndex={-1}
-            className="flex flex-col gap-1 outline-none"
-            aria-live="polite"
-          >
-            {progress !== undefined && (
-              <div className="h-1.5 w-full rounded-full bg-dark-bg overflow-hidden">
-                <div
-                  className="h-full bg-primary transition-[width] duration-300"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-            )}
-            <div className="flex items-start justify-between gap-3">
-              <span className="text-xs text-gray-300">
-                {getImportMessage(progress, elapsedSeconds)}
-              </span>
-              {progress !== undefined && (
-                <span className="text-xs text-gray-400 tabular-nums shrink-0">
-                  {progress}%
-                </span>
-              )}
+      {connectedId && !isImporting && isOnCooldown && (
+        <p className="text-xs text-gray-400">
+          Você pode importar de novo em {cooldownLabel}.
+        </p>
+      )}
+
+      {isImporting && (
+        <div
+          ref={progressRef}
+          tabIndex={-1}
+          className="flex flex-col gap-2 border-t border-dark-border pt-3.5 outline-none"
+          aria-live="polite"
+        >
+          {progress !== undefined && (
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-dark-bg">
+              <div
+                className="h-full rounded-full bg-primary transition-[width] duration-300"
+                style={{ width: `${progress}%` }}
+              />
             </div>
-            {slowImportNotice && (
-              <span className="text-xs text-gray-500">{slowImportNotice}</span>
+          )}
+          <div className="flex items-start justify-between gap-3">
+            <span className="text-xs text-gray-300">
+              {getImportMessage(progress, elapsedSeconds)}
+            </span>
+            {progress !== undefined && (
+              <span className="shrink-0 text-xs tabular-nums text-gray-300">
+                {progress}%
+              </span>
             )}
           </div>
-        )}
-      </div>
+          {slowImportNotice && (
+            <span className="text-xs text-gray-500">{slowImportNotice}</span>
+          )}
+        </div>
+      )}
 
       <ConfirmDialog
         open={disconnectTarget !== null}
@@ -750,6 +801,6 @@ export function PlatformImportSection<TResult>({
         onConfirm={handleDisconnect}
         isLoading={isDisconnecting}
       />
-    </div>
+    </section>
   )
 }

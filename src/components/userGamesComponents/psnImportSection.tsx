@@ -19,7 +19,7 @@ export function PsnImportSection({
   return (
     <PlatformImportSection
       icon={
-        <FaPlaystation className="size-4 text-gray-300" aria-hidden="true" />
+        <FaPlaystation className="size-5 text-[#5b9bff]" aria-hidden="true" />
       }
       label="PlayStation"
       masculine

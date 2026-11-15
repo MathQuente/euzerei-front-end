@@ -217,29 +217,33 @@ export function ImportResultSummary({
 
   if (variant === 'last') {
     return (
-      <div className="flex flex-col gap-2">
-        <p className="text-xs text-gray-300">
-          Última importação{finishedAt ? `, ${formatWhen(finishedAt)}` : ''}:{' '}
-          <Count>{imported}</Count>{' '}
-          {plural(imported, 'jogo novo', 'jogos novos')}
-          {missing > 0 && (
-            <>
-              {' · '}
-              <Count>{missing}</Count> sem correspondência
-            </>
-          )}
+      <div className="flex flex-col gap-2.5">
+        <p className="text-xs text-gray-400">
+          Última importação{finishedAt ? `, ${formatWhen(finishedAt)}` : ''}
         </p>
-        <div>
-          <Button
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-baseline gap-1.5 rounded-full border border-green-400/30 bg-green-400/10 px-2.5 py-1 text-xs text-gray-200">
+            <b className="font-bold text-green-400 tabular-nums">{imported}</b>
+            {plural(imported, 'jogo novo', 'jogos novos')}
+          </span>
+          {missing > 0 && (
+            <span className="inline-flex items-baseline gap-1.5 rounded-full border border-dark-border bg-dark-bg-lighter px-2.5 py-1 text-xs text-gray-200">
+              <Count>{missing}</Count> sem correspondência
+            </span>
+          )}
+          <button
             type="button"
-            variant="secondary"
-            size="sm"
+            onClick={() => setExpanded(value => !value)}
             aria-expanded={expanded}
             aria-controls={expanded ? detailId : undefined}
-            onClick={() => setExpanded(value => !value)}
+            className={`ml-auto inline-flex min-h-8 items-center gap-1 rounded px-1 text-[13px] font-medium text-primary-link hover:underline max-sm:min-h-11 ${focusRing}`}
           >
             {toggleLabel}
-          </Button>
+            <ChevronRight
+              className={`size-4 transition-transform motion-reduce:transition-none ${expanded ? 'rotate-90' : ''}`}
+              aria-hidden="true"
+            />
+          </button>
         </div>
         {expanded && details}
       </div>

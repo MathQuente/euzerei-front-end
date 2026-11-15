@@ -19,7 +19,7 @@ export function SteamImportSection({
 
   return (
     <PlatformImportSection
-      icon={<FaSteam className="size-4 text-gray-300" aria-hidden="true" />}
+      icon={<FaSteam className="size-5 text-[#66c0f4]" aria-hidden="true" />}
       label="Steam"
       connectedId={steamAccounts[0]?.steamId ?? null}
       connectedName={steamAccounts[0]?.personaName ?? null}

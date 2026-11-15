@@ -17,7 +17,7 @@ export function XboxImportSection({
 
   return (
     <PlatformImportSection
-      icon={<FaXbox className="size-4 text-gray-300" aria-hidden="true" />}
+      icon={<FaXbox className="size-5 text-[#6cc24a]" aria-hidden="true" />}
       label="Xbox"
       masculine
       connectLabel="Entrar com a Microsoft"
