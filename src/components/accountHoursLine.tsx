@@ -1,6 +1,6 @@
 import type { UserGamePlatformEntry } from '../types/platform'
 import { hasAccountBreakdown } from '../utils/accountHours'
-import { formatHoursDetailed } from '../utils/hours'
+import { formatHours } from '../utils/hours'
 
 export function AccountHoursLine({
   entry,
@@ -23,7 +23,7 @@ export function AccountHoursLine({
         >
           <span className="break-all text-gray-200">{account.accountName}</span>
           <span className="font-display font-bold text-white tabular-nums">
-            {formatHoursDetailed(account.hoursPlayed)}
+            {formatHours(account.hoursPlayed)}
           </span>
         </li>
       ))}

@@ -1,5 +1,5 @@
 import type { UserGamePlatformEntry } from '../types/platform'
-import { formatHoursDetailed } from './hours'
+import { formatHours } from './hours'
 
 export function hasAccountBreakdown(entry: UserGamePlatformEntry) {
   return entry.hoursPlayed !== null && entry.accountHours.length > 1
@@ -8,8 +8,7 @@ export function hasAccountBreakdown(entry: UserGamePlatformEntry) {
 export function accountHoursText(entry: UserGamePlatformEntry) {
   return entry.accountHours
     .map(
-      account =>
-        `${account.accountName} ${formatHoursDetailed(account.hoursPlayed)}`
+      account => `${account.accountName} ${formatHours(account.hoursPlayed)}`
     )
     .join(' · ')
 }
