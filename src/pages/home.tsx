@@ -1,18 +1,13 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 
 import { GameListSection } from '../components/gameListSection'
-import { GameCard } from '../components/gamesComponents/gameCard'
 import { CoverRow } from '../components/homeComponents/coverRow'
 import { LibrarySummary } from '../components/homeComponents/librarySummary'
 import { LoggedOutHero } from '../components/homeComponents/loggedOutHero'
 import { NextUp } from '../components/homeComponents/nextUp'
 import { PlayingNow } from '../components/homeComponents/playingNow'
-import {
-  coverLink,
-  sectionTitle,
-  textLink,
-} from '../components/homeComponents/styles'
+import { sectionTitle, textLink } from '../components/homeComponents/styles'
 import { useAuth } from '../hooks/useAuth'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useGames } from '../hooks/useGames'
@@ -23,6 +18,22 @@ import type { GamesFromHomePageResponse } from '../types/games'
 const WALL_LIMIT = 60
 
 const SKELETON_COVERS = ['a', 'b', 'c', 'd', 'e', 'f']
+
+const MANY_PLAYING_KEY = 'home:many-playing'
+
+function readManyPlaying() {
+  try {
+    return localStorage.getItem(MANY_PLAYING_KEY) !== '0'
+  } catch {
+    return true
+  }
+}
+
+function saveManyPlaying(many: boolean) {
+  try {
+    localStorage.setItem(MANY_PLAYING_KEY, many ? '1' : '0')
+  } catch {}
+}
 
 function LoggedInTop() {
   const {
@@ -40,6 +51,12 @@ function LoggedInTop() {
     [UserGamesResponse]
   )
 
+  const playingCount = gamesByStatus.PLAYING.length
+  const hasResponse = Boolean(UserGamesResponse)
+  useEffect(() => {
+    if (hasResponse) saveManyPlaying(playingCount > 1)
+  }, [hasResponse, playingCount])
+
   if (!UserGamesResponse) {
     if (isErrorUserGames) {
       return (
@@ -49,12 +66,22 @@ function LoggedInTop() {
       )
     }
 
+    const manyPlaying = readManyPlaying()
+
     return (
       <div
-        className="mt-2 grid grid-cols-1 gap-10 lg:grid-cols-[auto_minmax(0,1fr)] lg:gap-14"
+        className={`mt-2 grid grid-cols-1 gap-10 lg:gap-14 ${
+          manyPlaying
+            ? 'lg:grid-cols-[auto_minmax(0,640px)] lg:justify-start'
+            : 'lg:grid-cols-[7fr_5fr]'
+        }`}
         aria-busy={isLoadingUserGames}
       >
-        <div className="h-56 rounded-lg bg-dark-bg-light lg:h-80 lg:w-[528px] xl:w-[576px]" />
+        <div
+          className={`h-56 rounded-lg bg-dark-bg-light lg:h-80 ${
+            manyPlaying ? 'lg:w-[528px] xl:w-[576px]' : ''
+          }`}
+        />
         <div className="h-56 rounded-lg bg-dark-bg-light lg:h-80" />
       </div>
     )
@@ -112,7 +139,7 @@ function LoggedInTop() {
       <div
         className={`mt-2 grid grid-cols-1 gap-10 lg:gap-14 ${
           playing.length > 1
-            ? 'lg:grid-cols-[auto_minmax(0,1fr)]'
+            ? 'lg:grid-cols-[auto_minmax(0,640px)] lg:justify-start'
             : 'lg:grid-cols-[7fr_5fr]'
         }`}
       >
@@ -172,24 +199,11 @@ function Discovery({
             Nenhum jogo disponível no momento.
           </p>
         ) : (
-          <>
-            <CoverRow games={recentGames} className="mt-4 lg:hidden" />
-            <ul className="mt-4 hidden gap-4 lg:flex">
-              {recentGames.map(game => (
-                <li key={game.igdbId} className="w-40 min-w-0 xl:w-44">
-                  <Link
-                    to={`/games/${encodeURIComponent(game.igdbId)}`}
-                    className={coverLink}
-                  >
-                    <GameCard game={game} size="medium" interactive={false} />
-                    <p className="mt-2 line-clamp-2 text-sm leading-snug text-white">
-                      {game.name}
-                    </p>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </>
+          <CoverRow
+            games={recentGames}
+            className="mt-4"
+            itemClassName="xl:w-44"
+          />
         )}
       </section>
 

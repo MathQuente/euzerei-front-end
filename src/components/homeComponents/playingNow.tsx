@@ -5,7 +5,16 @@ import { getLibraryPlatform } from '../../utils/libraryPlatforms'
 import { GameCard } from '../gamesComponents/gameCard'
 import { coverLink, sectionTitle, textLink } from './styles'
 
-const MAX_PLAYING = 3
+const MAX_PLAYING = 5
+const EXTRA_VISIBILITY = ['', '', '', 'hidden 2xl:block', 'hidden wide:block']
+
+function seeAllVisibility(total: number) {
+  return [
+    total > 3 ? 'inline' : 'hidden',
+    total > 4 ? '2xl:inline' : '2xl:hidden',
+    total > 5 ? 'wide:inline' : 'wide:hidden',
+  ].join(' ')
+}
 
 const PLATFORM_PREPOSITION: Record<string, string> = {
   STEAM: 'na',
@@ -46,10 +55,10 @@ export function PlayingNow({
     <section className={`min-w-0 ${shown.length > 1 ? 'lg:w-fit' : ''}`}>
       <div className="flex items-baseline justify-between gap-4">
         <h2 className={sectionTitle}>Jogando agora</h2>
-        {total > MAX_PLAYING && (
+        {total > 3 && (
           <Link
             to="/userLibrary/playingGames"
-            className={`text-sm ${textLink}`}
+            className={`text-sm ${seeAllVisibility(total)} ${textLink}`}
           >
             Ver todos os {total}
           </Link>
@@ -88,8 +97,11 @@ export function PlayingNow({
 
       {shown.length > 1 && (
         <ul className="mt-4 grid grid-cols-3 gap-3 lg:flex lg:gap-6">
-          {shown.map(game => (
-            <li key={game.igdbId} className="min-w-0 lg:w-40 xl:w-44">
+          {shown.map((game, index) => (
+            <li
+              key={game.igdbId}
+              className={`min-w-0 lg:w-40 xl:w-44 ${EXTRA_VISIBILITY[index]}`}
+            >
               <Link
                 to={`/games/${encodeURIComponent(game.igdbId)}`}
                 className={coverLink}

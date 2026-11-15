@@ -75,18 +75,46 @@ export function RatedScore({
   )
 }
 
-function CountdownChip({ releaseDate }: { releaseDate: number | null }) {
+function countdownInfo(releaseDate: number | null) {
   const label = releaseDate ? releaseCountdown(releaseDate) : null
-  if (!label) return null
+  if (!releaseDate || !label) return null
+  const days = daysUntilRelease(releaseDate)
+  return { label, days, soon: days <= SOON_DAYS, word: days <= 1 }
+}
 
-  const soon = daysUntilRelease(releaseDate as number) <= SOON_DAYS
+function CountdownColumn({ releaseDate }: { releaseDate: number | null }) {
+  const info = countdownInfo(releaseDate)
+
+  if (!info) {
+    return (
+      <span className="w-10 shrink-0 text-center text-xs tabular-nums text-gray-400">
+        {releaseDate ? formatReleaseDayMonth(releaseDate) : '—'}
+      </span>
+    )
+  }
+
+  const tone = info.soon ? 'text-primary-link' : 'text-gray-300'
   return (
-    <span
-      className={`shrink-0 whitespace-nowrap rounded-md px-2 py-0.5 text-xs font-medium ${
-        soon ? 'bg-primary/15 text-primary-link' : 'bg-white/5 text-gray-300'
-      }`}
-    >
-      {label}
+    <span className="flex w-10 shrink-0 flex-col items-center leading-none">
+      <span className="sr-only">{info.label}</span>
+      <span aria-hidden="true" className="flex flex-col items-center">
+        {info.word ? (
+          <span className={`text-xs font-semibold ${tone}`}>
+            {info.days === 0 ? 'hoje' : 'amanhã'}
+          </span>
+        ) : (
+          <>
+            <span
+              className={`font-display text-xl font-extrabold tabular-nums ${tone}`}
+            >
+              {info.days}
+            </span>
+            <span className="mt-1 text-[10px] tracking-wide text-gray-400">
+              dias
+            </span>
+          </>
+        )}
+      </span>
     </span>
   )
 }
@@ -116,16 +144,49 @@ function supportText(game: GameBase, type: SectionType) {
 }
 
 function featureLines(game: GameBase, type: SectionType) {
-  const year =
-    game.releaseDate && type !== 'rateds'
-      ? String(releaseYear(game.releaseDate))
-      : ''
+  const year = !game.releaseDate
+    ? ''
+    : type === 'coming'
+      ? formatReleaseDate(game.releaseDate)
+      : type === 'trending'
+        ? String(releaseYear(game.releaseDate))
+        : ''
   const genres =
     type === 'coming' ? '' : (game.genres ?? []).slice(0, 2).join(', ')
   return {
     lineA: [year, genres].filter(Boolean).join(' · '),
     lineB: platformsText(game),
   }
+}
+
+function FeaturedCountdown({ game }: { game: GameBase }) {
+  const info = countdownInfo(game.releaseDate)
+  const tone = info?.soon ? 'text-primary-link' : 'text-gray-300'
+
+  if (!info) {
+    return (
+      <p className="font-display text-2xl font-extrabold tracking-tight tabular-nums text-white">
+        {game.releaseDate ? formatReleaseDayMonth(game.releaseDate) : '—'}
+      </p>
+    )
+  }
+
+  return (
+    <p className="flex items-baseline gap-2">
+      <span className="sr-only">{info.label}</span>
+      <span
+        aria-hidden="true"
+        className={`font-display text-2xl font-extrabold tracking-tight tabular-nums ${tone}`}
+      >
+        {info.word ? info.label : info.days}
+      </span>
+      {!info.word && (
+        <span aria-hidden="true" className="text-sm text-gray-400">
+          dias
+        </span>
+      )}
+    </p>
+  )
 }
 
 const gamePath = (game: GameBase) => `/games/${encodeURIComponent(game.igdbId)}`
@@ -149,6 +210,7 @@ export function GameRow({
           {rank}
         </span>
       )}
+      {type === 'coming' && <CountdownColumn releaseDate={game.releaseDate} />}
       <GameCard game={game} size="row" interactive={false} />
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <p className="truncate text-sm font-medium text-white">{game.name}</p>
@@ -156,7 +218,6 @@ export function GameRow({
           {supportText(game, type)}
         </p>
       </div>
-      {type === 'coming' && <CountdownChip releaseDate={game.releaseDate} />}
       {type === 'rateds' && <RatedScore igdbId={game.igdbId} variant="row" />}
     </Link>
   )
@@ -175,14 +236,7 @@ export function FeaturedGameRow({
     <Link to={gamePath(game)} className={`${rowLink} items-start gap-4`}>
       <GameCard game={game} size="feature" interactive={false} />
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-        {type === 'coming' && (
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <p className="font-display text-2xl font-extrabold tracking-tight tabular-nums text-white">
-              {game.releaseDate ? formatReleaseDayMonth(game.releaseDate) : '—'}
-            </p>
-            <CountdownChip releaseDate={game.releaseDate} />
-          </div>
-        )}
+        {type === 'coming' && <FeaturedCountdown game={game} />}
         {type === 'trending' && (
           <p
             className="font-display text-2xl font-extrabold tracking-tight tabular-nums text-white"
