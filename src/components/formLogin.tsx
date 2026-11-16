@@ -28,11 +28,11 @@ export function FormLogin() {
   })
 
   async function onSubmit(data: LoginForm) {
+    const redirectTo = safeRedirectPath(
+      sessionStorage.getItem('redirectAfterLogin')
+    )
     const success = await auth.login(data.email, data.password)
     if (success) {
-      const redirectTo = safeRedirectPath(
-        sessionStorage.getItem('redirectAfterLogin')
-      )
       navigate(redirectTo, { replace: true })
       sessionStorage.removeItem('redirectAfterLogin')
     }

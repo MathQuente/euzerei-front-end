@@ -34,15 +34,15 @@ export function FormSignUp() {
   const acceptedTerms = watch('acceptedTerms')
 
   async function onSubmit(data: SignUpForm) {
+    const redirectTo = safeRedirectPath(
+      sessionStorage.getItem('redirectAfterLogin')
+    )
     const signupError = await auth.signup(
       data.email,
       data.password,
       data.acceptedTerms
     )
     if (!signupError) {
-      const redirectTo = safeRedirectPath(
-        sessionStorage.getItem('redirectAfterLogin')
-      )
       navigate(redirectTo, { replace: true })
       sessionStorage.removeItem('redirectAfterLogin')
       return

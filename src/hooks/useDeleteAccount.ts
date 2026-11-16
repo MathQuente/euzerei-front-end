@@ -30,7 +30,7 @@ export function useDeleteAccount() {
     },
     onSuccess: async () => {
       await queryClient.cancelQueries()
-      navigate('/', { replace: true })
+      navigate('/', { replace: true, flushSync: true })
       clearSession()
       queryClient.clear()
       notify.success(SUCCESS_MESSAGES.accountDeleted)
