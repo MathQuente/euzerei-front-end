@@ -13,6 +13,7 @@ import { Layout } from './layout'
 import { AboutPage } from './pages/aboutPage'
 import { Authentication } from './pages/authentication'
 import { ComingSoonPage } from './pages/comingSoonPage'
+import { ConfirmEmailChangePage } from './pages/confirmEmailChangePage'
 import { ContactPage } from './pages/contactPage'
 import { ForgotPasswordPage } from './pages/forgotPasswordPage'
 import { GamePage } from './pages/gamePage'
@@ -74,6 +75,10 @@ const router = createBrowserRouter([
           {
             path: '/verify-email',
             element: <VerifyEmailPage />,
+          },
+          {
+            path: '/confirm-email-change',
+            element: <ConfirmEmailChangePage />,
           },
           {
             path: '/',

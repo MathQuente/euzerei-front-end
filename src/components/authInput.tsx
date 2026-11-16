@@ -23,6 +23,8 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
             ref={ref}
             type={resolvedType}
             spellCheck={false}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? `${id}-error` : undefined}
             {...inputProps}
             className={`bg-dark-bg-darker text-white placeholder-gray-500 rounded-lg block w-full text-sm [@media(max-width:639px)]:text-base py-3 pl-10 border autofill:[-webkit-text-fill-color:white] autofill:[caret-color:white] autofill:[transition:background-color_600000s_0s,color_600000s_0s] ${
               isPassword ? 'pr-10' : 'pr-3'
@@ -44,7 +46,7 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
             </button>
           )}
         </div>
-        <span className="text-red-500 text-xs min-h-[1rem]">
+        <span id={`${id}-error`} className="text-red-500 text-xs min-h-[1rem]">
           {error?.message ?? ' '}
         </span>
       </div>

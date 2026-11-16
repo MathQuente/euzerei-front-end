@@ -26,6 +26,7 @@ export interface User {
   email: string
   emailVerified: boolean
   hasPassword: boolean
+  pendingEmail?: string | null
   userName: string
   profilePicture: string
   userBanner: string

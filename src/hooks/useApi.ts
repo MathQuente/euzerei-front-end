@@ -157,6 +157,32 @@ export const api = {
     const response = await http.put<{ message: string }>('/auth/password', body)
     return response.data
   },
+  requestEmailChange: async (body: {
+    newEmail: string
+    currentPassword?: string
+  }) => {
+    const response = await http.post<{ pendingEmail: string }>(
+      '/auth/email-change',
+      body
+    )
+    return response.data
+  },
+  resendEmailChange: async () => {
+    const response = await http.post<{ pendingEmail: string }>(
+      '/auth/email-change/resend'
+    )
+    return response.data
+  },
+  cancelEmailChange: async () => {
+    await http.delete('/auth/email-change')
+  },
+  confirmEmailChange: async (token: string) => {
+    const response = await http.post<{ message: string; email: string }>(
+      '/auth/email-change/confirm',
+      { token }
+    )
+    return response.data
+  },
   verifyEmail: async (token: string) => {
     const response = await http.post<{ message: string }>(
       '/auth/verify-email',

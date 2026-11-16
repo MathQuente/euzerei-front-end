@@ -24,6 +24,9 @@ export const SUCCESS_MESSAGES = {
   profileSaved: 'Perfil salvo.',
   passwordChanged: 'Senha alterada.',
   passwordSet: 'Senha definida.',
+  emailChangeRequested: 'Link de confirmação enviado.',
+  emailChangeResent: 'Link reenviado.',
+  emailChangeCancelled: 'Troca de e-mail cancelada.',
 } as const
 
 export const ERROR_MESSAGES = {
@@ -31,6 +34,9 @@ export const ERROR_MESSAGES = {
   signIn: 'Não foi possível entrar. Confira o email e a senha.',
   signInFailed: cannot('entrar'),
   changePassword: cannot('salvar a senha'),
+  requestEmailChange: cannot('pedir a troca de e-mail'),
+  resendEmailChange: cannot('reenviar o link'),
+  cancelEmailChange: cannot('cancelar a troca'),
   copyList: 'Não foi possível copiar a lista. Selecione e copie à mão.',
   sendEmail:
     'Não foi possível enviar o email agora. Tente de novo em instantes.',
