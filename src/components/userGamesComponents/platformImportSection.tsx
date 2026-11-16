@@ -118,6 +118,7 @@ interface PlatformImportSectionProps<TResult> {
   getAccountResults?: (result: TResult) => AccountImportResult[]
   onViewLibrary?: () => void
   suggestionsPlatform?: LibraryPlatform
+  connectedNote?: string
 }
 
 export function PlatformImportSection<TResult>({
@@ -140,6 +141,7 @@ export function PlatformImportSection<TResult>({
   getAccountResults,
   onViewLibrary,
   suggestionsPlatform,
+  connectedNote,
 }: PlatformImportSectionProps<TResult>) {
   const article = masculine ? 'o' : 'a'
   const ofLabel = `${masculine ? 'do' : 'da'} ${label}`
@@ -759,6 +761,10 @@ export function PlatformImportSection<TResult>({
           </div>
         )}
       </output>
+
+      {connectedId && !isImporting && connectedNote && (
+        <p className="text-xs text-gray-400">{connectedNote}</p>
+      )}
 
       {connectedId && !isImporting && isOnCooldown && (
         <p className="text-xs text-gray-400">

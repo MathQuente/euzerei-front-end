@@ -3,6 +3,9 @@ import { useSteamImport } from '../../hooks/useSteamImport'
 import type { SteamAccount } from '../../types/user'
 import { PlatformImportSection } from './platformImportSection'
 
+const FAMILY_SHARING_NOTE =
+  'Jogos do Modo Família só entram se você os jogou nas últimas 2 semanas.'
+
 const MAX_STEAM_ACCOUNTS = 2
 
 const ADD_ACCOUNT_HINT =
@@ -34,6 +37,7 @@ export function SteamImportSection({
       importState={importState}
       onViewLibrary={onViewLibrary}
       suggestionsPlatform="STEAM"
+      connectedNote={FAMILY_SHARING_NOTE}
       getResultSections={result => [
         { title: 'Biblioteca', result: result.library },
         { title: 'Lista de desejos', result: result.wishlist },
