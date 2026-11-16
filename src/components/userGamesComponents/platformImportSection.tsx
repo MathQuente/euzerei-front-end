@@ -170,6 +170,7 @@ export function PlatformImportSection<TResult>({
   const restoreRef = useRef<HTMLButtonElement>(null)
   const focusAfterToggle = useRef<'restore' | 'first' | null>(null)
   const skipMenuRefocus = useRef(false)
+  const menuTriggerRef = useRef<HTMLButtonElement>(null)
   const [hideAnnouncement, setHideAnnouncement] = useState('')
   const isFirstStatusLoad = useRef(true)
 
@@ -440,6 +441,7 @@ export function PlatformImportSection<TResult>({
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
         <button
+          ref={menuTriggerRef}
           type="button"
           aria-label={`Mais ações de ${label}`}
           disabled={isImporting}
@@ -807,6 +809,7 @@ export function PlatformImportSection<TResult>({
         confirmLabel="Desconectar"
         onConfirm={handleDisconnect}
         isLoading={isDisconnecting}
+        returnFocusTo={menuTriggerRef}
       />
     </section>
   )

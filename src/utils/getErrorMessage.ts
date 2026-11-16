@@ -18,6 +18,12 @@ const GENERIC_API_MESSAGES = new Set([
 
 const USER_FACING_SERVER_STATUSES = new Set([502, 503])
 
+function firstError(value: unknown) {
+  return Array.isArray(value) && typeof value[0] === 'string'
+    ? value[0]
+    : undefined
+}
+
 export function getErrorMessage(error: unknown, fallback: string): string {
   if (!axios.isAxiosError(error)) return fallback
 
@@ -31,8 +37,10 @@ export function getErrorMessage(error: unknown, fallback: string): string {
   if (!status) return fallback
   if (status >= 500 && !USER_FACING_SERVER_STATUSES.has(status)) return fallback
 
-  const passwordError = error.response?.data?.error?.password?.[0]
-  if (typeof passwordError === 'string') return passwordError
+  const fieldErrors = error.response?.data?.error
+  const passwordError =
+    firstError(fieldErrors?.password) ?? firstError(fieldErrors?.newPassword)
+  if (passwordError) return passwordError
 
   const message = error.response?.data?.message
   if (typeof message !== 'string' || GENERIC_API_MESSAGES.has(message)) {

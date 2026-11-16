@@ -1,5 +1,5 @@
 import * as Dialog from '@radix-ui/react-dialog'
-import { type ReactNode, useRef } from 'react'
+import { type ReactNode, type RefObject, useRef } from 'react'
 import { Button } from './button'
 
 export function ConfirmDialog({
@@ -14,6 +14,7 @@ export function ConfirmDialog({
   confirmDisabled,
   confirmVariant = 'danger',
   lockWhileLoading,
+  returnFocusTo,
   children,
 }: {
   open: boolean
@@ -27,6 +28,7 @@ export function ConfirmDialog({
   confirmDisabled?: boolean
   confirmVariant?: 'danger' | 'primary'
   lockWhileLoading?: boolean
+  returnFocusTo?: RefObject<HTMLElement | null>
   children?: ReactNode
 }) {
   const contentRef = useRef<HTMLDivElement>(null)
@@ -55,7 +57,7 @@ export function ConfirmDialog({
               ?.focus()
           }}
           onCloseAutoFocus={event => {
-            const opener = returnFocusRef.current
+            const opener = returnFocusTo?.current ?? returnFocusRef.current
             returnFocusRef.current = null
             if (!opener?.isConnected) return
             event.preventDefault()
