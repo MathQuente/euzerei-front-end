@@ -150,6 +150,13 @@ export const api = {
       notify.error(ERROR_MESSAGES.unexpected)
     }
   },
+  changePassword: async (body: {
+    currentPassword?: string
+    newPassword: string
+  }) => {
+    const response = await http.put<{ message: string }>('/auth/password', body)
+    return response.data
+  },
   verifyEmail: async (token: string) => {
     const response = await http.post<{ message: string }>(
       '/auth/verify-email',

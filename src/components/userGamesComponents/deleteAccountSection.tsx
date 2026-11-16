@@ -1,15 +1,12 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../../hooks/useAuth'
 import { useDeleteAccount } from '../../hooks/useDeleteAccount'
+import { useReauth } from '../../hooks/useReauth'
 import { useUserProfile } from '../../hooks/useUserProfile'
 import { Button } from '../button'
 import { DeleteAccountDialog } from './deleteAccountDialog'
 
 export function DeleteAccountSection() {
   const { UserProfileResponse } = useUserProfile()
-  const { logout } = useAuth()
-  const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const { deleteAccount, isDeleting, needsReauth, errorMessage, resetError } =
     useDeleteAccount()
@@ -23,10 +20,7 @@ export function DeleteAccountSection() {
     setOpen(next)
   }
 
-  const handleReauth = async () => {
-    await logout()
-    navigate('/auth?tab=login', { replace: true })
-  }
+  const handleReauth = useReauth('/configuracoes/conta')
 
   return (
     <section

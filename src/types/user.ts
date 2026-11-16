@@ -25,6 +25,7 @@ export interface User {
   id: string
   email: string
   emailVerified: boolean
+  hasPassword: boolean
   userName: string
   profilePicture: string
   userBanner: string

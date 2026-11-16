@@ -26,6 +26,7 @@ import { SearchResults } from './pages/searchResults'
 import { AccountTab } from './pages/settings/accountTab'
 import { ImportTab } from './pages/settings/importTab'
 import { ProfileTab } from './pages/settings/profileTab'
+import { SecurityTab } from './pages/settings/securityTab'
 import { SettingsPage } from './pages/settingsPage'
 import { TermsPage } from './pages/termsPage'
 import { UserGamesPageByStatus } from './pages/userGamesPages'
@@ -125,6 +126,7 @@ const router = createBrowserRouter([
               { path: 'perfil', element: <ProfileTab /> },
               { path: 'importar', element: <ImportTab /> },
               { path: 'conta', element: <AccountTab /> },
+              { path: 'seguranca', element: <SecurityTab /> },
             ],
           },
           {

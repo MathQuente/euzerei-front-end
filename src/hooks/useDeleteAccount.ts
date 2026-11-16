@@ -3,6 +3,7 @@ import { isAxiosError } from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { SUCCESS_MESSAGES } from '../constants/messages'
 import { getErrorMessage } from '../utils/getErrorMessage'
+import { isReauthRequired } from '../utils/isReauthRequired'
 import { notify } from '../utils/notify'
 import { api, setAccountDeletionInProgress } from './useApi'
 import { useAuth } from './useAuth'
@@ -39,10 +40,7 @@ export function useDeleteAccount() {
   return {
     deleteAccount: () => mutation.mutate(),
     isDeleting: mutation.isPending,
-    needsReauth:
-      isAxiosError(mutation.error) &&
-      mutation.error.response?.status === 403 &&
-      mutation.error.response.data?.status === 'reauth_required',
+    needsReauth: isReauthRequired(mutation.error),
     errorMessage: mutation.isError
       ? getErrorMessage(mutation.error, FALLBACK_ERROR)
       : null,

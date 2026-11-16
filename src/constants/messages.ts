@@ -22,12 +22,15 @@ export const SUCCESS_MESSAGES = {
   markedAsPlayed: (gameName: string) => `${gameName} marcado como Jogado.`,
   passwordReset: 'Senha redefinida. Entre com a nova senha.',
   profileSaved: 'Perfil salvo.',
+  passwordChanged: 'Senha alterada.',
+  passwordSet: 'Senha definida.',
 } as const
 
 export const ERROR_MESSAGES = {
   unexpected: 'Algo deu errado. Tente de novo.',
   signIn: 'Não foi possível entrar. Confira o email e a senha.',
   signInFailed: cannot('entrar'),
+  changePassword: cannot('salvar a senha'),
   copyList: 'Não foi possível copiar a lista. Selecione e copie à mão.',
   sendEmail:
     'Não foi possível enviar o email agora. Tente de novo em instantes.',
