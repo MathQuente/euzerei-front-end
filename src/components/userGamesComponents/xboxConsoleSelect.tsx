@@ -33,7 +33,7 @@ export function XboxConsoleSelect({ account }: { account: XboxAccount }) {
         }
         disabled={isUpdating}
         aria-describedby={hintId}
-        className={`w-full min-h-11 rounded-md bg-dark-bg px-2 py-1 text-sm text-white ${inlineFieldFocus} disabled:opacity-50`}
+        className={`w-full min-h-11 rounded-md bg-dark-bg px-2 py-1 text-sm [@media(max-width:639px)]:text-base text-white ${inlineFieldFocus} disabled:opacity-50`}
       >
         {OPTIONS.map(option => (
           <option key={option.value} value={option.value}>

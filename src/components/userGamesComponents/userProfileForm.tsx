@@ -212,7 +212,7 @@ export function UserProfileForm({
           className="size-full rounded-full border-[3px] border-dark-bg-darker bg-dark-bg object-cover"
         />
         <label
-          className={`absolute -right-2 -bottom-1 grid size-9 cursor-pointer place-items-center rounded-full border border-dark-border bg-dark-bg-light text-gray-200 hover:text-white max-sm:size-11 ${focusRingWithin}`}
+          className={`absolute -right-2 -bottom-1 grid size-9 cursor-pointer place-items-center rounded-full border border-dark-border bg-dark-bg-light text-gray-200 hover:text-white [@media(max-width:639px)]:size-11 ${focusRingWithin}`}
           title="Trocar foto de perfil"
         >
           <Camera className="size-4" aria-hidden="true" />
@@ -256,7 +256,7 @@ export function UserProfileForm({
             type="text"
             aria-invalid={errors.userName ? true : undefined}
             aria-describedby="userName-hint"
-            className={`block min-h-11 w-full rounded-lg border bg-dark-bg px-3 text-sm text-white placeholder-gray-500 transition-colors duration-150 ${
+            className={`block min-h-11 w-full rounded-lg border bg-dark-bg px-3 text-sm [@media(max-width:639px)]:text-base text-white placeholder-gray-500 transition-colors duration-150 ${
               errors.userName ? 'border-red-400' : 'border-dark-border'
             } ${fieldFocus}`}
             {...registerField('userName')}
@@ -270,7 +270,7 @@ export function UserProfileForm({
           </p>
         </div>
 
-        <div className="flex flex-wrap justify-end gap-2.5 border-t border-dark-border pt-3.5 max-sm:[&>button]:flex-1">
+        <div className="flex flex-wrap justify-end gap-2.5 border-t border-dark-border pt-3.5 [@media(max-width:639px)]:[&>button]:flex-1">
           <Button
             type="button"
             variant="secondary"

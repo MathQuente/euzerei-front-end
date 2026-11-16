@@ -433,7 +433,7 @@ export function PlatformImportSection<TResult>({
     ) : null
 
   const menuItemClass =
-    'flex w-full cursor-pointer select-none flex-col items-start gap-0.5 rounded-md px-2.5 py-2 text-left text-[13.5px] text-gray-200 outline-none data-[highlighted]:bg-dark-bg-lighter data-[disabled]:cursor-not-allowed data-[disabled]:opacity-55 max-sm:min-h-11'
+    'flex w-full cursor-pointer select-none flex-col items-start gap-0.5 rounded-md px-2.5 py-2 text-left text-[13.5px] text-gray-200 outline-none data-[highlighted]:bg-dark-bg-lighter data-[disabled]:cursor-not-allowed data-[disabled]:opacity-55 [@media(max-width:639px)]:min-h-11'
 
   const destructiveItemClass = `${menuItemClass} text-red-300 data-[highlighted]:bg-red-400/10`
 
@@ -445,7 +445,7 @@ export function PlatformImportSection<TResult>({
           type="button"
           aria-label={`Mais ações de ${label}`}
           disabled={isImporting}
-          className={`grid size-9 shrink-0 place-items-center rounded-lg border border-transparent text-gray-300 transition-colors disabled:cursor-not-allowed disabled:opacity-40 hover:border-dark-border hover:bg-dark-bg-lighter hover:text-white data-[state=open]:border-dark-border data-[state=open]:bg-dark-bg-lighter max-sm:size-11 ${focusRing}`}
+          className={`grid size-9 shrink-0 place-items-center rounded-lg border border-transparent text-gray-300 transition-colors disabled:cursor-not-allowed disabled:opacity-40 hover:border-dark-border hover:bg-dark-bg-lighter hover:text-white data-[state=open]:border-dark-border data-[state=open]:bg-dark-bg-lighter [@media(max-width:639px)]:size-11 ${focusRing}`}
         >
           <MoreVertical className="size-[18px]" aria-hidden="true" />
         </button>
@@ -573,7 +573,7 @@ export function PlatformImportSection<TResult>({
         )}
 
       {wantsNewAccount && (needsInput || addingAccount) && (
-        <div className="flex items-center gap-2 max-[480px]:flex-col max-[480px]:items-stretch">
+        <div className="flex items-center gap-2 [@media(max-width:480px)]:flex-col [@media(max-width:480px)]:items-stretch">
           {needsInput && (
             <input
               type="text"
@@ -585,7 +585,7 @@ export function PlatformImportSection<TResult>({
               aria-invalid={isInputInvalid || undefined}
               aria-describedby={isInputInvalid ? inputHintId : undefined}
               disabled={isConnectBusy || isAwaitingVerification}
-              className={`bg-dark-bg text-white placeholder-gray-500 rounded-lg block w-full text-sm py-2.5 px-3 border border-dark-border ${fieldFocus} transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed`}
+              className={`bg-dark-bg text-white placeholder-gray-500 rounded-lg block w-full text-sm [@media(max-width:639px)]:text-base py-2.5 px-3 border border-dark-border ${fieldFocus} transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed`}
             />
           )}
           {!isAwaitingVerification && (

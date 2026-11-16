@@ -242,7 +242,7 @@ export function ImportResultSummary({
             onClick={() => setExpanded(value => !value)}
             aria-expanded={expanded}
             aria-controls={expanded ? detailId : undefined}
-            className={`ml-auto inline-flex min-h-8 items-center gap-1 rounded px-1 text-[13px] font-medium text-primary-link hover:underline max-sm:min-h-11 ${focusRing}`}
+            className={`ml-auto inline-flex min-h-8 items-center gap-1 rounded px-1 text-[13px] font-medium text-primary-link hover:underline [@media(max-width:639px)]:min-h-11 ${focusRing}`}
           >
             {toggleLabel}
             <ChevronRight
