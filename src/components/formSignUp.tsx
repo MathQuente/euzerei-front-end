@@ -74,12 +74,12 @@ export function FormSignUp() {
       />
 
       <div className="flex flex-col gap-1.5">
-        <label className="flex items-start gap-2.5 text-[13px] leading-normal text-gray-300 cursor-pointer max-sm:min-h-11">
+        <label className="flex items-start max-sm:items-center gap-2.5 text-[13px] leading-normal text-gray-300 cursor-pointer max-sm:min-h-11">
           <input
             type="checkbox"
             aria-invalid={errors.acceptedTerms ? true : undefined}
             aria-describedby={termsMessageId}
-            className={`mt-0.5 size-4 shrink-0 cursor-pointer accent-primary rounded-sm ${focusRing}`}
+            className={`mt-0.5 max-sm:mt-0 size-4 shrink-0 cursor-pointer accent-primary rounded-sm ${focusRing}`}
             {...register('acceptedTerms')}
           />
           <span>

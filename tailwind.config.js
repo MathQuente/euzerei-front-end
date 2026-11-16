@@ -1,3 +1,5 @@
+import plugin from 'tailwindcss/plugin'
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
@@ -5,8 +7,6 @@ export default {
     extend: {
       screens: {
         wide: '1792px',
-        nesthub: { raw: '(max-width: 1024px) and (max-height: 600px)' },
-        asus: { raw: '(min-width: 1071px) and (max-height: 695px)' },
       },
       zIndex: {
         confirm: '60',
@@ -70,5 +70,13 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    plugin(({ addVariant }) => {
+      addVariant(
+        'nesthub',
+        '@media (max-width: 1024px) and (max-height: 600px)'
+      )
+      addVariant('asus', '@media (min-width: 1071px) and (max-height: 695px)')
+    }),
+  ],
 }
