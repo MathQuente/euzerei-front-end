@@ -69,6 +69,13 @@ http.interceptors.response.use(
   }
 )
 
+export type SignInProvider = 'google' | 'discord'
+
+const PROVIDER_ORIGIN: Record<SignInProvider, string> = {
+  google: 'https://accounts.google.com',
+  discord: 'https://discord.com',
+}
+
 async function openPlatformSignIn(path: string, expectedOrigin: string) {
   const signInTab = window.open('', '_blank')
   if (signInTab) signInTab.opener = null
@@ -182,6 +189,22 @@ export const api = {
       { token }
     )
     return response.data
+  },
+  startProviderLink: async (provider: SignInProvider) => {
+    const response = await http.post<{ url: string }>(`/auth/${provider}/link`)
+    const url = new URL(response.data.url)
+    if (url.origin !== PROVIDER_ORIGIN[provider]) {
+      throw new Error('Unexpected sign-in URL')
+    }
+    window.location.assign(url.toString())
+  },
+  unlinkProvider: async (
+    provider: SignInProvider,
+    currentPassword?: string
+  ) => {
+    await http.delete(`/auth/${provider}/link`, {
+      data: currentPassword ? { currentPassword } : undefined,
+    })
   },
   verifyEmail: async (token: string) => {
     const response = await http.post<{ message: string }>(

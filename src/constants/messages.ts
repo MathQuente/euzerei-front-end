@@ -24,6 +24,8 @@ export const SUCCESS_MESSAGES = {
   profileSaved: 'Perfil salvo.',
   passwordChanged: 'Senha alterada.',
   passwordSet: 'Senha definida.',
+  providerLinked: (provider: string) => `${provider} vinculado.`,
+  providerUnlinked: (provider: string) => `${provider} desvinculado.`,
   emailChangeRequested: 'Link de confirmação enviado.',
   emailChangeResent: 'Link reenviado.',
   emailChangeCancelled: 'Troca de e-mail cancelada.',
@@ -34,6 +36,8 @@ export const ERROR_MESSAGES = {
   signIn: 'Não foi possível entrar. Confira o email e a senha.',
   signInFailed: cannot('entrar'),
   changePassword: cannot('salvar a senha'),
+  linkProvider: (provider: string) => cannot(`vincular o ${provider}`),
+  unlinkProvider: (provider: string) => cannot(`desvincular o ${provider}`),
   requestEmailChange: cannot('pedir a troca de e-mail'),
   resendEmailChange: cannot('reenviar o link'),
   cancelEmailChange: cannot('cancelar a troca'),
@@ -77,6 +81,22 @@ export const INFO_MESSAGES = {
   platformAdopted: (consoleName: string) =>
     `O registro sem console virou ${consoleName}. Nenhuma plataforma nova foi criada.`,
 } as const
+
+export const PROVIDER_LINK_CANCELLED_CODE = 'negado'
+
+export function providerLinkErrorMessage(code: string, provider: string) {
+  const messages: Record<string, string> = {
+    ja_ligado_outra_conta: `Este ${provider} já está ligado a outra conta do EuZerei.`,
+    ja_ligado: `O ${provider} já está vinculado à sua conta.`,
+    email_nao_verificado: `O email dessa conta do ${provider} não foi verificado lá. Verifique e tente de novo.`,
+    negado: `Vínculo com o ${provider} cancelado.`,
+    sessao:
+      'Você entrou com outra conta neste navegador. Entre de novo e tente de novo.',
+  }
+  return Object.prototype.hasOwnProperty.call(messages, code)
+    ? messages[code]
+    : `Não foi possível vincular o ${provider}. Tente de novo.`
+}
 
 export const OAUTH_ERROR_MESSAGES: Record<string, string> = {
   access_denied: 'Login cancelado.',

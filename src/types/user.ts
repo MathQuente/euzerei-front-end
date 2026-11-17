@@ -27,6 +27,8 @@ export interface User {
   emailVerified: boolean
   hasPassword: boolean
   pendingEmail?: string | null
+  googleLinked?: boolean
+  discordLinked?: boolean
   userName: string
   profilePicture: string
   userBanner: string

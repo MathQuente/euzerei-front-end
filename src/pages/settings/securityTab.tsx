@@ -1,11 +1,21 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useQueryClient } from '@tanstack/react-query'
 import { Lock } from 'lucide-react'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { AuthInput } from '../../components/authInput'
 import { Button } from '../../components/button'
+import { ProviderSection } from '../../components/userGamesComponents/providerSection'
+import {
+  PROVIDER_LINK_CANCELLED_CODE,
+  SUCCESS_MESSAGES,
+  providerLinkErrorMessage,
+} from '../../constants/messages'
+import type { SignInProvider } from '../../hooks/useApi'
 import { useChangePassword } from '../../hooks/useChangePassword'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
+import { PROVIDER_LABEL } from '../../hooks/useProviderLink'
 import { useReauth } from '../../hooks/useReauth'
 import { useUserProfile } from '../../hooks/useUserProfile'
 import {
@@ -13,6 +23,7 @@ import {
   makeChangePasswordSchema,
 } from '../../schemas/changePasswordSchema'
 import { focusRing } from '../../styles/focus'
+import { notify } from '../../utils/notify'
 
 function PasswordSection({ hasPassword }: { hasPassword: boolean }) {
   const schema = makeChangePasswordSchema(hasPassword)
@@ -139,6 +150,43 @@ export function SecurityTab() {
   useDocumentTitle('Segurança · Configurações')
   const { UserProfileResponse, isLoading, isError } = useUserProfile()
   const user = UserProfileResponse?.user
+  const [searchParams, setSearchParams] = useSearchParams()
+  const queryClient = useQueryClient()
+
+  useEffect(() => {
+    const hasParams = ['vinculado', 'vinculo_erro', 'provedor'].some(key =>
+      searchParams.has(key)
+    )
+    if (!hasParams) return
+
+    const isProvider = (value: string | null): value is SignInProvider =>
+      value === 'google' || value === 'discord'
+    const linked = searchParams.get('vinculado')
+    const failure = searchParams.get('vinculo_erro')
+    const failedProvider = searchParams.get('provedor')
+
+    if (isProvider(linked)) {
+      notify.success(SUCCESS_MESSAGES.providerLinked(PROVIDER_LABEL[linked]), {
+        id: `provider-link-${linked}`,
+      })
+      queryClient.invalidateQueries({ queryKey: ['userProfile'] })
+    } else if (failure) {
+      const label = isProvider(failedProvider)
+        ? PROVIDER_LABEL[failedProvider]
+        : 'provedor'
+      const message = providerLinkErrorMessage(failure, label)
+      const options = { id: `provider-link-error-${failure}-${label}` }
+      if (failure === PROVIDER_LINK_CANCELLED_CODE)
+        notify.info(message, options)
+      else notify.error(message, options)
+    }
+
+    const next = new URLSearchParams(searchParams)
+    next.delete('vinculado')
+    next.delete('vinculo_erro')
+    next.delete('provedor')
+    setSearchParams(next, { replace: true })
+  }, [searchParams, setSearchParams, queryClient])
 
   if (isLoading) {
     return (
@@ -158,9 +206,16 @@ export function SecurityTab() {
   }
 
   return (
-    <PasswordSection
-      key={String(user.hasPassword)}
-      hasPassword={user.hasPassword}
-    />
+    <>
+      <PasswordSection
+        key={String(user.hasPassword)}
+        hasPassword={user.hasPassword}
+      />
+      <ProviderSection
+        hasPassword={user.hasPassword}
+        googleLinked={Boolean(user.googleLinked)}
+        discordLinked={Boolean(user.discordLinked)}
+      />
+    </>
   )
 }
