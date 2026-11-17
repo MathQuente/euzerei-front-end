@@ -21,6 +21,12 @@ export interface PsnAccount {
   onlineId: string
 }
 
+export interface AchievementStats {
+  steam: { achievements: number } | null
+  xbox: { gamerscore: number; achievements: number } | null
+  psn: { trophies: number; platinum: number } | null
+}
+
 export interface User {
   id: string
   email: string
@@ -36,6 +42,7 @@ export interface User {
   totalHoursPlayed: number
   hundredPercentCount?: number
   createdAt?: string
+  achievementStats?: AchievementStats
   steamAccounts: SteamAccount[]
   psnAccounts: PsnAccount[]
   xboxAccounts: XboxAccount[]
@@ -52,6 +59,7 @@ export interface PublicUserProfile {
   totalHoursPlayed: number
   hundredPercentCount?: number
   createdAt?: string
+  achievementStats?: AchievementStats
   stores?: {
     steam: string[]
     playstation: string[]

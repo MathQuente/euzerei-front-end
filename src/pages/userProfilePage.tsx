@@ -103,6 +103,7 @@ export function UserProfilePage() {
         }
         hundredPercentCount={user.hundredPercentCount}
         createdAt={user.createdAt}
+        achievementStats={user.achievementStats}
         stores={user.stores}
         followersCount={user.followersCount}
         followingCount={user.followingCount}

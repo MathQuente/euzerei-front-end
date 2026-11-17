@@ -3,9 +3,11 @@ import { Link } from 'react-router-dom'
 import userProfilePictureDefault from '../../assets/Default_pfp.svg.png'
 import { focusRing } from '../../styles/focus'
 import type { TotalPerStatus } from '../../types/games'
+import type { AchievementStats } from '../../types/user'
 import { formatMemberSince } from '../../utils/memberSince'
 import { ProfileStats } from './profileStats'
 import { type StoreAccounts, StoreChips, hasStoreAccounts } from './storeChips'
+import { StoreStats } from './storeStats'
 
 const socialButton = `group inline-flex min-h-11 items-center rounded-md text-gray-200 transition-colors hover:text-white ${focusRing}`
 const socialPill =
@@ -32,6 +34,7 @@ interface ProfileHeaderProps {
   onStatsRetry?: () => unknown
   hundredPercentCount?: number
   createdAt?: string | null
+  achievementStats?: AchievementStats
   followersCount: number
   followingCount: number
   onFollowersClick: () => void
@@ -52,6 +55,7 @@ export function ProfileHeader({
   onStatsRetry,
   hundredPercentCount,
   createdAt,
+  achievementStats,
   followersCount,
   followingCount,
   onFollowersClick,
@@ -158,6 +162,7 @@ export function ProfileHeader({
         hundredPercentCount={hundredPercentCount}
         queueIncludesDropped={isOwn}
       />
+      <StoreStats stats={achievementStats} stores={stores} isOwn={isOwn} />
     </header>
   )
 }

@@ -55,6 +55,7 @@ export function UserProfileDisplay({
         onStatsRetry={onStatsRetry}
         hundredPercentCount={profileUser.hundredPercentCount}
         createdAt={profileUser.createdAt}
+        achievementStats={profileUser.achievementStats}
         isOwn
         stores={{
           steam: (profileUser.steamAccounts ?? []).map(a => a.personaName),
