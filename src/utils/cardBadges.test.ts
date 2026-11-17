@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { cardSummary, completionsText, replayBadgeCount } from './cardBadges'
+import {
+  cardSummary,
+  completionsText,
+  isHundredPercent,
+  replayBadgeCount,
+} from './cardBadges'
 
 describe('replayBadgeCount', () => {
   it('hides the count for a played game until the second time', () => {
@@ -71,5 +76,32 @@ describe('cardSummary', () => {
       'Jogado, concluído a 100%'
     )
     expect(cardSummary({ statusLabel: 'Jogado' })).toBe('Jogado')
+  })
+
+  it('says when the game is the favorite one', () => {
+    expect(
+      cardSummary({
+        statusLabel: 'Jogado',
+        hundredPercent: true,
+        favorite: true,
+      })
+    ).toBe('Jogado, concluído a 100%, favorito')
+    expect(cardSummary({ statusLabel: 'Jogado', favorite: true })).toBe(
+      'Jogado, favorito'
+    )
+  })
+})
+
+describe('isHundredPercent', () => {
+  it('only counts a played game with the mark', () => {
+    expect(isHundredPercent({ hundredPercent: true, status: 'PLAYED' })).toBe(
+      true
+    )
+    expect(isHundredPercent({ hundredPercent: true, status: 'PLAYING' })).toBe(
+      false
+    )
+    expect(isHundredPercent({ hundredPercent: true })).toBe(false)
+    expect(isHundredPercent({ status: 'PLAYED' })).toBe(false)
+    expect(isHundredPercent(undefined)).toBe(false)
   })
 })

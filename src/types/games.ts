@@ -79,6 +79,13 @@ export interface UserGameEntry extends GameCardData {
   hundredPercent: boolean
 }
 
+export interface FavoriteGamesResponse {
+  games: (Omit<UserGameEntry, 'status'> & {
+    status: string | null
+    isMain: boolean
+  })[]
+}
+
 export type UserGamesByStatus = Record<GameStatusEnum, UserGameEntry[]>
 
 export interface UserGamesResponse {

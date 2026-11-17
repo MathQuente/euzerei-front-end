@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom'
 import { BackButton } from '../components/backButton'
 import { Button } from '../components/button'
 import { FollowActionButton } from '../components/followActionButton'
+import { FavoriteGamesSection } from '../components/libraryComponents/favoriteGamesSection'
 import { LibraryShelves } from '../components/libraryComponents/libraryShelves'
 import { ProfileHeader } from '../components/libraryComponents/profileHeader'
 import { StatusMessage } from '../components/statusMessage'
@@ -99,6 +100,8 @@ export function UserProfilePage() {
         onFollowingClick={() => setFollowingModalOpen(true)}
         actions={userId && <FollowActionButton userId={userId} />}
       />
+
+      {userId && <FavoriteGamesSection userId={userId} editable={false} />}
 
       {hasGames ? (
         <LibraryShelves

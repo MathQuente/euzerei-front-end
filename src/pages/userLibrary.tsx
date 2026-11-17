@@ -1,7 +1,9 @@
 import { Button } from '../components/button'
 import { EmptyLibrary } from '../components/libraryComponents/emptyLibrary'
+import { FavoriteGamesSection } from '../components/libraryComponents/favoriteGamesSection'
 import { LibraryShelves } from '../components/libraryComponents/libraryShelves'
 import { UserProfileDisplay } from '../components/userGamesComponents/userProfileDisplay'
+import { useAuth } from '../hooks/useAuth'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { usePlatformLinkResult } from '../hooks/usePlatformLinkResult'
 import { useUserGames } from '../hooks/useUserGames'
@@ -11,6 +13,7 @@ const SKELETON_SHELVES = ['a', 'b', 'c']
 export function UserLibrary() {
   useDocumentTitle('Minha biblioteca')
   usePlatformLinkResult()
+  const { user } = useAuth()
   const {
     UserGamesResponse,
     isErrorUserGames,
@@ -24,6 +27,8 @@ export function UserLibrary() {
   return (
     <>
       <UserProfileDisplay />
+
+      {user?.id && <FavoriteGamesSection userId={user.id} editable />}
 
       {!UserGamesResponse &&
         (isErrorUserGames ? (

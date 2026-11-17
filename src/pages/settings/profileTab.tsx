@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useState } from 'react'
-import { useBlocker } from 'react-router-dom'
-import { ConfirmDialog } from '../../components/confirmDialog'
+import { useCallback, useState } from 'react'
+import { UnsavedChangesGuard } from '../../components/unsavedChangesGuard'
 import { UserProfileForm } from '../../components/userGamesComponents/userProfileForm'
 import { useAuth } from '../../hooks/useAuth'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
@@ -13,20 +12,6 @@ export function ProfileTab() {
   const user = UserProfileResponse?.user
   const [dirty, setDirty] = useState(false)
   const handleDirtyChange = useCallback((value: boolean) => setDirty(value), [])
-
-  const blocker = useBlocker(
-    ({ currentLocation, nextLocation }) =>
-      dirty &&
-      Boolean(authUser) &&
-      currentLocation.pathname !== nextLocation.pathname
-  )
-
-  useEffect(() => {
-    if (!dirty) return
-    const warn = (event: BeforeUnloadEvent) => event.preventDefault()
-    window.addEventListener('beforeunload', warn)
-    return () => window.removeEventListener('beforeunload', warn)
-  }, [dirty])
 
   return (
     <>
@@ -43,15 +28,9 @@ export function ProfileTab() {
       )}
       {user && <UserProfileForm onDirtyChange={handleDirtyChange} />}
 
-      <ConfirmDialog
-        open={blocker.state === 'blocked'}
-        onOpenChange={open => !open && blocker.reset?.()}
-        title="Descartar alterações?"
+      <UnsavedChangesGuard
+        dirty={dirty && Boolean(authUser)}
         description="Você tem alterações não salvas. Se sair desta aba ou página, elas serão perdidas."
-        confirmLabel="Descartar"
-        cancelLabel="Continuar editando"
-        confirmVariant="primary"
-        onConfirm={() => blocker.proceed?.()}
       />
     </>
   )

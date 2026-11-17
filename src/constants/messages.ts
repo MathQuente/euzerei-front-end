@@ -1,6 +1,7 @@
 const cannot = (action: string) => `Não foi possível ${action}. Tente de novo.`
 
 export const SUCCESS_MESSAGES = {
+  favoritesSaved: 'Favoritos salvos.',
   ratingAddedAsPlaying: 'Jogo adicionado à sua biblioteca como Jogando.',
   ratingSavedAsPlayed: 'Nota salva. O jogo foi marcado como Jogado.',
   statusUpdated: 'Status atualizado.',
@@ -36,6 +37,7 @@ export const ERROR_MESSAGES = {
   signIn: 'Não foi possível entrar. Confira o email e a senha.',
   signInFailed: cannot('entrar'),
   changePassword: cannot('salvar a senha'),
+  saveFavorites: cannot('salvar os favoritos'),
   linkProvider: (provider: string) => cannot(`vincular o ${provider}`),
   unlinkProvider: (provider: string) => cannot(`desvincular o ${provider}`),
   requestEmailChange: cannot('pedir a troca de e-mail'),

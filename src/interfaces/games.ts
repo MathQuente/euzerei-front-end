@@ -24,6 +24,9 @@ export interface GameCardProps {
   size?: 'small' | 'medium' | 'compact' | 'larger' | 'row' | 'feature'
   enableModal?: boolean
   interactive?: boolean
+  hoverEffects?: boolean
+  statusBar?: boolean
+  favorite?: boolean
 }
 
 export interface GameFormProps {

@@ -7,7 +7,11 @@ import type {
   IsFollowingResponse,
   SearchUsersResponse,
 } from '../types/follow'
-import type { GameStatusEnum, UserGamesResponse } from '../types/games'
+import type {
+  FavoriteGamesResponse,
+  GameStatusEnum,
+  UserGamesResponse,
+} from '../types/games'
 import type { StartImportResponse } from '../types/import'
 import type {
   LibraryPlatform,
@@ -265,6 +269,21 @@ export const api = {
   getUserProfile: async (userId: string | null) => {
     const response = await http.get<PublicUserProfileResponse>(
       `/users/${encodeURIComponent(String(userId))}`,
+      {}
+    )
+    return response.data
+  },
+  getUserFavorites: async (userId: string | null) => {
+    const response = await http.get<FavoriteGamesResponse>(
+      `/users/${encodeURIComponent(String(userId))}/favorites`,
+      {}
+    )
+    return response.data
+  },
+  setFavorites: async (igdbIds: number[], mainIgdbId: number | null = null) => {
+    const response = await http.put<FavoriteGamesResponse>(
+      '/users/favorites',
+      { igdbIds, mainIgdbId },
       {}
     )
     return response.data

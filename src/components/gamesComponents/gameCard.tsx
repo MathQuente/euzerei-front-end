@@ -18,6 +18,7 @@ import { focusRing } from '../../styles/focus'
 import {
   cardSummary,
   formatRating,
+  isHundredPercent,
   replayBadgeCount,
 } from '../../utils/cardBadges'
 import { hiResCover } from '../../utils/hiResCover'
@@ -129,6 +130,9 @@ export function GameCard({
   size = 'medium',
   enableModal,
   interactive = true,
+  hoverEffects = true,
+  statusBar = true,
+  favorite = false,
 }: GameCardProps) {
   const openGame = useGameModal()
   const [loadedSrc, setLoadedSrc] = useState<string | null>(null)
@@ -145,8 +149,7 @@ export function GameCard({
   const showRating = !bare && game?.rating != null
   const ratingText = game?.rating != null ? formatRating(game.rating) : ''
   const showEndless = !bare && game?.endless === true
-  const showHundred =
-    !bare && game?.hundredPercent === true && game?.status === 'PLAYED'
+  const showHundred = !bare && isHundredPercent(game)
   const replayCount = bare
     ? null
     : replayBadgeCount(game?.status, game?.completions)
@@ -170,22 +173,24 @@ export function GameCard({
         completions: replayCount ? game?.completions : 0,
         endless: showEndless,
         hundredPercent: showHundred,
+        favorite,
         platforms: playedOn.map(platform => platform.label),
       })
 
-  const lifts = !bare
+  const lifts = !bare && hoverEffects
   const cardClassName = twMerge(
     'group relative rounded-lg overflow-hidden',
     lifts &&
-      'hover:ring-1 ring-primary/40 transition-transform duration-200 hover:scale-[1.02] [container-type:inline-size]',
-    showHundred && 'hundred-frame hover:ring-0',
+      'hover:ring-1 ring-primary/40 transition-transform duration-200 hover:scale-[1.02]',
+    !bare && '[container-type:inline-size]',
+    showHundred && !favorite && 'hundred-frame hover:ring-0',
     interactive && focusRing,
     size === 'medium' ? 'block w-full' : sizes[size]
   )
 
   const cardContent = (
     <>
-      {statusBadge && !showHundred && (
+      {statusBadge && !showHundred && statusBar && (
         <span
           className={`absolute top-0 inset-x-0 h-0.5 z-10 ${statusBadge.barColor}`}
           aria-hidden="true"
@@ -307,7 +312,7 @@ export function GameCard({
               sizes[size],
               'rounded-lg object-cover transition-opacity duration-200',
               !coverLoaded && 'opacity-0',
-              !bare && coverLoaded && 'group-hover:opacity-20'
+              !bare && hoverEffects && coverLoaded && 'group-hover:opacity-20'
             )}
             src={coverSrc}
             loading="lazy"
@@ -332,7 +337,7 @@ export function GameCard({
 
       {summaryText && <span className="sr-only">, {summaryText}</span>}
 
-      {!bare && (
+      {!bare && hoverEffects && (
         <div
           aria-hidden="true"
           className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"

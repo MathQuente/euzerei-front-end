@@ -18,6 +18,12 @@ export function replayBadgeCount(
   return completions > MAX_COUNT ? `${MAX_COUNT}+` : `${completions}×`
 }
 
+export function isHundredPercent(
+  game: { hundredPercent?: boolean; status?: string | null } | null | undefined
+) {
+  return game?.hundredPercent === true && game?.status === 'PLAYED'
+}
+
 export function completionsText(completions: number) {
   return `zerado ${completions} ${completions === 1 ? 'vez' : 'vezes'}`
 }
@@ -29,6 +35,7 @@ interface CardSummaryInput {
   completions?: number
   endless?: boolean
   hundredPercent?: boolean
+  favorite?: boolean
   platforms?: string[]
 }
 
@@ -47,6 +54,7 @@ export function cardSummary({
   completions,
   endless,
   hundredPercent,
+  favorite,
   platforms,
 }: CardSummaryInput) {
   const parts: string[] = []
@@ -56,6 +64,7 @@ export function cardSummary({
   if (completions && completions > 0) parts.push(completionsText(completions))
   if (endless) parts.push('Infinito')
   if (hundredPercent) parts.push('concluído a 100%')
+  if (favorite) parts.push('favorito')
   if (platforms && platforms.length > 0) {
     parts.push(`jogado em ${platforms.join(', ')}`)
   }

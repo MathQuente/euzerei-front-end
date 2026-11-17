@@ -7,4 +7,5 @@ export const invalidateUserGames = (
   queryClient.invalidateQueries({ queryKey: ['userGames', userId] })
   queryClient.invalidateQueries({ queryKey: ['publicUserGames', userId] })
   queryClient.invalidateQueries({ queryKey: ['publicUserProfile', userId] })
+  queryClient.invalidateQueries({ queryKey: ['favoriteGames', userId] })
 }
