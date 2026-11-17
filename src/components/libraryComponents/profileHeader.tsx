@@ -130,6 +130,7 @@ export function ProfileHeader({
         gamesAmount={gamesAmount}
         totalHoursPlayed={totalHoursPlayed}
         totalPerStatus={totalPerStatus}
+        queueIncludesDropped={isOwn}
       />
     </header>
   )

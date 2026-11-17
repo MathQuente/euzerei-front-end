@@ -77,6 +77,7 @@ export interface UserGameEntry extends GameCardData {
   status: string
   endless: boolean
   hundredPercent: boolean
+  updatedAt?: string
 }
 
 export interface FavoriteGamesResponse {

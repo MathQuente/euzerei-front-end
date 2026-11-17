@@ -44,6 +44,7 @@ import type {
 } from '../types/user'
 import type { XboxImportStatusResponse } from '../types/xbox'
 import { notify } from '../utils/notify'
+import type { QUEUE_FILTER } from '../utils/queue'
 
 export const SESSION_ENDED_EVENT = 'auth:session-ended'
 
@@ -243,7 +244,7 @@ export const api = {
   getUserGames: async (
     page?: number,
     search?: string | undefined,
-    filter?: GameStatusEnum,
+    filter?: GameStatusEnum | typeof QUEUE_FILTER,
     sortBy?: SortField,
     sortOrder?: SortOrder
   ) => {

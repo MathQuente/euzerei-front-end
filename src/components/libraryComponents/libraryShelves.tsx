@@ -1,13 +1,11 @@
-import { ChevronRight, CircleX } from 'lucide-react'
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { focusRing } from '../../styles/focus'
 import type {
   GameStatusEnum,
   TotalPerStatus,
   UserGameEntry,
   UserGamesByStatus,
 } from '../../types/games'
+import { mergeQueue } from '../../utils/queue'
 import { type ShelfLink, type ShelfTab, StatusShelf } from './statusShelf'
 
 const MAX_PER_SHELF = 8
@@ -38,8 +36,8 @@ export function LibraryShelves({
     totalPerStatus.find(t => t.status === status)?.totalGames ??
     games[status].length
 
-  const allLink = (status: ShelfStatus, route: string) => {
-    const total = totalOf(status)
+  const allLink = (status: ShelfStatus, route: string, count?: number) => {
+    const total = count ?? totalOf(status)
     return readOnly || total < 2
       ? undefined
       : { to: `/userLibrary/${route}`, label: 'Ver todos' }
@@ -49,20 +47,23 @@ export function LibraryShelves({
   const explore = readOnly ? undefined : EXPLORE
 
   const backlogTotal = totalOf('BACKLOG')
+  const droppedTotal = readOnly ? 0 : totalOf('DROPPED')
+  const queueTotal = backlogTotal + droppedTotal
+  const queueGames = readOnly
+    ? games.BACKLOG
+    : mergeQueue(games.BACKLOG, games.DROPPED, MAX_PER_SHELF)
   const playingEmptyLink =
-    backlogTotal > 0
+    queueTotal > 0
       ? {
           to: '/userLibrary/backlogGames',
           label:
-            backlogTotal === 1
+            queueTotal === 1
               ? 'Ver o jogo da fila'
-              : `Escolher entre os ${backlogTotal} da fila`,
+              : `Escolher entre os ${queueTotal} da fila`,
         }
       : EXPLORE
 
   const pausedTotal = totalOf('PAUSED')
-  const droppedTotal = totalOf('DROPPED')
-
   const nowGames = games.PLAYING.filter(game => !game.endless)
   const endlessGames = games.PLAYING.filter(game => game.endless)
   const playingComplete = totalOf('PLAYING') <= games.PLAYING.length
@@ -145,11 +146,11 @@ export function LibraryShelves({
       <StatusShelf
         status="BACKLOG"
         title="Na fila"
-        games={games.BACKLOG.slice(0, MAX_PER_SHELF)}
-        summary={`${gameCount(backlogTotal)} esperando a vez`}
+        games={queueGames.slice(0, MAX_PER_SHELF)}
+        summary={`${gameCount(queueTotal)} esperando a vez`}
         emptyText={empty('Nenhum jogo ainda. Aqui fica a sua fila para jogar.')}
         emptyLink={explore}
-        allLink={allLink('BACKLOG', 'backlogGames')}
+        allLink={allLink('BACKLOG', 'backlogGames', queueTotal)}
       />
       <StatusShelf
         status="WISHLIST"
@@ -166,24 +167,6 @@ export function LibraryShelves({
         emptyLink={explore}
         allLink={allLink('WISHLIST', 'wishlistGames')}
       />
-      {!readOnly && droppedTotal > 0 && (
-        <p className="flex items-center gap-2 border-t border-dark-border py-5 text-sm text-gray-400">
-          <CircleX
-            className="size-4 shrink-0 text-red-400"
-            aria-hidden="true"
-          />
-          {droppedTotal === 1
-            ? '1 jogo largado'
-            : `${droppedTotal} jogos largados`}
-          <Link
-            to="/userLibrary/droppedGames"
-            className={`-my-3 inline-flex min-h-11 items-center gap-0.5 rounded-sm text-gray-300 transition-colors hover:text-white ${focusRing}`}
-          >
-            Ver
-            <ChevronRight className="size-4" aria-hidden="true" />
-          </Link>
-        </p>
-      )}
     </div>
   )
 }

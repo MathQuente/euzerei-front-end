@@ -7,6 +7,7 @@ interface ProfileStatsProps {
   gamesAmount: number
   totalHoursPlayed: number
   totalPerStatus?: TotalPerStatus[]
+  queueIncludesDropped?: boolean
 }
 
 function Cell({
@@ -46,6 +47,7 @@ export function ProfileStats({
   gamesAmount,
   totalHoursPlayed,
   totalPerStatus,
+  queueIncludesDropped = false,
 }: ProfileStatsProps) {
   const countOf = (status: string) =>
     totalPerStatus
@@ -59,7 +61,11 @@ export function ProfileStats({
 
   const played = countOf('PLAYED')
   const playing = countOf('PLAYING')
-  const backlog = countOf('BACKLOG')
+  const pending = countOf('BACKLOG')
+  const backlog =
+    pending === null || !queueIncludesDropped
+      ? pending
+      : pending + (countOf('DROPPED') ?? 0)
 
   return (
     <ul

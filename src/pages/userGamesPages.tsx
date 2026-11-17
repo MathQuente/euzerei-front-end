@@ -10,6 +10,7 @@ import { GameStatusEnum } from '../types/games'
 import type { GameListData } from '../types/games'
 import { notify } from '../utils/notify'
 import { parsePage } from '../utils/parsePage'
+import { QUEUE_FILTER } from '../utils/queue'
 
 const ITEMS_PER_PAGE = 48
 
@@ -101,7 +102,9 @@ export function UserGamesPageByStatus() {
   const { UserGamesResponse } = useUserGames(
     page,
     '',
-    currentEnumStatus,
+    currentEnumStatus === GameStatusEnum.Backlog
+      ? QUEUE_FILTER
+      : currentEnumStatus,
     sortOrder,
     sortField
   )

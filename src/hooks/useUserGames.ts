@@ -8,6 +8,7 @@ import type {
   UserGamesByStatus,
   UserGamesResponse,
 } from '../types/games'
+import type { QUEUE_FILTER } from '../utils/queue'
 import { api } from './useApi'
 import { useAuth } from './useAuth'
 
@@ -23,7 +24,7 @@ const EMPTY_GROUPS: UserGamesByStatus = {
 export const useUserGames = (
   page?: number,
   search?: string | undefined,
-  filter?: GameStatusEnum | undefined,
+  filter?: GameStatusEnum | typeof QUEUE_FILTER | undefined,
   sortOrder?: SortOrder,
   sortBy?: SortField
 ) => {
