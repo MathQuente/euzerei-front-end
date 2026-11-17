@@ -1,6 +1,7 @@
 import {
   CircleX,
   Gamepad2,
+  Gem,
   Gift,
   Infinity as InfinityIcon,
   Library,
@@ -144,6 +145,8 @@ export function GameCard({
   const showRating = !bare && game?.rating != null
   const ratingText = game?.rating != null ? formatRating(game.rating) : ''
   const showEndless = !bare && game?.endless === true
+  const showHundred =
+    !bare && game?.hundredPercent === true && game?.status === 'PLAYED'
   const replayCount = bare
     ? null
     : replayBadgeCount(game?.status, game?.completions)
@@ -166,6 +169,7 @@ export function GameCard({
         rating: showRating ? game?.rating : null,
         completions: replayCount ? game?.completions : 0,
         endless: showEndless,
+        hundredPercent: showHundred,
         platforms: playedOn.map(platform => platform.label),
       })
 
@@ -174,13 +178,14 @@ export function GameCard({
     'group relative rounded-lg overflow-hidden',
     lifts &&
       'hover:ring-1 ring-primary/40 transition-transform duration-200 hover:scale-[1.02] [container-type:inline-size]',
+    showHundred && 'hundred-frame hover:ring-0',
     interactive && focusRing,
     size === 'medium' ? 'block w-full' : sizes[size]
   )
 
   const cardContent = (
     <>
-      {statusBadge && (
+      {statusBadge && !showHundred && (
         <span
           className={`absolute top-0 inset-x-0 h-0.5 z-10 ${statusBadge.barColor}`}
           aria-hidden="true"
@@ -217,10 +222,17 @@ export function GameCard({
                 className="inline-flex aspect-square items-center justify-center"
                 title={statusBadge.label}
               >
-                <statusBadge.icon
-                  className={`size-3 overflow-visible sm:size-3.5 ${statusBadge.iconColor}`}
-                  strokeWidth={2.5}
-                />
+                {showHundred ? (
+                  <Gem
+                    className="size-3 overflow-visible fill-current text-[#dbe6ff] sm:size-3.5"
+                    strokeWidth={2.5}
+                  />
+                ) : (
+                  <statusBadge.icon
+                    className={`size-3 overflow-visible sm:size-3.5 ${statusBadge.iconColor}`}
+                    strokeWidth={2.5}
+                  />
+                )}
               </span>
             </span>
           )}

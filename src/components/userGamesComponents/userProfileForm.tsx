@@ -14,7 +14,13 @@ import { Button, buttonClasses } from '../button'
 type ProfileForm = z.infer<typeof updateProfileSchema>
 
 const IMAGE_ACCEPT = 'image/png,image/jpeg,image/gif'
-const fileButton = `${buttonClasses({ variant: 'secondary' })} cursor-pointer gap-1.5 bg-dark-bg/70 ${focusRingWithin}`
+const bannerButton =
+  'border-gray-600 bg-dark-bg-lighter text-white shadow-md shadow-black/50 hover:bg-dark-border'
+
+const removeBannerButton =
+  'w-[34px] border-red-400/50 bg-dark-bg-lighter px-0 text-red-300 shadow-md shadow-black/50 hover:bg-red-950 hover:text-red-200 max-sm:w-11'
+
+const fileButton = `${buttonClasses({ variant: 'secondary', className: bannerButton })} cursor-pointer gap-1.5 ${focusRingWithin}`
 
 export function UserProfileForm({
   onDirtyChange,
@@ -197,7 +203,7 @@ export function UserProfileForm({
               type="button"
               onClick={handleRemoveBanner}
               aria-label="Remover banner"
-              className={`${buttonClasses({ variant: 'secondary' })} bg-dark-bg/70 px-2.5 ${focusRing}`}
+              className={`${buttonClasses({ variant: 'secondary', className: removeBannerButton })} ${focusRing}`}
             >
               <X className="size-4" aria-hidden="true" />
             </button>

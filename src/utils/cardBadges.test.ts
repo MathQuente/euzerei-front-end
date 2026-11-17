@@ -65,4 +65,11 @@ describe('cardSummary', () => {
       'DLC, Na fila'
     )
   })
+
+  it('says when the game was finished at 100%', () => {
+    expect(cardSummary({ statusLabel: 'Jogado', hundredPercent: true })).toBe(
+      'Jogado, concluído a 100%'
+    )
+    expect(cardSummary({ statusLabel: 'Jogado' })).toBe('Jogado')
+  })
 })

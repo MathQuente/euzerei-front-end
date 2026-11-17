@@ -1,6 +1,7 @@
 import { ChevronRight } from 'lucide-react'
 import { type ReactNode, useId, useState } from 'react'
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants/messages'
+import { useCountUp } from '../hooks/useCountUp'
 import { focusRing } from '../styles/focus'
 import type { ImportSectionResult } from '../types/import'
 import { groupNotFound } from '../utils/groupNotFound'
@@ -45,11 +46,19 @@ function formatWhen(timestamp: number) {
 function Count({
   children,
   className = 'text-white',
+  animate = false,
 }: {
   children: number
   className?: string
+  animate?: boolean
 }) {
-  return <b className={`font-bold tabular-nums ${className}`}>{children}</b>
+  const shown = useCountUp(children, animate)
+  return (
+    <b className={`font-bold tabular-nums ${className}`}>
+      <span aria-hidden={animate || undefined}>{shown}</span>
+      {animate && <span className="sr-only">{children}</span>}
+    </b>
+  )
 }
 
 export function ImportResultSummary({
@@ -77,7 +86,7 @@ export function ImportResultSummary({
       key: section.title,
       node: (
         <>
-          <Count>{section.result.imported}</Count>{' '}
+          <Count animate={variant === 'fresh'}>{section.result.imported}</Count>{' '}
           {SUPPORT_LABELS[section.title] ?? `em ${section.title.toLowerCase()}`}
         </>
       ),
@@ -88,7 +97,7 @@ export function ImportResultSummary({
       key: 'updated',
       node: (
         <>
-          <Count>{updated}</Count>{' '}
+          <Count animate={variant === 'fresh'}>{updated}</Count>{' '}
           {plural(updated, 'atualizado', 'atualizados')}
         </>
       ),
@@ -99,7 +108,7 @@ export function ImportResultSummary({
       key: 'skipped',
       node: (
         <>
-          <Count>{skipped}</Count>{' '}
+          <Count animate={variant === 'fresh'}>{skipped}</Count>{' '}
           {plural(
             skipped,
             'já estava na biblioteca',
@@ -259,7 +268,9 @@ export function ImportResultSummary({
   const headline =
     imported > 0 ? (
       <>
-        <span className="text-green-400">{imported}</span>{' '}
+        <Count className="text-green-400" animate>
+          {imported}
+        </Count>{' '}
         {plural(imported, 'jogo entrou', 'jogos entraram')} na sua biblioteca
       </>
     ) : (

@@ -23,6 +23,7 @@ export interface GameCardData {
   platforms?: string[]
   status?: string
   endless?: boolean
+  hundredPercent?: boolean
 }
 
 export interface GameBase extends GameCardData {
@@ -75,6 +76,7 @@ export interface UserGameEntry extends GameCardData {
   hoursPlayed: number
   status: string
   endless: boolean
+  hundredPercent: boolean
 }
 
 export type UserGamesByStatus = Record<GameStatusEnum, UserGameEntry[]>
@@ -130,6 +132,7 @@ export type GameStatus = {
 export type GameStatusResponse = {
   userGameStatus: GameStatus | null
   endless: boolean
+  hundredPercent: boolean
 }
 
 export interface GameResponse {

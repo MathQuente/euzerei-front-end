@@ -7,6 +7,7 @@ import {
 } from '../../constants/importMessages'
 import { useHiddenImportResult } from '../../hooks/useHiddenImportResult'
 import type { PlatformImport } from '../../hooks/usePlatformImport'
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion'
 import { fieldFocus, focusRing } from '../../styles/focus'
 import type { ImportSectionResult } from '../../types/import'
 import type { LibraryPlatform } from '../../types/platform'
@@ -18,6 +19,11 @@ import {
 } from '../importResultSummary'
 import { CompletionSuggestionsBlock } from './completionSuggestions'
 import { HiddenImportRow } from './hiddenImportRow'
+import {
+  IMPORT_FINISH_MS,
+  IMPORT_LEAVE_MS,
+  ImportFinishBurst,
+} from './importFinishBurst'
 
 const POLLING_STATUSES = ['waiting', 'active', 'delayed']
 
@@ -164,6 +170,11 @@ export function PlatformImportSection<TResult>({
   const [verificationCode, setVerificationCode] = useState<string | null>(null)
   const [addingAccount, setAddingAccount] = useState(false)
   const [justFinished, setJustFinished] = useState(false)
+  const [celebrating, setCelebrating] = useState(false)
+  const [leaving, setLeaving] = useState(false)
+  const celebrationTimer = useRef<ReturnType<typeof setTimeout>>()
+  const finishTimer = useRef<ReturnType<typeof setTimeout>>()
+  const reducedMotion = usePrefersReducedMotion()
   const [disconnectTarget, setDisconnectTarget] =
     useState<PlatformAccount | null>(null)
   const previousStatus = useRef<string | undefined>(undefined)
@@ -178,6 +189,7 @@ export function PlatformImportSection<TResult>({
 
   const [visuallyImporting, setVisuallyImporting] = useState(false)
   const importStartedAtRef = useRef<number | null>(null)
+  const messageSeedRef = useRef(0)
 
   const rawIsImporting = POLLING_STATUSES.includes(status?.status ?? '')
 
@@ -185,6 +197,7 @@ export function PlatformImportSection<TResult>({
     if (rawIsImporting && !visuallyImporting) {
       setVisuallyImporting(true)
       importStartedAtRef.current = Date.now()
+      messageSeedRef.current = Math.floor(Math.random() * 2 ** 31)
     }
   }, [rawIsImporting, visuallyImporting])
 
@@ -212,12 +225,38 @@ export function PlatformImportSection<TResult>({
       0
     )
 
-    const timer = setTimeout(showImportResult, remaining)
+    const timer = setTimeout(
+      () => finishImport(status.status === 'completed'),
+      remaining
+    )
 
     return () => clearTimeout(timer)
   }, [status?.status])
 
+  useEffect(
+    () => () => {
+      clearTimeout(celebrationTimer.current)
+      clearTimeout(finishTimer.current)
+    },
+    []
+  )
+
+  function finishImport(completed: boolean) {
+    clearTimeout(celebrationTimer.current)
+    if (!completed || reducedMotion) {
+      showImportResult()
+      return
+    }
+    setCelebrating(true)
+    celebrationTimer.current = setTimeout(() => {
+      setLeaving(true)
+      celebrationTimer.current = setTimeout(showImportResult, IMPORT_LEAVE_MS)
+    }, IMPORT_FINISH_MS)
+  }
+
   function showImportResult() {
+    setCelebrating(false)
+    setLeaving(false)
     setVisuallyImporting(false)
     importStartedAtRef.current = null
     setJustFinished(true)
@@ -276,7 +315,10 @@ export function PlatformImportSection<TResult>({
     hiddenResult.show()
   }
 
-  const slowImportNotice = getSlowImportNotice(elapsedSeconds)
+  const slowImportNotice = getSlowImportNotice(
+    elapsedSeconds,
+    messageSeedRef.current
+  )
   const progress =
     status?.status === 'active' ? (status.progress ?? 0) : undefined
 
@@ -284,12 +326,17 @@ export function PlatformImportSection<TResult>({
     setVisuallyImporting(true)
     setJustFinished(false)
     importStartedAtRef.current = Date.now()
+    messageSeedRef.current = Math.floor(Math.random() * 2 ** 31)
     try {
       await startImport()
       const fresh = await refetchStatus()
       if (fresh?.status === 'completed' || fresh?.status === 'failed') {
         previousStatus.current = fresh.status
-        setTimeout(showImportResult, MIN_IMPORTING_VISIBLE_MS)
+        clearTimeout(finishTimer.current)
+        finishTimer.current = setTimeout(
+          () => finishImport(fresh.status === 'completed'),
+          MIN_IMPORTING_VISIBLE_MS
+        )
       } else {
         previousStatus.current = fresh?.status
       }
@@ -675,7 +722,9 @@ export function PlatformImportSection<TResult>({
           status?.status === 'completed' &&
           status.result && (
             <>
-              <div className="flex flex-col gap-2.5 border-t border-dark-border pt-3.5">
+              <div
+                className={`flex flex-col gap-2.5 border-t border-dark-border pt-3.5 ${justFinished ? 'animate-import-result' : ''}`}
+              >
                 {showHiddenRow ? (
                   <HiddenImportRow
                     ref={restoreRef}
@@ -776,10 +825,11 @@ export function PlatformImportSection<TResult>({
         <div
           ref={progressRef}
           tabIndex={-1}
-          className="flex flex-col gap-2 border-t border-dark-border pt-3.5 outline-none"
+          className={`flex flex-col gap-2 border-t border-dark-border pt-3.5 outline-none transition-opacity duration-500 ${leaving ? 'opacity-0' : ''}`}
           aria-live="polite"
         >
-          {progress !== undefined && (
+          {celebrating && <ImportFinishBurst />}
+          {!celebrating && progress !== undefined && (
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-dark-bg">
               <div
                 className="h-full rounded-full bg-primary transition-[width] duration-300"
@@ -787,17 +837,23 @@ export function PlatformImportSection<TResult>({
               />
             </div>
           )}
-          <div className="flex items-start justify-between gap-3">
-            <span className="text-xs text-gray-300">
-              {getImportMessage(progress, elapsedSeconds)}
-            </span>
-            {progress !== undefined && (
-              <span className="shrink-0 text-xs tabular-nums text-gray-300">
-                {progress}%
+          {!celebrating && (
+            <div className="flex items-start justify-between gap-3">
+              <span className="text-xs text-gray-300">
+                {getImportMessage(
+                  progress,
+                  elapsedSeconds,
+                  messageSeedRef.current
+                )}
               </span>
-            )}
-          </div>
-          {slowImportNotice && (
+              {progress !== undefined && (
+                <span className="shrink-0 text-xs tabular-nums text-gray-300">
+                  {progress}%
+                </span>
+              )}
+            </div>
+          )}
+          {slowImportNotice && !celebrating && (
             <span className="text-xs text-gray-500">{slowImportNotice}</span>
           )}
         </div>

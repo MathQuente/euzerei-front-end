@@ -2,6 +2,101 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .animate-import-result {
+    animation: import-result-in 600ms ease-out;
+  }
+
+  @keyframes import-result-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-import-result {
+      animation: none;
+    }
+  }
+
+  .import-burst-fill {
+    animation: import-glow 450ms ease-out;
+  }
+
+  .import-spark {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    border-radius: 9999px;
+    background: #9d52e8;
+    opacity: 0;
+    animation: import-spark 650ms ease-out forwards;
+  }
+
+  @keyframes import-glow {
+    50% {
+      box-shadow: 0 0 14px rgba(157, 82, 232, 0.9);
+    }
+  }
+
+  @keyframes import-spark {
+    from {
+      opacity: 1;
+      transform: translate(0, 0) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translate(var(--dx), var(--dy)) scale(0.2);
+    }
+  }
+
+  .hundred-frame {
+    box-shadow: 0 0 14px rgba(180, 200, 255, 0.28), 0 2px 8px rgba(0, 0, 0, 0.5);
+  }
+
+  .hundred-frame::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    border-radius: inherit;
+    padding: 2px;
+    pointer-events: none;
+    background: linear-gradient(
+      135deg,
+      #ffd1f0,
+      #b9d8ff 22%,
+      #c9ffe6 44%,
+      #fff1b8 66%,
+      #e5c4ff 88%,
+      #ffd1f0
+    );
+    background-size: 220% 220%;
+    -webkit-mask: linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: hundred-holo 7s linear infinite;
+  }
+
+  @keyframes hundred-holo {
+    to {
+      background-position: 220% 220%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hundred-frame::after {
+      animation: none;
+    }
+  }
+}
+
 @font-face {
   font-family: "JetBrains Mono";
   font-style: normal;

@@ -13,14 +13,13 @@ export function DeleteAccountSection() {
 
   const profile = UserProfileResponse?.user
   const confirmationText = profile?.userName || profile?.email
+  const handleReauth = useReauth('/configuracoes/conta')
   if (!confirmationText) return null
 
   const handleOpenChange = (next: boolean) => {
     if (!next) resetError()
     setOpen(next)
   }
-
-  const handleReauth = useReauth('/configuracoes/conta')
 
   return (
     <section
@@ -58,6 +57,15 @@ export function DeleteAccountSection() {
         isLoading={isDeleting}
         needsReauth={needsReauth}
         errorMessage={errorMessage}
+        summary={{
+          games: profile?.gamesAmount ?? 0,
+          followers: profile?.followersCount ?? 0,
+          following: profile?.followingCount ?? 0,
+          accounts:
+            (profile?.steamAccounts.length ?? 0) +
+            (profile?.xboxAccounts.length ?? 0) +
+            (profile?.psnAccounts.length ?? 0),
+        }}
       />
     </section>
   )

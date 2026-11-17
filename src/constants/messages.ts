@@ -45,6 +45,7 @@ export const ERROR_MESSAGES = {
   sendEmail:
     'Não foi possível enviar o email agora. Tente de novo em instantes.',
   updateEndless: cannot('atualizar a marca Infinito'),
+  updateHundredPercent: cannot('atualizar a marca de 100%'),
   saveHours: cannot('salvar as horas'),
   saveRating: cannot('salvar a nota'),
   removeRating: cannot('remover a nota'),

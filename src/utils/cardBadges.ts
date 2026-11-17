@@ -28,6 +28,7 @@ interface CardSummaryInput {
   rating?: number | null
   completions?: number
   endless?: boolean
+  hundredPercent?: boolean
   platforms?: string[]
 }
 
@@ -45,6 +46,7 @@ export function cardSummary({
   rating,
   completions,
   endless,
+  hundredPercent,
   platforms,
 }: CardSummaryInput) {
   const parts: string[] = []
@@ -53,6 +55,7 @@ export function cardSummary({
   if (rating != null) parts.push(`nota ${formatRating(rating)}`)
   if (completions && completions > 0) parts.push(completionsText(completions))
   if (endless) parts.push('Infinito')
+  if (hundredPercent) parts.push('concluído a 100%')
   if (platforms && platforms.length > 0) {
     parts.push(`jogado em ${platforms.join(', ')}`)
   }

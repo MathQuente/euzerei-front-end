@@ -386,6 +386,16 @@ export const api = {
     )
     return response.data
   },
+  setHundredPercent: async (
+    igdbId: string | undefined,
+    hundredPercent: boolean
+  ) => {
+    const response = await http.put<{
+      igdbId: number
+      hundredPercent: boolean
+    }>(`/users/hundred-percent/${igdbId}`, { hundredPercent }, {})
+    return response.data
+  },
   removeGame: async (igdbId: string | undefined) => {
     const response = await http.delete(`/users/games/${igdbId}`, {})
     return response

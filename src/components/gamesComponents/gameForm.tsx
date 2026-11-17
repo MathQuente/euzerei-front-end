@@ -5,6 +5,7 @@ import type { GameFormProps } from '../../interfaces/games'
 import { endlessControl } from '../../utils/endlessAvailability'
 import { EndlessToggle } from '../endlessToggle'
 import { GamePlatformsSection } from '../gamePlatformsSection'
+import { HundredPercentToggle } from '../hundredPercentToggle'
 import { LibraryRecordFields } from '../libraryRecordFields'
 import { GameStatusButtons } from './gameStatusButtons'
 
@@ -43,6 +44,10 @@ export function GameForm({ game }: GameFormProps) {
           igdbId={game.igdbId.toString()}
           disabledReason={endless.disabledReason}
         />
+      )}
+
+      {hasStatus(STATUS.PLAYED) && (
+        <HundredPercentToggle igdbId={game.igdbId.toString()} />
       )}
 
       {canHavePlatforms && (
