@@ -30,6 +30,7 @@ export function UserProfilePage() {
   const {
     games,
     totalPerStatus,
+    hasData: hasGamesData,
     isLoading: isLoadingGames,
   } = usePublicUserGames(userId, !!data)
   const hasGames = totalPerStatus.some(t => t.totalGames > 0)
@@ -42,7 +43,7 @@ export function UserProfilePage() {
     return (
       <>
         <BackButton className="mt-4" />
-        <div className="w-full h-36 rounded-lg border border-dark-border bg-dark-bg-light animate-pulse mt-2" />
+        <div className="w-full h-[28rem] sm:h-72 rounded-lg border border-dark-border bg-dark-bg-light animate-pulse mt-2" />
       </>
     )
   }
@@ -94,6 +95,7 @@ export function UserProfilePage() {
         bannerUrl={user.userBanner}
         gamesAmount={user.gamesAmount ?? 0}
         totalHoursPlayed={user.totalHoursPlayed ?? 0}
+        totalPerStatus={hasGamesData ? totalPerStatus : undefined}
         followersCount={user.followersCount}
         followingCount={user.followingCount}
         onFollowersClick={() => setFollowersModalOpen(true)}

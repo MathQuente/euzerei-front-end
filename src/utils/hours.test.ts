@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   NO_HOURS_LABEL,
   formatHours,
+  formatHoursCompact,
   formatHoursOrNone,
   formatHoursSpoken,
 } from './hours'
@@ -24,6 +25,17 @@ describe('formatHours', () => {
 
   it('rounds beyond the two decimals the database keeps', () => {
     expect(formatHours(13.054)).toBe(`13,05${NBSP}h`)
+  })
+})
+
+describe('formatHoursCompact', () => {
+  it.each([
+    [3771.78, '3.772'],
+    [0.4, '0,4'],
+    [12.5, '13'],
+    [0, '0'],
+  ])('rounds to whole hours: %s', (hours, expected) => {
+    expect(formatHoursCompact(hours)).toBe(`${expected}${NBSP}h`)
   })
 })
 

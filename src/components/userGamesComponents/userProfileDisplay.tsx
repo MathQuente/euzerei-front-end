@@ -6,12 +6,17 @@ import { useFollowers } from '../../hooks/useFollowers'
 import { useFollowing } from '../../hooks/useFollowing'
 import { useUserProfile } from '../../hooks/useUserProfile'
 import type { FollowSummary } from '../../types/follow'
+import type { TotalPerStatus } from '../../types/games'
 import { buttonClasses } from '../button'
 import { IconButton } from '../iconButton'
 import { ProfileHeader } from '../libraryComponents/profileHeader'
 import { UserListModal } from '../userListModal'
 
-export function UserProfileDisplay() {
+export function UserProfileDisplay({
+  totalPerStatus,
+}: {
+  totalPerStatus?: TotalPerStatus[]
+}) {
   const [followersModalOpen, setFollowersModalOpen] = useState(false)
   const [followingModalOpen, setFollowingModalOpen] = useState(false)
   const { UserProfileResponse, isLoading, isError } = useUserProfile()
@@ -22,7 +27,7 @@ export function UserProfileDisplay() {
 
   if (isLoading) {
     return (
-      <div className="h-28 w-full animate-pulse rounded-lg bg-dark-bg-light" />
+      <div className="h-[28rem] w-full animate-pulse rounded-lg bg-dark-bg-light sm:h-72" />
     )
   }
 
@@ -44,6 +49,13 @@ export function UserProfileDisplay() {
         bannerUrl={profileUser.userBanner}
         gamesAmount={profileUser.gamesAmount}
         totalHoursPlayed={profileUser.totalHoursPlayed}
+        totalPerStatus={totalPerStatus}
+        isOwn
+        stores={{
+          steam: (profileUser.steamAccounts ?? []).map(a => a.personaName),
+          playstation: (profileUser.psnAccounts ?? []).map(a => a.onlineId),
+          xbox: (profileUser.xboxAccounts ?? []).map(a => a.gamertag),
+        }}
         followersCount={profileUser.followersCount}
         followingCount={profileUser.followingCount}
         onFollowersClick={() => setFollowersModalOpen(true)}
@@ -53,7 +65,7 @@ export function UserProfileDisplay() {
             to="/configuracoes"
             className={buttonClasses({
               variant: 'secondary',
-              className: 'gap-1.5',
+              className: 'gap-1.5 bg-dark-bg-darker/85',
             })}
           >
             <Settings className="size-4" aria-hidden="true" />

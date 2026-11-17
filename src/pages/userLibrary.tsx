@@ -26,7 +26,9 @@ export function UserLibrary() {
 
   return (
     <>
-      <UserProfileDisplay />
+      <UserProfileDisplay
+        totalPerStatus={UserGamesResponse ? totalPerStatus : undefined}
+      />
 
       {user?.id && <FavoriteGamesSection userId={user.id} editable />}
 

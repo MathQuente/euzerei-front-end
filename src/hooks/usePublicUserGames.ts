@@ -24,6 +24,7 @@ export const usePublicUserGames = (
   return {
     games: data?.games ?? EMPTY_GROUPS,
     totalPerStatus: data?.totalPerStatus ?? [],
+    hasData: Boolean(data),
     isLoading,
   }
 }

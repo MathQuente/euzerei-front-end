@@ -1,9 +1,18 @@
 const hoursFormat = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 })
 
+const hoursCompactFormat = new Intl.NumberFormat('pt-BR', {
+  maximumFractionDigits: 0,
+})
+
 export const NO_HOURS_LABEL = 'sem horas registradas'
 
 export function formatHours(hours: number) {
   return `${hoursFormat.format(hours)} h`
+}
+
+export function formatHoursCompact(hours: number) {
+  if (hours > 0 && hours < 1) return formatHours(hours)
+  return `${hoursCompactFormat.format(hours)} h`
 }
 
 export function formatHoursOrNone(hours: number | null) {
