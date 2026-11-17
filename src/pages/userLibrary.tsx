@@ -28,6 +28,11 @@ export function UserLibrary() {
     <>
       <UserProfileDisplay
         totalPerStatus={UserGamesResponse ? totalPerStatus : undefined}
+        onStatsRetry={
+          !UserGamesResponse && isErrorUserGames
+            ? () => refetchUserGames()
+            : undefined
+        }
       />
 
       {user?.id && <FavoriteGamesSection userId={user.id} editable />}

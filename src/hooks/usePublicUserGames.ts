@@ -15,7 +15,7 @@ export const usePublicUserGames = (
   userId: string | undefined,
   enabled: boolean
 ) => {
-  const { data, isLoading } = useQuery<UserGamesResponse>({
+  const { data, isLoading, isError, refetch } = useQuery<UserGamesResponse>({
     queryKey: ['publicUserGames', userId],
     queryFn: () => api.getPublicUserGames(userId ?? null),
     enabled: Boolean(userId) && enabled,
@@ -26,5 +26,7 @@ export const usePublicUserGames = (
     totalPerStatus: data?.totalPerStatus ?? [],
     hasData: Boolean(data),
     isLoading,
+    isError,
+    refetch,
   }
 }

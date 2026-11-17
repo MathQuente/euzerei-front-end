@@ -7,7 +7,9 @@ import { formatMemberSince } from '../../utils/memberSince'
 import { ProfileStats } from './profileStats'
 import { type StoreAccounts, StoreChips, hasStoreAccounts } from './storeChips'
 
-const socialButton = `min-h-11 rounded-sm text-gray-200 transition-colors hover:text-white ${focusRing}`
+const socialButton = `group inline-flex min-h-11 items-center rounded-md text-gray-200 transition-colors hover:text-white ${focusRing}`
+const socialPill =
+  'rounded-md border border-dark-border bg-dark-bg-darker/85 px-2.5 py-1 transition-colors group-hover:border-gray-500'
 
 function Count({ value, label }: { value: number; label: string }) {
   return (
@@ -27,6 +29,7 @@ interface ProfileHeaderProps {
   gamesAmount: number
   totalHoursPlayed: number
   totalPerStatus?: TotalPerStatus[]
+  onStatsRetry?: () => unknown
   hundredPercentCount?: number
   createdAt?: string | null
   followersCount: number
@@ -46,6 +49,7 @@ export function ProfileHeader({
   gamesAmount,
   totalHoursPlayed,
   totalPerStatus,
+  onStatsRetry,
   hundredPercentCount,
   createdAt,
   followersCount,
@@ -104,23 +108,27 @@ export function ProfileHeader({
               )
             )}
 
-            <div className="flex flex-wrap gap-x-[18px] text-sm">
+            <div className="flex flex-wrap gap-x-2 text-sm">
               <button
                 type="button"
                 onClick={onFollowersClick}
                 className={socialButton}
               >
-                <Count
-                  value={followersCount}
-                  label={followersCount === 1 ? 'seguidor' : 'seguidores'}
-                />
+                <span className={socialPill}>
+                  <Count
+                    value={followersCount}
+                    label={followersCount === 1 ? 'seguidor' : 'seguidores'}
+                  />
+                </span>
               </button>
               <button
                 type="button"
                 onClick={onFollowingClick}
                 className={socialButton}
               >
-                <Count value={followingCount} label="seguindo" />
+                <span className={socialPill}>
+                  <Count value={followingCount} label="seguindo" />
+                </span>
               </button>
             </div>
           </div>
@@ -146,6 +154,7 @@ export function ProfileHeader({
         gamesAmount={gamesAmount}
         totalHoursPlayed={totalHoursPlayed}
         totalPerStatus={totalPerStatus}
+        onRetry={onStatsRetry}
         hundredPercentCount={hundredPercentCount}
         queueIncludesDropped={isOwn}
       />

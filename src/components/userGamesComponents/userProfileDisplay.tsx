@@ -14,8 +14,10 @@ import { UserListModal } from '../userListModal'
 
 export function UserProfileDisplay({
   totalPerStatus,
+  onStatsRetry,
 }: {
   totalPerStatus?: TotalPerStatus[]
+  onStatsRetry?: () => unknown
 }) {
   const [followersModalOpen, setFollowersModalOpen] = useState(false)
   const [followingModalOpen, setFollowingModalOpen] = useState(false)
@@ -50,6 +52,7 @@ export function UserProfileDisplay({
         gamesAmount={profileUser.gamesAmount}
         totalHoursPlayed={profileUser.totalHoursPlayed}
         totalPerStatus={totalPerStatus}
+        onStatsRetry={onStatsRetry}
         hundredPercentCount={profileUser.hundredPercentCount}
         createdAt={profileUser.createdAt}
         isOwn

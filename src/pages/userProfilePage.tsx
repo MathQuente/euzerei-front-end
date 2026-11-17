@@ -32,6 +32,8 @@ export function UserProfilePage() {
     totalPerStatus,
     hasData: hasGamesData,
     isLoading: isLoadingGames,
+    isError: isErrorGames,
+    refetch: refetchGames,
   } = usePublicUserGames(userId, !!data)
   const hasGames = totalPerStatus.some(t => t.totalGames > 0)
   const { followers } = useFollowers(data ? userId : undefined)
@@ -96,6 +98,9 @@ export function UserProfilePage() {
         gamesAmount={user.gamesAmount ?? 0}
         totalHoursPlayed={user.totalHoursPlayed ?? 0}
         totalPerStatus={hasGamesData ? totalPerStatus : undefined}
+        onStatsRetry={
+          isErrorGames && !hasGamesData ? () => refetchGames() : undefined
+        }
         hundredPercentCount={user.hundredPercentCount}
         createdAt={user.createdAt}
         stores={user.stores}
