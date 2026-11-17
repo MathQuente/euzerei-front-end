@@ -45,7 +45,7 @@ export function UserProfilePage() {
     return (
       <>
         <BackButton className="mt-4" />
-        <div className="w-full h-[28rem] sm:h-72 rounded-lg border border-dark-border bg-dark-bg-light animate-pulse mt-2" />
+        <div className="w-full h-[34rem] sm:h-[22rem] lg:h-[24rem] rounded-lg border border-dark-border bg-dark-bg-light animate-pulse mt-2" />
       </>
     )
   }
@@ -101,7 +101,6 @@ export function UserProfilePage() {
         onStatsRetry={
           isErrorGames && !hasGamesData ? () => refetchGames() : undefined
         }
-        hundredPercentCount={user.hundredPercentCount}
         createdAt={user.createdAt}
         achievementStats={user.achievementStats}
         stores={user.stores}

@@ -1,6 +1,6 @@
-import { FaSteam } from 'react-icons/fa'
 import { useSteamImport } from '../../hooks/useSteamImport'
 import type { SteamAccount } from '../../types/user'
+import { SteamLogo } from '../steamLogo'
 import { PlatformImportSection } from './platformImportSection'
 
 const FAMILY_SHARING_NOTE =
@@ -22,7 +22,7 @@ export function SteamImportSection({
 
   return (
     <PlatformImportSection
-      icon={<FaSteam className="size-5 text-[#66c0f4]" aria-hidden="true" />}
+      icon={<SteamLogo className="size-6" />}
       label="Steam"
       connectedId={steamAccounts[0]?.steamId ?? null}
       connectedName={steamAccounts[0]?.personaName ?? null}

@@ -1,4 +1,4 @@
-import { Clock, Gamepad2, Gem, LayoutGrid, Library, Play } from 'lucide-react'
+import { Clock, Gamepad2, LayoutGrid, Library, Play } from 'lucide-react'
 import { type ReactNode, useState } from 'react'
 import { focusRing } from '../../styles/focus'
 import type { TotalPerStatus } from '../../types/games'
@@ -8,9 +8,41 @@ interface ProfileStatsProps {
   gamesAmount: number
   totalHoursPlayed: number
   totalPerStatus?: TotalPerStatus[]
-  hundredPercentCount?: number
   onRetry?: () => unknown
   queueIncludesDropped?: boolean
+  /**
+   * rail: números ao lado do avatar (telas largas); strip: faixa abaixo do
+   * cabeçalho (telas estreitas); retry: só o aviso de erro com o botão.
+   */
+  variant?: 'rail' | 'strip' | 'retry'
+}
+
+function RailCell({
+  value,
+  label,
+  spoken,
+}: {
+  value: string
+  label: string
+  spoken: string
+}) {
+  return (
+    <li className="flex flex-col items-center gap-1 border-l border-dark-border px-4 first:border-l-0 first:pl-0 last:pr-0">
+      <b
+        className="font-display text-xl font-bold leading-none tracking-tight tabular-nums text-white"
+        aria-hidden="true"
+      >
+        {value}
+      </b>
+      <span
+        className="text-[10px] uppercase tracking-widest text-gray-400"
+        aria-hidden="true"
+      >
+        {label}
+      </span>
+      <span className="sr-only">{spoken}</span>
+    </li>
+  )
 }
 
 function Cell({
@@ -25,15 +57,12 @@ function Cell({
   spoken: string
 }) {
   return (
-    <li className="flex flex-col items-center gap-0.5 bg-dark-bg px-1.5 py-3 text-center text-xs text-gray-400 lg:flex-row lg:justify-center lg:gap-2 lg:px-2 lg:py-3.5 lg:text-sm">
-      <span className="text-gray-400" aria-hidden="true">
+    <li className="flex items-center gap-1.5 text-sm text-gray-400">
+      <span className="text-primary-link" aria-hidden="true">
         {icon}
       </span>
-      <span
-        className="flex flex-col items-center gap-0.5 lg:flex-row lg:items-baseline lg:gap-1.5"
-        aria-hidden="true"
-      >
-        <b className="font-display text-base font-bold tabular-nums text-white lg:text-lg">
+      <span className="flex items-baseline gap-1" aria-hidden="true">
+        <b className="font-display font-bold tabular-nums text-white">
           {value}
         </b>
         <span>{label}</span>
@@ -43,15 +72,15 @@ function Cell({
   )
 }
 
-const iconClass = 'size-[18px]'
+const iconClass = 'size-4'
 
 export function ProfileStats({
   gamesAmount,
   totalHoursPlayed,
   totalPerStatus,
-  hundredPercentCount,
   onRetry,
   queueIncludesDropped = false,
+  variant = 'strip',
 }: ProfileStatsProps) {
   const failed = onRetry !== undefined
   const [retrying, setRetrying] = useState(false)
@@ -63,7 +92,6 @@ export function ProfileStats({
       setRetrying(false)
     }
   }
-  const hasHundred = hundredPercentCount !== undefined
   const countOf = (status: string) =>
     totalPerStatus
       ? (totalPerStatus.find(t => t.status === status)?.totalGames ?? 0)
@@ -84,11 +112,62 @@ export function ProfileStats({
       ? pending
       : pending + (countOf('DROPPED') ?? 0)
 
+  if (variant === 'rail') {
+    return (
+      <ul
+        aria-label="Estatísticas da biblioteca"
+        className="m-0 flex list-none items-end p-0"
+      >
+        <RailCell
+          value={fmt(gamesAmount)}
+          label="Jogos"
+          spoken={`${fmt(gamesAmount)} ${gamesAmount === 1 ? 'jogo' : 'jogos'}`}
+        />
+        <RailCell
+          value={fmt(played)}
+          label="Zerados"
+          spoken={spokenCount(played, 'zerado', 'zerados')}
+        />
+        <RailCell
+          value={fmt(playing)}
+          label="Jogando"
+          spoken={spokenCount(playing, 'jogando')}
+        />
+        <RailCell
+          value={fmt(backlog)}
+          label="Na fila"
+          spoken={spokenCount(backlog, 'na fila')}
+        />
+        <RailCell
+          value={formatHoursCompact(totalHoursPlayed)}
+          label="Horas"
+          spoken={`${formatHoursSpoken(totalHoursPlayed)} jogadas`}
+        />
+      </ul>
+    )
+  }
+
+  const retryBlock = onRetry && (
+    <div className="flex flex-wrap items-center gap-x-3 border-t border-dark-border px-4 py-1 text-sm text-gray-300 sm:px-6">
+      <output>Não foi possível carregar zerados, jogando e na fila.</output>
+      <button
+        type="button"
+        onClick={retry}
+        disabled={retrying}
+        className={`min-h-11 rounded-sm px-1 text-primary-link underline underline-offset-4 transition-colors hover:text-white disabled:opacity-50 ${focusRing}`}
+      >
+        {retrying ? 'Tentando…' : 'Tentar de novo'}
+      </button>
+    </div>
+  )
+
+  if (variant === 'retry') return <>{retryBlock}</>
+
   return (
     <>
       <ul
         aria-label="Estatísticas da biblioteca"
-        className={`m-0 grid list-none grid-cols-3 gap-px border-t border-dark-border bg-dark-border p-0 ${hasHundred ? 'sm:grid-cols-6' : 'sm:grid-cols-5 max-sm:[&>li:last-child]:col-span-2'}`}
+        className="m-0 flex list-none flex-wrap items-center gap-x-4 gap-y-2 border-t border-dark-border px-4 py-3 sm:px-6"
       >
         <Cell
           icon={<LayoutGrid className={iconClass} />}
@@ -102,14 +181,6 @@ export function ProfileStats({
           label="Zerados"
           spoken={spokenCount(played, 'zerado', 'zerados')}
         />
-        {hasHundred && (
-          <Cell
-            icon={<Gem className={iconClass} />}
-            value={fmt(hundredPercentCount)}
-            label="A 100%"
-            spoken={`${fmt(hundredPercentCount)} ${hundredPercentCount === 1 ? 'jogo' : 'jogos'} a 100%`}
-          />
-        )}
         <Cell
           icon={<Play className={iconClass} />}
           value={fmt(playing)}
@@ -129,19 +200,7 @@ export function ProfileStats({
           spoken={`${formatHoursSpoken(totalHoursPlayed)} jogadas`}
         />
       </ul>
-      {onRetry && (
-        <div className="flex flex-wrap items-center gap-x-3 border-t border-dark-border bg-dark-bg px-4 py-1 text-sm text-gray-300 sm:px-6">
-          <output>Não foi possível carregar zerados, jogando e na fila.</output>
-          <button
-            type="button"
-            onClick={retry}
-            disabled={retrying}
-            className={`min-h-11 rounded-sm px-1 text-primary-link underline underline-offset-4 transition-colors hover:text-white disabled:opacity-50 ${focusRing}`}
-          >
-            {retrying ? 'Tentando…' : 'Tentar de novo'}
-          </button>
-        </div>
-      )}
+      {retryBlock}
     </>
   )
 }

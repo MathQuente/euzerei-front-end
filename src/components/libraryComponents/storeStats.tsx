@@ -1,10 +1,12 @@
-import { Trophy } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { focusRing } from '../../styles/focus'
 import type { AchievementStats } from '../../types/user'
+import { StoreBrandIcon } from '../storeBrand'
 import type { StoreAccounts } from './storeChips'
 
 type StoreKey = keyof AchievementStats
+
+const BRAND = { steam: 'steam', xbox: 'xbox', psn: 'playstation' } as const
 
 interface StoreCell {
   key: StoreKey
@@ -66,15 +68,6 @@ const STORE_ACCOUNT_KEY = {
   psn: 'playstation',
 } as const satisfies Record<StoreKey, keyof StoreAccounts>
 
-const COLUMNS = {
-  1: 'sm:grid-cols-1',
-  2: 'sm:grid-cols-2',
-  3: 'sm:grid-cols-3',
-} as const
-
-const cellClass =
-  'flex items-center gap-2.5 bg-dark-bg px-4 py-3 text-sm text-gray-400 sm:px-6'
-
 export function StoreStats({
   stats,
   stores,
@@ -103,20 +96,16 @@ export function StoreStats({
       {cells.length > 0 && (
         <ul
           aria-label="Conquistas por loja"
-          className={`m-0 grid list-none grid-cols-1 gap-px border-t border-dark-border bg-dark-border p-0 ${COLUMNS[cells.length as 1 | 2 | 3]}`}
+          className="m-0 flex list-none flex-wrap items-center gap-x-4 gap-y-2 border-t border-dark-border px-4 py-3 text-sm text-gray-400 sm:px-6"
         >
           {cells.map(cell => (
-            <li key={cell.key} className={cellClass}>
-              <Trophy
-                className="size-[18px] flex-none text-gray-400"
-                aria-hidden="true"
-              />
+            <li key={cell.key} className="flex items-center gap-1.5">
+              <StoreBrandIcon store={BRAND[cell.key]} className="size-4" />
               <span
-                className="flex min-w-0 flex-wrap items-baseline gap-x-1.5"
+                className="flex flex-wrap items-baseline gap-x-1"
                 aria-hidden="true"
               >
-                <span className="text-gray-300">{cell.name}</span>
-                <b className="font-display text-base font-bold tabular-nums text-white">
+                <b className="font-display font-bold tabular-nums text-white">
                   {cell.value}
                 </b>
                 <span>{cell.unit}</span>
@@ -128,7 +117,7 @@ export function StoreStats({
         </ul>
       )}
       {missing.length > 0 && (
-        <p className="m-0 flex flex-wrap items-center gap-x-2 border-t border-dark-border bg-dark-bg px-4 py-1 text-sm text-gray-400 sm:px-6">
+        <p className="m-0 flex flex-wrap items-center gap-x-2 border-t border-dark-border px-4 py-1 text-sm text-gray-400 sm:px-6">
           <span>
             Conquistas de {joinNames(missing.map(m => m.label))} aparecem depois
             de importar de novo.

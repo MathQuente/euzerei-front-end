@@ -29,7 +29,7 @@ export function UserProfileDisplay({
 
   if (isLoading) {
     return (
-      <div className="h-[28rem] w-full animate-pulse rounded-lg bg-dark-bg-light sm:h-72" />
+      <div className="h-[34rem] w-full animate-pulse rounded-lg bg-dark-bg-light sm:h-[22rem] lg:h-[24rem]" />
     )
   }
 
@@ -53,7 +53,6 @@ export function UserProfileDisplay({
         totalHoursPlayed={profileUser.totalHoursPlayed}
         totalPerStatus={totalPerStatus}
         onStatsRetry={onStatsRetry}
-        hundredPercentCount={profileUser.hundredPercentCount}
         createdAt={profileUser.createdAt}
         achievementStats={profileUser.achievementStats}
         isOwn

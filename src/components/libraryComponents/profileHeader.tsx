@@ -7,20 +7,21 @@ import type { AchievementStats } from '../../types/user'
 import { formatMemberSince } from '../../utils/memberSince'
 import { ProfileStats } from './profileStats'
 import { type StoreAccounts, StoreChips, hasStoreAccounts } from './storeChips'
-import { StoreStats } from './storeStats'
 
-const socialButton = `group inline-flex min-h-11 items-center rounded-md text-gray-200 transition-colors hover:text-white ${focusRing}`
-const socialPill =
-  'rounded-md border border-dark-border bg-dark-bg-darker/85 px-2.5 py-1 transition-colors group-hover:border-gray-500'
+// O texto sobe para cima do banner: a sombra garante a leitura em qualquer imagem.
+const onBanner =
+  '[text-shadow:0_1px_2px_rgb(0_0_0/0.85),0_0_10px_rgb(0_0_0/0.55)]'
+
+const socialButton = `inline-flex min-h-11 items-center rounded-sm text-gray-400 transition-colors hover:text-gray-200 ${focusRing}`
 
 function Count({ value, label }: { value: number; label: string }) {
   return (
-    <>
+    <span>
       <b className="font-semibold tabular-nums text-white">
         {value.toLocaleString('pt-BR')}
       </b>{' '}
       {label}
-    </>
+    </span>
   )
 }
 
@@ -32,7 +33,6 @@ interface ProfileHeaderProps {
   totalHoursPlayed: number
   totalPerStatus?: TotalPerStatus[]
   onStatsRetry?: () => unknown
-  hundredPercentCount?: number
   createdAt?: string | null
   achievementStats?: AchievementStats
   followersCount: number
@@ -53,7 +53,6 @@ export function ProfileHeader({
   totalHoursPlayed,
   totalPerStatus,
   onStatsRetry,
-  hundredPercentCount,
   createdAt,
   achievementStats,
   followersCount,
@@ -65,11 +64,18 @@ export function ProfileHeader({
   isOwn = false,
 }: ProfileHeaderProps) {
   const memberSince = createdAt ? formatMemberSince(createdAt) : null
+  const statsProps = {
+    gamesAmount,
+    totalHoursPlayed,
+    totalPerStatus,
+    onRetry: onStatsRetry,
+    queueIncludesDropped: isOwn,
+  }
   return (
-    <header className="overflow-hidden rounded-lg border border-dark-border">
-      <div className="relative isolate px-4 pb-4 pt-5 sm:px-6 sm:pb-6 sm:pt-7">
+    <header className="overflow-hidden rounded-lg border border-dark-border bg-dark-bg">
+      <div className="relative">
         <div
-          className="absolute inset-0 -z-20 bg-dark-bg-light"
+          className="h-40 bg-dark-bg-light sm:h-56 lg:h-64"
           aria-hidden="true"
         >
           {bannerUrl && (
@@ -79,90 +85,86 @@ export function ProfileHeader({
               className="h-full w-full object-cover"
             />
           )}
-        </div>
-        {bannerUrl && (
           <div
-            className="absolute inset-0 -z-10 bg-dark-bg-darker/15"
-            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-4/5"
+            style={{
+              background:
+                'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.67) 12%, rgba(0,0,0,0.5) 28%, rgba(0,0,0,0.32) 45%, rgba(0,0,0,0.16) 62%, rgba(0,0,0,0.06) 80%, rgba(0,0,0,0) 100%)',
+            }}
           />
-        )}
-
-        <div className="grid grid-cols-[auto_1fr] items-start gap-x-4 gap-y-3 sm:grid-cols-[auto_1fr_auto] sm:gap-x-6">
-          <img
-            src={profilePicture || userProfilePictureDefault}
-            alt={`Foto de perfil de ${userName}`}
-            className="size-[72px] flex-none rounded-full border-[3px] border-dark-bg bg-dark-bg object-cover sm:size-24"
-          />
-
-          <div className="flex min-w-0 flex-col gap-1.5">
-            <h1 className="break-words font-display text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
-              {userName}
-            </h1>
-
-            {hasStoreAccounts(stores) ? (
-              <StoreChips stores={stores} />
-            ) : (
-              isOwn && (
-                <Link
-                  to="/configuracoes/importar"
-                  className={`inline-flex min-h-11 items-center self-start rounded-sm text-sm text-primary-link underline underline-offset-4 transition-colors hover:text-white ${focusRing}`}
-                >
-                  Conectar Steam, Xbox ou PlayStation
-                </Link>
-              )
+        </div>
+        {/* O nome pousa na base do banner, alinhado à coluna ao lado do avatar:
+            px-4 + avatar 5rem + gap-4 (mobile); px-6 + avatar 6rem + gap-5 (sm). */}
+        <h1
+          className={`absolute bottom-3 left-[6rem] right-4 break-words font-display text-2xl font-extrabold leading-tight tracking-tight text-white sm:left-[8.75rem] sm:right-[17rem] sm:text-3xl ${onBanner}`}
+        >
+          {userName}
+        </h1>
+        {(actions || memberSince) && (
+          <div
+            className={`absolute right-4 top-3 flex flex-col items-end gap-2 sm:bottom-3 sm:right-6 sm:top-auto sm:flex-row-reverse sm:items-center sm:gap-3`}
+          >
+            {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
+            {memberSince && (
+              <p className={`text-sm text-gray-200 ${onBanner}`}>
+                Desde {memberSince}
+              </p>
             )}
-
-            <div className="flex flex-wrap gap-x-2 text-sm">
-              <button
-                type="button"
-                onClick={onFollowersClick}
-                className={socialButton}
-              >
-                <span className={socialPill}>
-                  <Count
-                    value={followersCount}
-                    label={followersCount === 1 ? 'seguidor' : 'seguidores'}
-                  />
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={onFollowingClick}
-                className={socialButton}
-              >
-                <span className={socialPill}>
-                  <Count value={followingCount} label="seguindo" />
-                </span>
-              </button>
-            </div>
           </div>
+        )}
+      </div>
 
-          {(actions || memberSince) && (
-            <div className="col-span-2 flex flex-col items-start gap-2 sm:col-span-1 sm:items-end">
-              {actions && (
-                <div className="flex flex-wrap gap-2 sm:justify-end">
-                  {actions}
-                </div>
-              )}
-              {memberSince && (
-                <p className="inline-flex min-h-7 items-center rounded-md border border-dark-border bg-dark-bg-darker/85 px-2 text-sm text-gray-300">
-                  Desde {memberSince}
-                </p>
-              )}
-            </div>
+      <div className="flex flex-wrap items-start gap-x-4 gap-y-1 px-4 pb-2 sm:flex-nowrap sm:gap-x-5 sm:px-6">
+        <img
+          src={profilePicture || userProfilePictureDefault}
+          alt={`Foto de perfil de ${userName}`}
+          className="relative -mt-11 size-20 flex-none rounded-full border-4 border-dark-bg bg-dark-bg object-cover sm:-mt-[3.25rem] sm:size-24"
+        />
+
+        <div className="flex min-w-0 flex-1 basis-40 flex-wrap items-center gap-x-4 gap-y-0 pt-1">
+          {hasStoreAccounts(stores) ? (
+            <StoreChips stores={stores} />
+          ) : (
+            isOwn && (
+              <Link
+                to="/configuracoes/importar"
+                className={`inline-flex min-h-11 items-center rounded-sm text-sm text-primary-link underline underline-offset-4 transition-colors hover:text-white ${focusRing}`}
+              >
+                Conectar Steam, Xbox ou PlayStation
+              </Link>
+            )
           )}
+
+          <div className="flex flex-wrap gap-x-4 text-sm text-gray-400">
+            <button
+              type="button"
+              onClick={onFollowersClick}
+              className={socialButton}
+            >
+              <Count
+                value={followersCount}
+                label={followersCount === 1 ? 'seguidor' : 'seguidores'}
+              />
+            </button>
+            <button
+              type="button"
+              onClick={onFollowingClick}
+              className={socialButton}
+            >
+              <Count value={followingCount} label="seguindo" />
+            </button>
+          </div>
+        </div>
+
+        <div className="hidden pt-3 lg:block">
+          <ProfileStats {...statsProps} variant="rail" />
         </div>
       </div>
 
-      <ProfileStats
-        gamesAmount={gamesAmount}
-        totalHoursPlayed={totalHoursPlayed}
-        totalPerStatus={totalPerStatus}
-        onRetry={onStatsRetry}
-        hundredPercentCount={hundredPercentCount}
-        queueIncludesDropped={isOwn}
-      />
-      <StoreStats stats={achievementStats} stores={stores} isOwn={isOwn} />
+      <div className="lg:hidden">
+        <ProfileStats {...statsProps} variant="strip" />
+      </div>
+      <ProfileStats {...statsProps} variant="retry" />
     </header>
   )
 }
