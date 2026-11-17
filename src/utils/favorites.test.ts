@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  canAddFavorite,
   clearMainIfRemoved,
   compactFavorites,
   isFavoritesDirty,
@@ -7,6 +8,8 @@ import {
   setFavoriteSlot,
   toDraft,
   toggleMain,
+  withFavorite,
+  withoutFavorite,
 } from './favorites'
 
 describe('toDraft', () => {
@@ -103,5 +106,51 @@ describe('the crowned favorite', () => {
     expect(isFavoritesDirty([1, 2, null, null], [1, 2], 2, 2)).toBe(false)
     expect(isFavoritesDirty([1, 2, null, null], [1, 2], 1, 2)).toBe(true)
     expect(isFavoritesDirty([1, 2, null, null], [1, 2], null, 2)).toBe(true)
+  })
+})
+
+describe('turning a favorite on and off from the game page', () => {
+  it('adds the game at the end, keeping the crown of another game', () => {
+    expect(withFavorite({ ids: [1, 2], main: 2 }, 9)).toEqual({
+      ids: [1, 2, 9],
+      main: 2,
+    })
+    expect(withFavorite({ ids: [], main: null }, 9)).toEqual({
+      ids: [9],
+      main: null,
+    })
+  })
+
+  it('does not add when the four slots are full or the game is already there', () => {
+    const full = { ids: [1, 2, 3, 4], main: 3 }
+    expect(canAddFavorite(full, 9)).toBe(false)
+    expect(withFavorite(full, 9)).toBe(full)
+    const some = { ids: [1, 2], main: null }
+    expect(canAddFavorite(some, 2)).toBe(false)
+    expect(withFavorite(some, 2)).toBe(some)
+    expect(canAddFavorite(some, 9)).toBe(true)
+  })
+
+  it('removes from the middle and closes the gap', () => {
+    expect(withoutFavorite({ ids: [1, 2, 3], main: 3 }, 2)).toEqual({
+      ids: [1, 3],
+      main: 3,
+    })
+  })
+
+  it('takes the crown away only when the removed game had it', () => {
+    expect(withoutFavorite({ ids: [1, 2], main: 2 }, 2)).toEqual({
+      ids: [1],
+      main: null,
+    })
+    expect(withoutFavorite({ ids: [1, 2], main: 1 }, 2)).toEqual({
+      ids: [1],
+      main: 1,
+    })
+  })
+
+  it('leaves the list alone when the game is not in it', () => {
+    const list = { ids: [1, 2], main: 1 }
+    expect(withoutFavorite(list, 9)).toBe(list)
   })
 })

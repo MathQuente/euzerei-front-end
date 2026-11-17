@@ -38,6 +38,7 @@ export const ERROR_MESSAGES = {
   signInFailed: cannot('entrar'),
   changePassword: cannot('salvar a senha'),
   saveFavorites: cannot('salvar os favoritos'),
+  toggleFavorite: cannot('atualizar os favoritos'),
   linkProvider: (provider: string) => cannot(`vincular o ${provider}`),
   unlinkProvider: (provider: string) => cannot(`desvincular o ${provider}`),
   requestEmailChange: cannot('pedir a troca de e-mail'),

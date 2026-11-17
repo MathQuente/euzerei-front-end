@@ -4,6 +4,7 @@ import { useGameStatus } from '../../hooks/useGameStatus'
 import type { GameFormProps } from '../../interfaces/games'
 import { endlessControl } from '../../utils/endlessAvailability'
 import { EndlessToggle } from '../endlessToggle'
+import { FavoriteToggle } from '../favoriteToggle'
 import { GamePlatformsSection } from '../gamePlatformsSection'
 import { HundredPercentToggle } from '../hundredPercentToggle'
 import { LibraryRecordFields } from '../libraryRecordFields'
@@ -49,6 +50,8 @@ export function GameForm({ game }: GameFormProps) {
       {hasStatus(STATUS.PLAYED) && (
         <HundredPercentToggle igdbId={game.igdbId.toString()} />
       )}
+
+      <FavoriteToggle igdbId={game.igdbId} gameName={game.name} />
 
       {canHavePlatforms && (
         <GamePlatformsSection

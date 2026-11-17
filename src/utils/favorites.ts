@@ -56,3 +56,28 @@ export function setFavoriteSlot(
   next[slot] = igdbId
   return next
 }
+
+export interface FavoriteList {
+  ids: number[]
+  main: number | null
+}
+
+export function canAddFavorite(list: FavoriteList, igdbId: number) {
+  return list.ids.length < FAVORITE_SLOTS && !list.ids.includes(igdbId)
+}
+
+export function withFavorite(list: FavoriteList, igdbId: number): FavoriteList {
+  if (!canAddFavorite(list, igdbId)) return list
+  return { ids: [...list.ids, igdbId], main: list.main }
+}
+
+export function withoutFavorite(
+  list: FavoriteList,
+  igdbId: number
+): FavoriteList {
+  if (!list.ids.includes(igdbId)) return list
+  return {
+    ids: list.ids.filter(id => id !== igdbId),
+    main: list.main === igdbId ? null : list.main,
+  }
+}
