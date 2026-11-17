@@ -96,6 +96,9 @@ export function UserProfilePage() {
         gamesAmount={user.gamesAmount ?? 0}
         totalHoursPlayed={user.totalHoursPlayed ?? 0}
         totalPerStatus={hasGamesData ? totalPerStatus : undefined}
+        hundredPercentCount={user.hundredPercentCount}
+        createdAt={user.createdAt}
+        stores={user.stores}
         followersCount={user.followersCount}
         followingCount={user.followingCount}
         onFollowersClick={() => setFollowersModalOpen(true)}

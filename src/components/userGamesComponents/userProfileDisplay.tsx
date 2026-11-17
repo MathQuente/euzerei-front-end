@@ -50,6 +50,8 @@ export function UserProfileDisplay({
         gamesAmount={profileUser.gamesAmount}
         totalHoursPlayed={profileUser.totalHoursPlayed}
         totalPerStatus={totalPerStatus}
+        hundredPercentCount={profileUser.hundredPercentCount}
+        createdAt={profileUser.createdAt}
         isOwn
         stores={{
           steam: (profileUser.steamAccounts ?? []).map(a => a.personaName),

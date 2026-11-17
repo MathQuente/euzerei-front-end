@@ -34,6 +34,8 @@ export interface User {
   userBanner: string
   gamesAmount: number
   totalHoursPlayed: number
+  hundredPercentCount?: number
+  createdAt?: string
   steamAccounts: SteamAccount[]
   psnAccounts: PsnAccount[]
   xboxAccounts: XboxAccount[]
@@ -48,6 +50,13 @@ export interface PublicUserProfile {
   userBanner: string | null
   gamesAmount: number
   totalHoursPlayed: number
+  hundredPercentCount?: number
+  createdAt?: string
+  stores?: {
+    steam: string[]
+    playstation: string[]
+    xbox: string[]
+  }
   followersCount: number
   followingCount: number
 }

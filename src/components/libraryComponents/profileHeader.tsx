@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import userProfilePictureDefault from '../../assets/Default_pfp.svg.png'
 import { focusRing } from '../../styles/focus'
 import type { TotalPerStatus } from '../../types/games'
+import { formatMemberSince } from '../../utils/memberSince'
 import { ProfileStats } from './profileStats'
 import { type StoreAccounts, StoreChips, hasStoreAccounts } from './storeChips'
 
@@ -26,12 +27,14 @@ interface ProfileHeaderProps {
   gamesAmount: number
   totalHoursPlayed: number
   totalPerStatus?: TotalPerStatus[]
+  hundredPercentCount?: number
+  createdAt?: string | null
   followersCount: number
   followingCount: number
   onFollowersClick: () => void
   onFollowingClick: () => void
   actions?: ReactNode
-  /** Contas vinculadas por loja; só usado no perfil próprio. */
+  /** Contas vinculadas por loja (nomes de exibição). */
   stores?: StoreAccounts
   isOwn?: boolean
 }
@@ -43,6 +46,8 @@ export function ProfileHeader({
   gamesAmount,
   totalHoursPlayed,
   totalPerStatus,
+  hundredPercentCount,
+  createdAt,
   followersCount,
   followingCount,
   onFollowersClick,
@@ -51,6 +56,7 @@ export function ProfileHeader({
   stores,
   isOwn = false,
 }: ProfileHeaderProps) {
+  const memberSince = createdAt ? formatMemberSince(createdAt) : null
   return (
     <header className="overflow-hidden rounded-lg border border-dark-border">
       <div className="relative isolate px-4 pb-4 pt-5 sm:px-6 sm:pb-6 sm:pt-7">
@@ -85,17 +91,18 @@ export function ProfileHeader({
               {userName}
             </h1>
 
-            {isOwn &&
-              (hasStoreAccounts(stores) ? (
-                <StoreChips stores={stores} />
-              ) : (
+            {hasStoreAccounts(stores) ? (
+              <StoreChips stores={stores} />
+            ) : (
+              isOwn && (
                 <Link
                   to="/configuracoes/importar"
                   className={`inline-flex min-h-11 items-center self-start rounded-sm text-sm text-primary-link underline underline-offset-4 transition-colors hover:text-white ${focusRing}`}
                 >
                   Conectar Steam, Xbox ou PlayStation
                 </Link>
-              ))}
+              )
+            )}
 
             <div className="flex flex-wrap gap-x-[18px] text-sm">
               <button
@@ -118,9 +125,18 @@ export function ProfileHeader({
             </div>
           </div>
 
-          {actions && (
-            <div className="col-span-2 flex flex-wrap items-start gap-2 sm:col-span-1 sm:justify-end">
-              {actions}
+          {(actions || memberSince) && (
+            <div className="col-span-2 flex flex-col items-start gap-2 sm:col-span-1 sm:items-end">
+              {actions && (
+                <div className="flex flex-wrap gap-2 sm:justify-end">
+                  {actions}
+                </div>
+              )}
+              {memberSince && (
+                <p className="inline-flex min-h-7 items-center rounded-md border border-dark-border bg-dark-bg-darker/85 px-2 text-sm text-gray-300">
+                  Desde {memberSince}
+                </p>
+              )}
             </div>
           )}
         </div>
@@ -130,6 +146,7 @@ export function ProfileHeader({
         gamesAmount={gamesAmount}
         totalHoursPlayed={totalHoursPlayed}
         totalPerStatus={totalPerStatus}
+        hundredPercentCount={hundredPercentCount}
         queueIncludesDropped={isOwn}
       />
     </header>
