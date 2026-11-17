@@ -4,6 +4,7 @@ import type { SignInProvider } from '../../hooks/useApi'
 import { PROVIDER_LABEL, useProviderLink } from '../../hooks/useProviderLink'
 import { useReauth } from '../../hooks/useReauth'
 import { fieldFocus, fieldFocusError } from '../../styles/focus'
+import { isReauthRequired } from '../../utils/isReauthRequired'
 import { Button } from '../button'
 import { ConfirmDialog } from '../confirmDialog'
 
@@ -138,7 +139,7 @@ function ProviderRow({
         </div>
       )}
 
-      {errorMessage && (
+      {errorMessage && !(needsPassword && confirming) && (
         <output className="block text-sm text-red-300">{errorMessage}</output>
       )}
 
@@ -164,8 +165,9 @@ function ProviderRow({
               setPassword('')
               setConfirming(false)
             },
-            onError: () => {
-              if (!needsPassword) setConfirming(false)
+            onError: error => {
+              if (!needsPassword || isReauthRequired(error))
+                setConfirming(false)
             },
           })
         }}
