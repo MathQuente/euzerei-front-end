@@ -4,6 +4,7 @@ import userProfilePictureDefault from '../../assets/Default_pfp.svg.png'
 import { BANNER_FADE } from '../../styles/bannerFade'
 import { focusRing } from '../../styles/focus'
 import type { TotalPerStatus } from '../../types/games'
+import type { AchievementStats } from '../../types/user'
 import { formatMemberSince } from '../../utils/memberSince'
 import { ProfileStats } from './profileStats'
 import { type StoreAccounts, StoreChips, hasStoreAccounts } from './storeChips'
@@ -41,6 +42,8 @@ interface ProfileHeaderProps {
   actions?: ReactNode
   /** Contas vinculadas por loja (nomes de exibição). */
   stores?: StoreAccounts
+  /** Conquistas por loja, mostradas ao lado de cada ladrilho. */
+  achievementStats?: AchievementStats
   isOwn?: boolean
 }
 
@@ -59,6 +62,7 @@ export function ProfileHeader({
   onFollowingClick,
   actions,
   stores,
+  achievementStats,
   isOwn = false,
 }: ProfileHeaderProps) {
   const memberSince = createdAt ? formatMemberSince(createdAt) : null
@@ -118,7 +122,11 @@ export function ProfileHeader({
 
         <div className="flex min-w-0 flex-1 basis-40 flex-wrap items-center gap-x-4 gap-y-0 pt-1">
           {hasStoreAccounts(stores) ? (
-            <StoreChips stores={stores} />
+            <StoreChips
+              stores={stores}
+              achievementStats={achievementStats}
+              isOwn={isOwn}
+            />
           ) : (
             isOwn && (
               <Link

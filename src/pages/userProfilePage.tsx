@@ -103,6 +103,7 @@ export function UserProfilePage() {
         }
         createdAt={user.createdAt}
         stores={user.stores}
+        achievementStats={user.achievementStats}
         followersCount={user.followersCount}
         followingCount={user.followingCount}
         onFollowersClick={() => setFollowersModalOpen(true)}
