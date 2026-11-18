@@ -1,25 +1,18 @@
-import { type ChangeEvent, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { INFO_MESSAGES } from '../constants/messages'
 import type { GameListProps, SortField, SortOrder } from '../interfaces/games'
 import type { GameStatusEnum } from '../types/games'
 import { pushListState } from '../utils/listHistory'
+import { SORT_FIELDS } from '../utils/listSort'
 import { notify } from '../utils/notify'
 import { parsePage } from '../utils/parsePage'
 import { GameGridSkeleton } from './gameGridSkeleton'
 import { GamesGrid } from './gamesComponents/gamesGrid'
+import { ListToolbar } from './listToolbar'
 import { Pagination } from './pagination'
-import { SortControls } from './sorting'
+import { StatusMessage } from './statusMessage'
 
 const CHANGING_PAGE_DELAY_MS = 200
-
-const SORT_FIELDS: SortField[] = [
-  'name',
-  'releaseDate',
-  'rating',
-  'hoursPlayed',
-  'completedAt',
-  'dateAdded',
-]
 
 export function GameListPage({
   games,
@@ -37,6 +30,11 @@ export function GameListPage({
   isUserLibrary,
   emptyState,
   isChangingPage = false,
+  sortFields,
+  search = '',
+  setSearch,
+  searchPlaceholder,
+  statusTabs,
 }: GameListProps) {
   const gamesArray = games.games
 
@@ -60,6 +58,15 @@ export function GameListPage({
   const safePage =
     typeof page === 'number' && !Number.isNaN(page) && page > 0 ? page : 1
   const totalPages = Math.ceil(safeTotal / pageSize) || 1
+  const listEmptyState = search ? (
+    <StatusMessage
+      variant="empty"
+      title="Nenhum jogo encontrado"
+      description={`Nada com "${search}". Tente outro termo.`}
+    />
+  ) : (
+    emptyState
+  )
   const isAwaitingPage = gamesArray.length === 0 && safeTotal > 0
 
   useEffect(() => {
@@ -89,8 +96,9 @@ export function GameListPage({
       const urlOrder = params.get('sortOrder')
 
       setPage(parsePage(params.get('page')))
+      setSearch?.(params.get('search') ?? '')
       setSortField(
-        urlField && SORT_FIELDS.includes(urlField)
+        urlField && (sortFields ?? SORT_FIELDS).includes(urlField)
           ? urlField
           : fallbackSort.current.field
       )
@@ -107,7 +115,7 @@ export function GameListPage({
       window.removeEventListener('popstate', syncFromUrl)
       window.history.scrollRestoration = previousRestoration
     }
-  }, [setPage, setSortField, setSortOrder])
+  }, [setPage, setSortField, setSortOrder, setSearch, sortFields])
 
   function setCurrentPage(p: number) {
     const url = new URL(window.location.toString())
@@ -117,38 +125,49 @@ export function GameListPage({
     window.scrollTo(0, 0)
   }
 
-  function onSortFieldChange(e: ChangeEvent<HTMLSelectElement>) {
-    const value = e.target.value as SortField
+  function onSortChange(field: SortField, order: SortOrder) {
     const url = new URL(window.location.toString())
-    url.searchParams.set('sortField', value)
-    pushListState(url)
-    setSortField(value)
-  }
-
-  function onSortOrderChange(order: SortOrder) {
-    const url = new URL(window.location.toString())
+    url.searchParams.set('sortField', field)
     url.searchParams.set('sortOrder', order)
     pushListState(url)
+    setSortField(field)
     setSortOrder(order)
   }
 
-  function onSortFilterField(e: ChangeEvent<HTMLSelectElement>) {
-    const value = e.target.value as GameStatusEnum
+  function onSearchChange(value: string) {
+    const url = new URL(window.location.toString())
+    const hadSearch = url.searchParams.has('search')
+    if (value) url.searchParams.set('search', value)
+    else url.searchParams.delete('search')
+    url.searchParams.delete('page')
+    if (hadSearch && value) {
+      window.history.replaceState(window.history.state, '', url)
+    } else {
+      pushListState(url)
+    }
+    setSearch?.(value)
+    setPage(1)
+  }
+
+  function onStatusChange(value: GameStatusEnum) {
     if (onFilterChange) onFilterChange(value)
     else setFilterField?.(value)
   }
 
   return (
     <div className="flex flex-col gap-4 w-full mt-4">
-      <SortControls
-        onSortFieldChange={onSortFieldChange}
-        onSortOrderChange={onSortOrderChange}
-        onSortFilterField={onSortFilterField}
-        filterField={filterField}
+      <ListToolbar
+        totalGames={safeTotal}
         sortField={sortField}
         sortOrder={sortOrder}
-        isUserLibrary={isUserLibrary}
-        totalGames={safeTotal}
+        sortFields={sortFields}
+        onSortChange={sortFields ? onSortChange : undefined}
+        search={search}
+        onSearchChange={setSearch ? onSearchChange : undefined}
+        searchPlaceholder={searchPlaceholder}
+        statusTabs={isUserLibrary ? statusTabs : undefined}
+        currentStatus={filterField}
+        onStatusChange={onStatusChange}
       />
 
       {isAwaitingPage ? (
@@ -178,7 +197,7 @@ export function GameListPage({
                 : 'transition-opacity duration-200'
             }
           >
-            <GamesGrid games={gamesArray} emptyState={emptyState} />
+            <GamesGrid games={gamesArray} emptyState={listEmptyState} />
           </div>
         </div>
       )}

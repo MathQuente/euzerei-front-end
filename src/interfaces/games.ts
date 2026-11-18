@@ -1,4 +1,4 @@
-import type { ChangeEvent, ComponentProps, ReactNode } from 'react'
+import type { ComponentProps, ReactNode } from 'react'
 import type {
   Game,
   GameBase,
@@ -58,10 +58,15 @@ export interface GameListProps {
   filterField?: GameStatusEnum
   setFilterField?: (filterField: GameStatusEnum) => void
   currentStatus?: string
-  onFilterChange?: (filter: GameStatusEnum | '') => void
+  onFilterChange?: (filter: GameStatusEnum) => void
   isUserLibrary?: boolean
   emptyState?: ReactNode
   isChangingPage?: boolean
+  sortFields?: SortField[]
+  search?: string
+  setSearch?: (search: string) => void
+  searchPlaceholder?: string
+  statusTabs?: StatusTab[]
 }
 
 export interface GameListSectionProps extends ComponentProps<'div'> {
@@ -111,13 +116,23 @@ export interface PlayerInfosProps {
   GameResponse: GameResponse
 }
 
-export interface SortControlsProps {
+export interface StatusTab {
+  value: GameStatusEnum
+  label: string
+  href: string
+  count?: number
+}
+
+export interface ListToolbarProps {
+  totalGames: number
   sortField: SortField
   sortOrder: SortOrder
-  filterField: GameStatusEnum | undefined
-  onSortFieldChange: (event: ChangeEvent<HTMLSelectElement>) => void
-  onSortOrderChange: (order: SortOrder) => void
-  onSortFilterField: (event: ChangeEvent<HTMLSelectElement>) => void
-  totalGames: number
-  isUserLibrary?: boolean
+  sortFields?: SortField[]
+  onSortChange?: (field: SortField, order: SortOrder) => void
+  search?: string
+  onSearchChange?: (value: string) => void
+  searchPlaceholder?: string
+  statusTabs?: StatusTab[]
+  currentStatus?: GameStatusEnum
+  onStatusChange?: (value: GameStatusEnum) => void
 }

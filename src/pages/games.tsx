@@ -4,6 +4,7 @@ import { GameListPage } from '../components/gameListPage'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useGames } from '../hooks/useGames'
 import type { SortField, SortOrder } from '../interfaces/games'
+import { sortFieldsFor } from '../utils/listSort'
 import { parsePage } from '../utils/parsePage'
 
 export function Games() {
@@ -22,17 +23,18 @@ export function Games() {
   const [sortField, setSortField] = useState<SortField>(() => {
     const url = new URL(window.location.toString())
     const v = url.searchParams.get('sortField')
-    return v === 'releaseDate'
-      ? 'releaseDate'
-      : v === 'rating'
-        ? 'rating'
-        : 'name'
+    return sortFieldsFor('games').find(field => field === v) ?? 'name'
+  })
+
+  const [search, setSearch] = useState(() => {
+    const url = new URL(window.location.toString())
+    return url.searchParams.get('search') ?? ''
   })
 
   const LIMIT = 48
   const { GamesResponse, isChangingPage } = useGames(
     page,
-    '',
+    search,
     sortField,
     sortOrder,
     LIMIT,
@@ -62,6 +64,10 @@ export function Games() {
         sortField={sortField}
         setSortField={setSortField}
         defaultSort={{ field: 'name', order: 'asc' }}
+        sortFields={sortFieldsFor('games')}
+        search={search}
+        setSearch={setSearch}
+        searchPlaceholder="Buscar jogos"
       />
     </>
   )

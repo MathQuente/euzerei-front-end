@@ -34,6 +34,7 @@ export const useUserGames = (
   const {
     data: UserGamesResponse,
     isLoading: isLoadingUserGames,
+    isPlaceholderData: isChangingUserGames,
     isError: isErrorUserGames,
     refetch: refetchUserGames,
   } = useQuery<UserGamesResponse>({
@@ -65,6 +66,7 @@ export const useUserGames = (
   return {
     UserGamesResponse,
     isLoadingUserGames,
+    isChangingUserGames,
     isErrorUserGames,
     refetchUserGames,
     GamesToDisplay,

@@ -33,7 +33,7 @@ graph TD
 
   subgraph SharedComponents["Shared Component Families"]
     gameFamily["GameCard / GameModal / GameForm / GameInfo"]
-    listFamily["GameListPage / GamesGrid / Pagination / SortControls"]
+    listFamily["GameListPage / GamesGrid / Pagination / ListToolbar"]
     userProfileFamily["UserProfileDisplay / Form / Banner / Picture"]
     authForms["FormLogin / FormSignUp / GoogleAuthButton / DiscordAuthButton / AuthInput"]
     ratingFamily["RatingAverage / RatingChart"]
@@ -224,7 +224,7 @@ Convention: components use `bg-dark-bg*`, `border-dark-border`, `text-primary(-l
 | `sectionHeading.tsx` | Reusable heading, colored dot + optional icon. |
 | `sideBar.tsx` | Desktop nav + mobile drawer; calls `api.logout()` directly rather than via `useAuth()`. |
 | `similarGamesSlider.tsx` | Embla carousel of similar games. |
-| `sorting.tsx` | Sort field/order + optional status filter (user-library only). |
+| `listToolbar.tsx` | Bar above every game list: status tabs with counts (library only), name search (debounced 300 ms, `?search=`), sort menu (field + order with direction in the labels, from `utils/listSort.ts`) and a result summary line. Sort/search controls render only when the page passes `sortFields` / `setSearch` (Em breve passes neither: its backend ignores sort and query). |
 | `../storeBrand.tsx` | `StoreTile` (solid brand-colored tile with a white glyph, sizes `xs`/`sm`/`lg`; used by the profile `StoreChips` and the Importar tab) and `StoreBrandIcon` (colored logo). `libraryComponents/storeChips.tsx` renders one `StoreTile` per linked store, with a count badge for 2+ accounts. |
 | `libraryComponents/profileHeader.tsx` | Shared profile header for `/userLibrary` and the public profile. The name (`h1`) sits at the bottom of the banner over a soft gradient; "Desde …" and the `actions` slot are in the banner too (bottom right from `sm`, top right on phones). Below: avatar, `StoreChips` (store tiles) and followers/following on one line. From `lg` the library numbers (`ProfileStats variant="rail"`) sit to the right of the avatar; below `lg` they are a strip (`variant="strip"`); the retry notice is always shown (`variant="retry"`). |
 | `libraryComponents/libraryShelves.tsx` | The four status shelves in fixed order (Zerados, Jogando, Pendentes, Lista de desejos; PAUSED has none). Owns copy, 3/8 caps (8 shown only from `2xl`), "Ver todos" links and empty-state links. `readOnly` for other users' profiles. |

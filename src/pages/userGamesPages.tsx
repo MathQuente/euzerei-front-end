@@ -5,12 +5,13 @@ import { GameListPage } from '../components/gameListPage'
 import { INFO_MESSAGES } from '../constants/messages'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useUserGames } from '../hooks/useUserGames'
-import type { SortField, SortOrder } from '../interfaces/games'
+import type { SortField, SortOrder, StatusTab } from '../interfaces/games'
 import { GameStatusEnum } from '../types/games'
 import type { GameListData } from '../types/games'
+import { sortFieldsFor } from '../utils/listSort'
 import { notify } from '../utils/notify'
 import { parsePage } from '../utils/parsePage'
-import { QUEUE_FILTER } from '../utils/queue'
+import { QUEUE_FILTER, QUEUE_STATUSES } from '../utils/queue'
 
 const ITEMS_PER_PAGE = 48
 
@@ -55,37 +56,22 @@ export function UserGamesPageByStatus() {
   const [sortField, setSortField] = useState<SortField>(() => {
     const url = new URL(window.location.toString())
     const v = url.searchParams.get('sortField')
-    if (
-      v === 'releaseDate' ||
-      v === 'rating' ||
-      v === 'name' ||
-      v === 'hoursPlayed' ||
-      v === 'completedAt' ||
-      v === 'dateAdded'
-    ) {
-      return v
-    }
-    return startsOnPlayed ? 'completedAt' : 'dateAdded'
+    const offered = sortFieldsFor(startsOnPlayed ? 'played' : 'library')
+    const requested = offered.find(field => field === v)
+    return requested ?? (startsOnPlayed ? 'completedAt' : 'dateAdded')
   })
 
-  const [filterField, setFilterField] = useState<GameStatusEnum>(() => {
-    return status && status in routeToEnumMap
-      ? routeToEnumMap[status]
-      : GameStatusEnum.Played
+  const [search, setSearch] = useState(() => {
+    const url = new URL(window.location.toString())
+    return url.searchParams.get('search') ?? ''
   })
 
-  function handleFilterChange(newFilter: GameStatusEnum | '') {
-    if (!newFilter) {
-      navigate('/userLibrary')
-      if (sortField === 'completedAt') {
-        setSortField('dateAdded')
-        setSortOrder('desc')
-      }
-      return
-    }
+  function handleFilterChange(newFilter: GameStatusEnum) {
+    if (newFilter === currentEnumStatus) return
+    setSearch('')
+    setPage(1)
     const newRoute = enumToRouteMap[newFilter]
     navigate(`/userLibrary/${newRoute}`)
-    setFilterField(newFilter)
     if (newFilter === GameStatusEnum.Played) {
       setSortField('completedAt')
       setSortOrder('desc')
@@ -100,15 +86,16 @@ export function UserGamesPageByStatus() {
       ? routeToEnumMap[status]
       : GameStatusEnum.Played
 
-  const { UserGamesResponse } = useUserGames(
-    page,
-    '',
-    currentEnumStatus === GameStatusEnum.Backlog
-      ? QUEUE_FILTER
-      : currentEnumStatus,
-    sortOrder,
-    sortField
-  )
+  const { UserGamesResponse, totalPerStatus, isChangingUserGames } =
+    useUserGames(
+      page,
+      search,
+      currentEnumStatus === GameStatusEnum.Backlog
+        ? QUEUE_FILTER
+        : currentEnumStatus,
+      sortOrder,
+      sortField
+    )
 
   const gamesForList: GameListData = {
     games: UserGamesResponse?.games[currentEnumStatus] ?? [],
@@ -125,6 +112,33 @@ export function UserGamesPageByStatus() {
     [GameStatusEnum.Wishlist]: 'Lista de desejos',
     [GameStatusEnum.Dropped]: 'Larguei',
   }
+
+  const countOf = (...statuses: string[]) =>
+    totalPerStatus
+      .filter(t => statuses.includes(t.status))
+      .reduce((sum, t) => sum + t.totalGames, 0)
+  const hasCounts = totalPerStatus.length > 0
+
+  const statusTabs: StatusTab[] = [
+    ...[
+      GameStatusEnum.Played,
+      GameStatusEnum.Playing,
+      GameStatusEnum.Paused,
+      GameStatusEnum.Backlog,
+      GameStatusEnum.Wishlist,
+      GameStatusEnum.Dropped,
+    ].map(value => ({
+      value,
+      label:
+        value === GameStatusEnum.Wishlist ? 'Desejos' : statusLabels[value],
+      href: `/userLibrary/${enumToRouteMap[value]}`,
+      count: hasCounts
+        ? value === GameStatusEnum.Backlog
+          ? countOf(...QUEUE_STATUSES)
+          : countOf(value)
+        : undefined,
+    })),
+  ]
 
   useDocumentTitle(
     isInvalidStatus
@@ -164,10 +178,17 @@ export function UserGamesPageByStatus() {
               : { field: 'dateAdded', order: 'desc' }
           }
           currentStatus={currentEnumStatus}
-          filterField={filterField}
-          setFilterField={setFilterField}
+          filterField={currentEnumStatus}
+          isChangingPage={isChangingUserGames}
           onFilterChange={handleFilterChange}
           isUserLibrary
+          sortFields={sortFieldsFor(
+            currentEnumStatus === GameStatusEnum.Played ? 'played' : 'library'
+          )}
+          search={search}
+          setSearch={setSearch}
+          searchPlaceholder="Buscar na biblioteca"
+          statusTabs={statusTabs}
         />
       )}
     </>
