@@ -1,8 +1,6 @@
 import { Link } from 'react-router-dom'
 import type { UserGameEntry } from '../../types/games'
 import { gamePath } from '../../utils/gamePath'
-import { formatHours } from '../../utils/hours'
-import { getLibraryPlatform } from '../../utils/libraryPlatforms'
 import { GameCard } from '../gamesComponents/gameCard'
 import { coverLink, sectionTitle, textLink } from './styles'
 
@@ -15,32 +13,6 @@ function seeAllVisibility(total: number) {
     total > 4 ? '2xl:inline' : '2xl:hidden',
     total > 5 ? 'wide:inline' : 'wide:hidden',
   ].join(' ')
-}
-
-const PLATFORM_PREPOSITION: Record<string, string> = {
-  STEAM: 'na',
-  EPIC: 'na',
-  PLAYSTATION: 'no',
-  XBOX: 'no',
-  NINTENDO: 'no',
-}
-
-function playedSummary(game: UserGameEntry) {
-  const hours = Math.round((game.hoursPlayed ?? 0) * 10) / 10
-  const platforms = (game.playedOn ?? []).flatMap(value => {
-    const option = getLibraryPlatform(value)
-    const preposition = PLATFORM_PREPOSITION[value]
-    return option && preposition ? [`${preposition} ${option.label}`] : []
-  })
-  const where =
-    platforms.length > 1
-      ? `${platforms.slice(0, -1).join(', ')} e ${platforms[platforms.length - 1]}`
-      : platforms.join('')
-
-  if (hours > 0) {
-    return where ? `${formatHours(hours)} ${where}` : formatHours(hours)
-  }
-  return where ? where.charAt(0).toUpperCase() + where.slice(1) : null
 }
 
 export function PlayingNow({
@@ -76,24 +48,13 @@ export function PlayingNow({
       )}
 
       {shown.length === 1 && (
-        <div className="mt-4 flex items-end gap-4 lg:gap-6">
-          <Link
-            to={gamePath(shown[0])}
-            className={`w-28 flex-none sm:w-36 lg:w-44 ${coverLink}`}
-          >
-            <GameCard game={shown[0]} size="medium" interactive={false} />
-          </Link>
-          <div className="min-w-0">
-            <p className="text-lg font-semibold leading-snug text-white lg:text-xl">
-              {shown[0].name}
-            </p>
-            {playedSummary(shown[0]) && (
-              <p className="mt-1 text-sm text-gray-400">
-                {playedSummary(shown[0])}
-              </p>
-            )}
-          </div>
-        </div>
+        <Link
+          to={gamePath(shown[0])}
+          aria-label={shown[0].name}
+          className={`mt-4 block w-28 sm:w-36 lg:w-44 ${coverLink}`}
+        >
+          <GameCard game={shown[0]} size="medium" interactive={false} />
+        </Link>
       )}
 
       {shown.length > 1 && (
@@ -103,17 +64,13 @@ export function PlayingNow({
               key={game.igdbId}
               className={`min-w-0 lg:w-40 xl:w-44 ${EXTRA_VISIBILITY[index]}`}
             >
-              <Link to={gamePath(game)} className={coverLink}>
+              <Link
+                to={gamePath(game)}
+                aria-label={game.name}
+                className={coverLink}
+              >
                 <GameCard game={game} size="medium" interactive={false} />
               </Link>
-              <p className="mt-2 line-clamp-2 text-sm font-semibold leading-snug text-white lg:text-base">
-                {game.name}
-              </p>
-              {playedSummary(game) && (
-                <p className="text-xs text-gray-400 lg:text-sm">
-                  {playedSummary(game)}
-                </p>
-              )}
             </li>
           ))}
         </ul>

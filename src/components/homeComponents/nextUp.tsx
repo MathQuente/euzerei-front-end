@@ -240,7 +240,7 @@ export function NextUp({
       <section className="min-w-0 [container-type:inline-size]">
         <h2 className={sectionTitle}>{title}</h2>
         <div
-          className={`mt-4 grid gap-5 ${wide ? '[@container(min-width:860px)]:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] [@container(min-width:860px)]:items-stretch' : ''}`}
+          className={`mt-4 grid gap-5 ${wide ? '[@container(min-width:680px)]:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] [@container(min-width:680px)]:items-stretch' : ''}`}
         >
           <Suggestion
             key={celebrate ? `done:${shown.igdbId}` : shown.igdbId}

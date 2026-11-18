@@ -74,7 +74,7 @@ function LoggedInTop() {
       <div
         className={`mt-2 grid grid-cols-1 gap-10 lg:gap-14 ${
           manyPlaying
-            ? 'lg:grid-cols-[auto_minmax(0,1fr)] lg:justify-start'
+            ? 'lg:grid-cols-[auto_minmax(0,880px)] lg:justify-start'
             : 'lg:grid-cols-[7fr_5fr]'
         }`}
         aria-busy={isLoadingUserGames}
@@ -147,7 +147,7 @@ function LoggedInTop() {
       <div
         className={`mt-2 grid grid-cols-1 gap-10 lg:gap-14 ${
           playing.length > 1
-            ? 'lg:grid-cols-[auto_minmax(0,1fr)] lg:justify-start'
+            ? 'lg:grid-cols-[auto_minmax(0,880px)] lg:justify-start'
             : 'lg:grid-cols-[7fr_5fr]'
         }`}
       >
