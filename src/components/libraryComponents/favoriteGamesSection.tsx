@@ -17,7 +17,7 @@ import {
 } from '../../utils/favorites'
 import { Button } from '../button'
 import { GameCard } from '../gamesComponents/gameCard'
-import { sectionTitle } from '../homeComponents/styles'
+import { inlineAction, sectionTitle } from '../homeComponents/styles'
 import { UnsavedChangesGuard } from '../unsavedChangesGuard'
 import { FavoriteCardMarks } from './favoriteCardMarks'
 import { FavoriteGamePicker } from './favoriteGamePicker'
@@ -26,9 +26,12 @@ import { FavoriteSlots } from './favoriteSlots'
 export function FavoriteGamesSection({
   userId,
   editable,
+  hideError = false,
 }: {
   userId: string
   editable: boolean
+  /** A página já mostra um aviso de erro só para tudo: este não repete o seu. */
+  hideError?: boolean
 }) {
   const [editing, setEditing] = useState(false)
   const { favorites, isLoading, isError, refetch } = useFavoriteGames(
@@ -73,7 +76,7 @@ export function FavoriteGamesSection({
 
   if (isLoading) return null
   if (isError && !editing) {
-    if (!editable) return null
+    if (!editable || hideError) return null
     return (
       <section
         aria-labelledby="favorites-title"
@@ -83,17 +86,22 @@ export function FavoriteGamesSection({
           id="favorites-title"
           className={`flex items-center gap-2 ${sectionTitle}`}
         >
-          <Heart className="size-5 text-primary-light" aria-hidden="true" />
+          <Heart
+            className="size-5 text-primary-light opacity-60"
+            aria-hidden="true"
+          />
           Jogos favoritos
         </h2>
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <p className="text-sm text-gray-400">
-            Não foi possível carregar seus favoritos agora.
-          </p>
-          <Button type="button" variant="secondary" onClick={() => refetch()}>
+        <p className="mt-1 text-sm text-gray-400">
+          Não foi possível carregar seus favoritos agora.{' '}
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className={inlineAction}
+          >
             Tentar novamente
-          </Button>
-        </div>
+          </button>
+        </p>
       </section>
     )
   }
@@ -172,7 +180,7 @@ export function FavoriteGamesSection({
         className={`flex items-center gap-2 ${sectionTitle}`}
       >
         <Heart
-          className={`size-5 text-primary-light ${favorites.length > 0 || editing ? 'fill-current' : ''}`}
+          className={`size-5 text-primary-light ${favorites.length > 0 || editing ? 'fill-current' : 'opacity-60'}`}
           aria-hidden="true"
         />
         {editing ? 'Editando favoritos' : 'Jogos favoritos'}
@@ -206,17 +214,13 @@ export function FavoriteGamesSection({
         className="border-t border-dark-border pt-6"
       >
         {heading}
-        <div className="mt-4 flex flex-wrap items-center gap-3 rounded-lg border-[1.5px] border-dashed border-dark-border p-4">
-          <p className="min-w-48 flex-1 text-sm text-gray-400">
-            <strong className="font-semibold text-white">
-              Escolha até {FAVORITE_SLOTS} jogos favoritos.
-            </strong>{' '}
-            Eles aparecem aqui, no topo do seu perfil.
-          </p>
-          <Button type="button" variant="primary" onClick={startEditing}>
+        <p className="mt-1 text-sm text-gray-400">
+          Escolha até {FAVORITE_SLOTS} jogos para aparecerem no topo do seu
+          perfil.{' '}
+          <button type="button" onClick={startEditing} className={inlineAction}>
             Escolher favoritos
-          </Button>
-        </div>
+          </button>
+        </p>
       </section>
     )
   }

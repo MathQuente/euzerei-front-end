@@ -4,9 +4,7 @@ import { Link } from 'react-router-dom'
 import { focusRing } from '../../styles/focus'
 import type { UserGameEntry } from '../../types/games'
 import { GameCard, LIBRARY_STATUS_BADGES } from '../gamesComponents/gameCard'
-import { sectionTitle } from '../homeComponents/styles'
-
-const shelfLink = `whitespace-nowrap rounded-sm text-primary-link underline underline-offset-4 transition-colors hover:text-white ${focusRing}`
+import { inlineAction, sectionTitle } from '../homeComponents/styles'
 
 const allLinkClass = `-my-2 inline-flex min-h-11 shrink-0 items-center gap-0.5 whitespace-nowrap rounded-sm text-sm text-gray-300 transition-colors hover:text-white ${focusRing}`
 
@@ -71,7 +69,7 @@ export function StatusShelf({
             {isEmpty && emptyLink && (
               <>
                 {' '}
-                <Link to={emptyLink.to} className={shelfLink}>
+                <Link to={emptyLink.to} className={inlineAction}>
                   {emptyLink.label}
                 </Link>
               </>

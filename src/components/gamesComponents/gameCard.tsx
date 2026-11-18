@@ -157,7 +157,9 @@ export function GameCard({
     ? null
     : replayBadgeCount(game?.status, game?.completions)
   const statusBadge =
-    !bare && game?.status ? LIBRARY_STATUS_BADGES[game.status] : undefined
+    !bare && statusBar && game?.status
+      ? LIBRARY_STATUS_BADGES[game.status]
+      : undefined
   const accentColor = statusBadge?.iconColor ?? 'text-primary'
   const playedOn = !bare
     ? (game?.playedOn ?? [])
@@ -198,7 +200,7 @@ export function GameCard({
 
   const cardContent = (
     <>
-      {statusBadge && !showHundred && statusBar && (
+      {statusBadge && !showHundred && (
         <span
           className={`absolute top-0 inset-x-0 h-0.5 z-10 ${statusBadge.barColor}`}
           aria-hidden="true"

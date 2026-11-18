@@ -148,13 +148,13 @@ export function ProfileStats({
   }
 
   const retryBlock = onRetry && (
-    <div className="flex flex-wrap items-center gap-x-3 border-t border-dark-border px-4 py-1 text-sm text-gray-300 sm:px-6">
+    <div className="flex flex-wrap items-center gap-x-3 border-t border-dark-border px-4 py-1 text-sm text-gray-400 sm:px-6">
       <output>Não foi possível carregar zerados, jogando e na fila.</output>
       <button
         type="button"
         onClick={retry}
         disabled={retrying}
-        className={`min-h-11 rounded-sm px-1 text-primary-link underline underline-offset-4 transition-colors hover:text-white disabled:opacity-50 ${focusRing}`}
+        className={`min-h-11 rounded-sm px-1 text-primary-link transition-colors hover:text-white disabled:opacity-50 ${focusRing}`}
       >
         {retrying ? 'Tentando…' : 'Tentar de novo'}
       </button>
