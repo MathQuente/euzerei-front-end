@@ -94,6 +94,8 @@ function LoggedInTop() {
   )
   const backlog = gamesByStatus.BACKLOG
   const nextUpQueue = [...gamesByStatus.PAUSED, ...backlog]
+  const backlogTotal =
+    totalPerStatus.find(t => t.status === 'BACKLOG')?.totalGames ?? 0
   const playingTotal =
     totalPerStatus.find(t => t.status === 'PLAYING')?.totalGames ??
     playing.length
@@ -155,6 +157,7 @@ function LoggedInTop() {
           libraryIds={libraryIds}
           suggestion={GamesToDisplay}
           loadingSuggestion={isLoadingRecommendation}
+          showRoulette={backlogTotal >= 2}
           celebrate={celebration.celebrate}
           celebrationFinished={celebration.finished}
           onStarted={celebration.start}

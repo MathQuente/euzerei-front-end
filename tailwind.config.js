@@ -11,6 +11,7 @@ export default {
       zIndex: {
         confirm: '60',
         'confirm-content': '70',
+        confetti: '80',
       },
       transitionProperty: {
         width: 'width',

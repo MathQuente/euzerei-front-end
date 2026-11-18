@@ -25,7 +25,7 @@ graph TD
     comingSoon[comingSoonPage.tsx]
     gamePage[gamePage.tsx]
     search[searchResults.tsx]
-    roulette[rouletteWheel.tsx]
+    roulette[roulettePage.tsx]
     auth[authentication.tsx]
     userLib[userLibrary.tsx]
     userLibStatus[userGamesPages.tsx]
@@ -116,7 +116,7 @@ All routes are children of one `<Layout/>` (persistent `SideBar` + `AppToastCont
 | `/games` | `Games` | `pages/games.tsx` | No |
 | `/games/comingSoon` | `ComingSoonPage` | `pages/comingSoonPage.tsx` | No |
 | `/games/:gameRef` | `GamePage` | `pages/gamePage.tsx` | No (interactive parts hidden if logged out). `:gameRef` is a slug (`/games/the-witcher-3-wild-hunt`) or a numeric id (`/games/1942`, old links); see Non-obvious behaviour. `/games/:gameRef/reviews` is `GameReviewsPage`. |
-| `/roulette` | `RouletteWheel` | `pages/rouletteWheel.tsx` | No (but needs `user.id` internally — see Gotchas) |
+| `/roleta` | `RoulettePage` | `pages/roulettePage.tsx` | Yes (`RequireAuth`) |
 | `/termos` | `TermsPage` | `pages/termsPage.tsx` | No (linked from the footer "O projeto" column and from the sign-up checkbox label) |
 | `/privacidade` | `PrivacyPage` | `pages/privacyPage.tsx` | No (same) |
 | `/sobre` | `AboutPage` | `pages/aboutPage.tsx` | No (same; own layout, `components/aboutComponents/`) |
@@ -168,7 +168,7 @@ Interconnection: `GameCard(enableModal=true)` owns local `open` state, lazily mo
 | `invalidateGameLists.ts` | Not a hook — `invalidateGameLists(queryClient)` invalidates the catalog lists only: `games`, `gameSearch`, `comingSoon`, `gamesFeatured`, `similarGames`. It does not touch `userGames` or `userProfile`; callers invalidate those themselves. Called by `useGameStatus`, `useRating`, `usePlayedCount` and `useHoursPlayed` so the catalog lists reflect a status/rating change. | n/a | Add a new list query key to `GAME_LIST_QUERY_KEYS` there. |
 | `useGameRef.ts` | Turns the `:gameRef` route param (slug or id) into the numeric id string the other hooks use; resolves a slug through `GET /games/slug/:slug`. | `['gameBySlug', slug]` (also seeds `['game', id]`) | Returns `igdbId`, `isNotFound`, `isResolving`, `isFailed`, `refetch`. |
 | `useCanonicalGameUrl.ts` | Replaces the address with `/games/<slug>[/reviews]` once the detail has a slug; exports `isCanonicalNavigation` for the scroll and focus effects. | n/a | See Non-obvious behaviour. |
-| `useApi.ts` | Not a hook — exports `api` (axios wrapper), also called directly by `sideBar.tsx`/`rouletteWheel.tsx`, bypassing hook layer. | n/a | Sort-field mapping gotcha, see below. |
+| `useApi.ts` | Not a hook — exports `api` (axios wrapper), also called directly by `sideBar.tsx`, bypassing hook layer. | n/a | Sort-field mapping gotcha, see below. |
 | `useGames.ts` | Catalog: paged, infinite (search), coming-soon, home-featured. | `['games',...]`, `['gamesInfinite',...]`, `['comingSoon',...]`, `['gamesFeatured']` (home: trending, most rated, recent releases; the counts come from the backend) | `keepPreviousData` on paging/sort. |
 | `useGamePlatforms.ts` | Per-game platform rows (`platform` + `console`, one row per console). `addPlatform/updatePlatform/removePlatform` take `(platform, console, ...)` and hit `/users/platforms/:igdbId/:platform/:console`; the response replaces the cache. | `['gamePlatforms', userId, igdbId]` | `PUT` with a known console adopts an existing `UNKNOWN` row of the same platform (no new row). Console × platform map mirrors the back end in `utils/platformConsoles.ts`. |
 | `useCompletionSuggestions.ts` | "Looks finished" suggestions per import platform (Steam only today). Query + accept/dismiss/undo; accepted rows are kept in local state because the back end drops the game from the list once it becomes Played, so Undo only lives while the screen is open. Accept/undo invalidate library, profile and per-game caches. | `['completionSuggestions', userId, platform]` | Invalidated by `refreshAfterImport`. 409 becomes an inline row message. |
@@ -193,7 +193,7 @@ colors: {
 
 Custom screens: `wide` is `min-width: 1792px` (a plain width, so `wide:` works); `nesthub` and `asus` are plugin variants (`addVariant`, short viewports; unused in `src`), declared as plugins and not as `raw` screens because a `raw` screen turns off every `min-*`/`max-*` variant (see the note on `min-*` / `max-*` under Keyboard focus). Restart Vite after editing `tailwind.config.js`.
 
-Convention: components use `bg-dark-bg*`, `border-dark-border`, `text-primary(-light)`, `bg-primary`, `hover:bg-primary-hover` — no hardcoded hex in `className`, except where third-party libs need literal color values (MUI `Rating` `sx` in `ratingAverage.tsx`) and in `rouletteWheel.tsx` (least-polished page, ad-hoc hex + placeholder text — known, deliberately unfinished per project owner).
+Convention: components use `bg-dark-bg*`, `border-dark-border`, `text-primary(-light)`, `bg-primary`, `hover:bg-primary-hover` — no hardcoded hex in `className`, except where third-party libs need literal color values (MUI `Rating` `sx` in `ratingAverage.tsx`) and in the roulette wheel (`utils/roulette.ts` `ROULETTE_COLORS` and the canvas/SVG drawing in `rouletteWheel.tsx`/`confettiLayer.tsx`: a canvas cannot use Tailwind classes, so those colours are named constants of the app theme).
 
 ### Everything else
 
@@ -300,7 +300,7 @@ The tests are pure code only (`utils/*.test.ts`, `schemas/*.test.ts`, `constants
 
 - Zod schemas paired 1:1 with react-hook-form via `zodResolver`; form types via `z.infer<typeof schema>`.
 - TanStack Query hooks named `use<Noun>`, expose `.mutateAsync` wrapped in plain functions rather than the raw mutation object.
-- No hardcoded hex in Tailwind `className` outside third-party libs needing literal colors (MUI) and the known-unfinished `rouletteWheel.tsx`.
+- No hardcoded hex in Tailwind `className` outside third-party libs needing literal colors (MUI) and the canvas-drawn roulette (colours live as constants in `utils/roulette.ts`).
 - `focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light` on every interactive element.
 - `rounded-full` pill badges for small metadata chips; small square dot (`size-1.5 bg-primary`) as section-heading marker.
 
@@ -312,7 +312,6 @@ The tests are pure code only (`utils/*.test.ts`, `schemas/*.test.ts`, `constants
 4. **Two independent status vocabularies**: `GameStatusEnum` (string, order Played/Playing/Paused/Backlog/Wishlist) vs `USER_GAME_STATUS_ID` (numeric, PLAYED:1/PAUSED:2/PLAYING:3/BACKLOG:4/WISHLIST:5 — different internal order). No compile-time link; kept in sync only by matching English key names. `usePlayedCount.ts` hardcodes numeric literal `1` instead of `USER_GAME_STATUS_ID.PLAYED`.
 5. **`CategoriesDiv`/`categoryName`** used for genres in `gamePage.tsx` despite the name implying IGDB category (DLC/expansion/etc.) — real category-id classification lives in `gameCard.tsx`'s `getGameTag()`.
 6. **`removeGame` vs `removeUserGame`** (`useAddGame.ts`) — near-duplicate mutations, differ only in which cache they optimistically patch. Candidate for consolidation.
-7. **`/roulette` not wrapped in `RequireAuth`** despite needing `user.id` internally — shows empty state instead of redirecting when logged out.
 8. **`/forgotPasswordPage` link in `formLogin.tsx`** has no matching route — intentional placeholder for a not-yet-built feature (per project owner), not a bug to fix.
 9. **Unused dependencies**: `@auth0/auth0-react`, `typescript-cookie` in `package.json`, no imports found in `src/`.
 10. **`usePrefersReducedMotion`** reads `matchMedia` once per render, not reactive to live OS setting changes.
@@ -457,4 +456,16 @@ Reasons that used to live in code comments (the project keeps source files comme
 - Atenção ao verificar tipos no front: o `tsconfig.json` raiz só tem referências; `npx tsc --noEmit` não checa nada. Usar `npm run typecheck` (`tsc -b`).
 - **Largados dentro de "Na fila":** a biblioteca não tem mais a linha "N jogos largados · Ver". Fora do `readOnly`, a prateleira "Na fila" (`libraryShelves.tsx`) mistura `BACKLOG` e `DROPPED` com `mergeQueue` (`src/utils/queue.ts`: ordena por `updatedAt` decrescente; sem data em algum jogo, pendentes primeiro e largados depois), conta `BACKLOG + DROPPED` e o "Ver todos" leva a `/userLibrary/backlogGames`, que pede o filtro `QUEUE` ao backend (`QUEUE_FILTER`; `total` e paginação vêm do backend). O ícone e a cor de "Larguei" vêm sozinhos do `GameCard` (`LIBRARY_STATUS_BADGES.DROPPED`). No perfil público (`readOnly`) a prateleira continua só com `BACKLOG`. `/userLibrary/droppedGames` e o filtro "Larguei" continuam. A data é a última modificação do registro (`updated_at`), não exatamente "quando foi largado".
 - **Chave "Favorito" na página do jogo:** `FavoriteToggle` (`src/components/favoriteToggle.tsx`) entra em `GameForm` depois da chave de 100%, para qualquer jogo e para quem está logado (inclusive jogo fora da biblioteca: favoritar **não** adiciona o jogo à biblioteca). O hook `useToggleFavorite` lê a lista **mais recente do servidor** antes de gravar (`fetchQuery` com `staleTime: 0`), calcula a nova lista com `withFavorite`/`withoutFavorite` (`utils/favorites.ts`, sempre `{ ids, main }`: o PUT sem `mainIgdbId` apagaria a coroa de outro jogo) e envia `api.setFavorites(ids, main)`. Entra na primeira vaga livre (fim da lista); desligar compacta a lista. Com 4 favoritos a chave fica desativada para um jogo que não é favorito e o texto leva a `/userLibrary`; um favorito sempre pode ser desligado. A chave nunca dá a coroa; desligar o jogo coroado a tira (o texto avisa antes). Sem toast de sucesso; o anúncio vai num `<output class="sr-only">`; o erro usa `notify.failure` (`ERROR_MESSAGES.toggleFavorite`). Escreve a resposta do PUT em `['favoriteGames', userId]`, a mesma chave da seção do perfil. Limites conhecidos: o PUT troca a lista inteira, então um perfil em edição em **outra aba** (rascunho antigo) sobrescreve o que a chave fez ao salvar; e duas chaves acionadas em abas diferentes dentro do intervalo entre o GET e o PUT (uns 100 ms) também podem se sobrescrever (a solução seria um endpoint que adiciona/remove um jogo só). Se a lista já estiver cheia no servidor quando a chave é ligada, nada é gravado e o anúncio diz que as vagas estão cheias.
+
+## Roleta (`/roleta`)
+
+Sorteia o próximo jogo **pendente** (`BACKLOG`) da fila. Largados e pausados não entram. A roleta antiga (removida em `17109d1`) sorteava entre os zerados e não tem relação com esta.
+
+- **Dados:** `GET /users/roulette?count=&exclude=` (ver o mapa do backend) devolve `{ total, games }`: `total` = todos os pendentes e `games` = amostra aleatória de até `WHEEL_MAX` (24) deles. `hooks/useRoulette.ts`: `staleTime: Infinity`, `gcTime: 0` (cada visita parte de uma amostra nova), sem refetch ao focar a janela, `placeholderData: keepPreviousData` (a roda não some enquanto a nova amostra chega). A chave inclui `nonce` e `exclude`: "Trocar os jogos", "Sortear de novo" (fila > 24) e "Começar a jogar" aumentam o `nonce`.
+- **Justiça:** a roda mostra no máximo 24 jogos para os nomes ficarem legíveis (com 323 viravam uma faixa ilegível), escolhidos ao acaso entre todos os pendentes; depois o vencedor é sorteado nessa amostra. Cada jogo da fila tem a mesma chance. `utils/roulette.ts`: `randomInt` usa `crypto.getRandomValues` com rejeição (sem viés de módulo); `pickWinnerIndex` nunca repete o último vencedor (exceto se for o único); `finalRotation`/`indexUnderPointer` garantem que a fatia sorteada para sob o ponteiro. **O vencedor é escolhido antes da animação**; o giro só o revela.
+- **Tela:** `pages/roulettePage.tsx`. `components/rouletteComponents/rouletteWheel.tsx` desenha a roda em `<canvas>` (fatias chapadas nas 4 cores do tema, `paletteIndex` evita vizinhas iguais, nomes radiais com a fonte ajustada ao maior nome; o app não carrega a Inter, então lê a fonte do `body`), gira por `transform: rotate` dentro de uma caixa `overflow: hidden` redonda (sem ela o quadrado girando alarga a página no celular) e tem a gota "SORTEAR" como botão e ponteiro. `rouletteResultDialog.tsx` (Radix Dialog, borda na cor da fatia, foco no título, `onCloseAutoFocus` devolve o foco à roda) traz "Começar a jogar", "Sortear de novo" e "Ver o jogo". `confettiLayer.tsx` + `utils/confetti.ts`: canvas fixo acima do diálogo (`z-confetti` = 80), sem dependência nova.
+- **Tempos:** primeiro giro 7 s, "Sortear de novo" 4 s. **Movimento reduzido** (`prefersReducedMotion()` lido no clique): sem giro e sem confete, a janela abre direto e o resultado é anunciado por `<output>`.
+- **"Começar a jogar"** é o `StartPlayingButton` (`components/startPlayingButton.tsx`, extraído de `homeComponents/nextUp.tsx` sem mudar comportamento; `celebrating` é só da home). Depois dele a roleta pede amostra nova (o jogo agora é `PLAYING`).
+- **Estados:** carregando (roda cinza), erro (tentar de novo), fila vazia (link para explorar), **um só pendente** (cartão com "Começar a jogar", sem giro), normal.
+- **Entradas:** botão "Sortear" no cabeçalho da prateleira "Na fila" (`StatusShelf` ganhou `headerAction`; só no perfil próprio e com ≥ 2 pendentes, conferindo `backlogTotal`, não o `queueTotal` que soma largados) e link "Sortear na roleta" em "Para jogar em seguida" (`NextUp` ganhou `showRoulette`; a condição vem do total de pendentes da `home.tsx`, porque a lista que o `NextUp` recebe inclui os pausados e é só a prévia).
 

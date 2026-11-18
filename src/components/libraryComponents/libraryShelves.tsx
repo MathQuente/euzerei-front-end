@@ -1,4 +1,6 @@
+import { Dices } from 'lucide-react'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import type {
   GameStatusEnum,
   TotalPerStatus,
@@ -6,6 +8,7 @@ import type {
   UserGamesByStatus,
 } from '../../types/games'
 import { mergeQueue } from '../../utils/queue'
+import { buttonClasses } from '../button'
 import { type ShelfLink, type ShelfTab, StatusShelf } from './statusShelf'
 
 const MAX_PER_SHELF = 8
@@ -151,6 +154,21 @@ export function LibraryShelves({
         emptyText={empty('Nenhum jogo ainda. Aqui fica a sua fila para jogar.')}
         emptyLink={explore}
         allLink={allLink('BACKLOG', 'backlogGames', queueTotal)}
+        headerAction={
+          !readOnly && backlogTotal >= 2 ? (
+            <Link
+              to="/roleta"
+              className={buttonClasses({
+                variant: 'secondary',
+                size: 'sm',
+                className: 'gap-1.5',
+              })}
+            >
+              <Dices className="size-4" aria-hidden="true" />
+              Sortear
+            </Link>
+          ) : undefined
+        }
       />
       <StatusShelf
         status="WISHLIST"

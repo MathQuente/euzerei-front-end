@@ -1,10 +1,7 @@
-import { Check, ChevronRight, RefreshCw } from 'lucide-react'
+import { ChevronRight, RefreshCw } from 'lucide-react'
 import { type CSSProperties, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { USER_GAME_STATUS_ID as STATUS } from '../../constants/gameStatus'
-import { useAddGame } from '../../hooks/useAddGame'
 import { useCoverTint } from '../../hooks/useCoverTint'
-import { useGameStatus } from '../../hooks/useGameStatus'
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion'
 import { focusRing } from '../../styles/focus'
 import type {
@@ -14,67 +11,12 @@ import type {
 } from '../../types/games'
 import { gamePath } from '../../utils/gamePath'
 import { hiResCover } from '../../utils/hiResCover'
-import { Button } from '../button'
 import { GameCard } from '../gamesComponents/gameCard'
+import { StartPlayingButton } from '../startPlayingButton'
 import { coverLink, sectionTitle, textLink } from './styles'
 
 const QUEUE_SIZE = 3
 const LEAVE_MS = 220
-
-function StartPlayingButton({
-  igdbId,
-  inLibrary,
-  celebrating,
-  onStarted,
-}: {
-  igdbId: number
-  inLibrary: boolean
-  celebrating: boolean
-  onStarted: () => void
-}) {
-  const id = String(igdbId)
-  const { updateGameStatus } = useGameStatus(inLibrary ? id : undefined)
-  const { addGame } = useAddGame(id)
-  const [isSaving, setIsSaving] = useState(false)
-
-  async function startPlaying() {
-    setIsSaving(true)
-    try {
-      if (inLibrary) {
-        await updateGameStatus({ statusIds: STATUS.PLAYING })
-      } else {
-        await addGame({ statusIds: STATUS.PLAYING })
-      }
-      onStarted()
-    } catch {
-    } finally {
-      setIsSaving(false)
-    }
-  }
-
-  return (
-    <Button
-      type="button"
-      variant="primary"
-      size="md"
-      loading={isSaving}
-      onClick={startPlaying}
-      disabled={celebrating}
-      className={`min-h-11 whitespace-nowrap px-5 transition-[background-color,transform] duration-300 disabled:opacity-100 ${
-        celebrating ? 'bg-green-700 hover:bg-green-700' : ''
-      }`}
-    >
-      {celebrating ? (
-        <>
-          <Check className="mr-1.5 size-4" aria-hidden="true" />
-          Jogando agora
-        </>
-      ) : (
-        'Começar a jogar'
-      )}
-    </Button>
-  )
-}
 
 function Suggestion({
   game,
@@ -85,6 +27,7 @@ function Suggestion({
   leaving = false,
   entering = false,
   celebrating = false,
+  showRoulette = false,
 }: {
   game: GameCardData
   message?: string
@@ -94,6 +37,7 @@ function Suggestion({
   leaving?: boolean
   entering?: boolean
   celebrating?: boolean
+  showRoulette?: boolean
 }) {
   const [from, to] = useCoverTint(
     game.coverUrl ? hiResCover(game.coverUrl) : null
@@ -172,6 +116,15 @@ function Suggestion({
                 </Link>
               )
             )}
+            {showRoulette && !celebrating && (
+              <Link
+                to="/roleta"
+                className={`inline-flex min-h-11 items-center gap-0.5 px-1 ${textLink}`}
+              >
+                Sortear na roleta
+                <ChevronRight className="size-4" aria-hidden="true" />
+              </Link>
+            )}
           </div>
         </div>
       </div>
@@ -187,6 +140,7 @@ export function NextUp({
   showEmptyNote = true,
   loadingSuggestion = false,
   wide = true,
+  showRoulette = false,
   celebrate,
   celebrationFinished,
   onStarted,
@@ -199,6 +153,8 @@ export function NextUp({
   loadingSuggestion?: boolean
   /** Em coluna larga, o destaque e a fila ficam lado a lado. */
   wide?: boolean
+  /** Mostra o link da roleta (só vale quando há pendentes para sortear). */
+  showRoulette?: boolean
   /** Jogo que acabou de começar a ser jogado (a celebração vive na home). */
   celebrate: GameCardData | null
   celebrationFinished: boolean
@@ -281,10 +237,10 @@ export function NextUp({
     const shown = celebrate ?? current
 
     return (
-      <section className="min-w-0">
+      <section className="min-w-0 [container-type:inline-size]">
         <h2 className={sectionTitle}>{title}</h2>
         <div
-          className={`mt-4 grid gap-5 ${wide ? 'xl:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] xl:items-stretch' : ''}`}
+          className={`mt-4 grid gap-5 ${wide ? '[@container(min-width:860px)]:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] [@container(min-width:860px)]:items-stretch' : ''}`}
         >
           <Suggestion
             key={celebrate ? `done:${shown.igdbId}` : shown.igdbId}
@@ -296,6 +252,7 @@ export function NextUp({
             leaving={leaving}
             entering={animateIn && !celebrate}
             celebrating={Boolean(celebrate)}
+            showRoulette={showRoulette}
             onStarted={handleStarted}
             onAnother={backlog.length > 1 ? () => advance(1) : undefined}
           />

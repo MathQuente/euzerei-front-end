@@ -10,6 +10,7 @@ import type {
 import type {
   FavoriteGamesResponse,
   GameStatusEnum,
+  RouletteResponse,
   UserGamesResponse,
 } from '../types/games'
 import type { StartImportResponse } from '../types/import'
@@ -273,6 +274,12 @@ export const api = {
       `/users/${encodeURIComponent(String(userId))}`,
       {}
     )
+    return response.data
+  },
+  getRoulette: async (count: number, exclude?: number) => {
+    const response = await http.get<RouletteResponse>('/users/roulette', {
+      params: { count, exclude },
+    })
     return response.data
   },
   getUserFavorites: async (userId: string | null) => {

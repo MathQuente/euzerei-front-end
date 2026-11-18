@@ -23,6 +23,7 @@ import { Home } from './pages/home'
 import { NotFoundPage } from './pages/notFoundPage'
 import { PrivacyPage } from './pages/privacyPage'
 import { ResetPasswordPage } from './pages/resetPasswordPage'
+import { RoulettePage } from './pages/roulettePage'
 import { SearchResults } from './pages/searchResults'
 import { AccountTab } from './pages/settings/accountTab'
 import { ImportTab } from './pages/settings/importTab'
@@ -113,6 +114,14 @@ const router = createBrowserRouter([
             element: (
               <RequireAuth>
                 <UserLibrary />
+              </RequireAuth>
+            ),
+          },
+          {
+            path: '/roleta',
+            element: (
+              <RequireAuth>
+                <RoulettePage />
               </RequireAuth>
             ),
           },

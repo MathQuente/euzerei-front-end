@@ -1,4 +1,5 @@
 import { ChevronRight } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { focusRing } from '../../styles/focus'
 import type { UserGameEntry } from '../../types/games'
@@ -30,6 +31,7 @@ interface StatusShelfProps {
   emptyText: string
   emptyLink?: ShelfLink
   allLink?: ShelfLink
+  headerAction?: ReactNode
   tabs?: ShelfTab[]
   activeTab?: string
   onTabChange?: (key: string) => void
@@ -43,6 +45,7 @@ export function StatusShelf({
   emptyText,
   emptyLink,
   allLink,
+  headerAction,
   tabs,
   activeTab,
   onTabChange,
@@ -75,11 +78,16 @@ export function StatusShelf({
             )}
           </p>
         </div>
-        {!isEmpty && allLink && (
-          <Link to={allLink.to} className={allLinkClass}>
-            {allLink.label}
-            <ChevronRight className="size-4" aria-hidden="true" />
-          </Link>
+        {!isEmpty && (headerAction || allLink) && (
+          <div className="flex shrink-0 items-center gap-3">
+            {headerAction}
+            {allLink && (
+              <Link to={allLink.to} className={allLinkClass}>
+                {allLink.label}
+                <ChevronRight className="size-4" aria-hidden="true" />
+              </Link>
+            )}
+          </div>
         )}
       </div>
 

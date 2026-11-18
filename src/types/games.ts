@@ -80,6 +80,11 @@ export interface UserGameEntry extends GameCardData {
   updatedAt?: string
 }
 
+export interface RouletteResponse {
+  total: number
+  games: UserGameEntry[]
+}
+
 export interface FavoriteGamesResponse {
   games: (Omit<UserGameEntry, 'status'> & {
     status: string | null
