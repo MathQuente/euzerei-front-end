@@ -5,16 +5,13 @@ import { useHoursPlayed } from '../hooks/useHoursPlayed'
 import { usePlayedCount } from '../hooks/usePlayedCount'
 import { inlineFieldFocus } from '../styles/focus'
 import type { GameCardData } from '../types/games'
+import { sanitizeHoursInput } from '../utils/hours'
 import { Button } from './button'
 import { IconButton } from './iconButton'
 
-const MAX_HOURS = 9999.99
+const MAX_HOURS = 9999.9
 
 const today = () => new Date().toISOString().slice(0, 10)
-
-function stripLeadingZeros(raw: string) {
-  return raw.replace(/^0+(?=\d)/, '')
-}
 
 const inputClass = `rounded-md bg-dark-bg px-2.5 py-1.5 text-sm text-white ${inlineFieldFocus} disabled:opacity-50`
 
@@ -44,11 +41,11 @@ export function LibraryRecordFields({
   } = useCompletedAt(igdbId)
   const { completions, updatePlayedCount } = usePlayedCount(igdbId)
 
-  const [hours, setHours] = useState(hoursPlayed.toString())
+  const [hours, setHours] = useState(sanitizeHoursInput(hoursPlayed.toString()))
   const [date, setDate] = useState(completedAt ?? '')
 
   useEffect(() => {
-    setHours(hoursPlayed.toString())
+    setHours(sanitizeHoursInput(hoursPlayed.toString()))
   }, [hoursPlayed])
 
   useEffect(() => {
@@ -91,7 +88,7 @@ export function LibraryRecordFields({
             max={MAX_HOURS}
             step="any"
             value={hours}
-            onChange={e => setHours(stripLeadingZeros(e.target.value))}
+            onChange={e => setHours(sanitizeHoursInput(e.target.value))}
             disabled={isBusy}
             aria-invalid={!hoursValid}
             aria-describedby={hoursValid ? undefined : hoursErrorId}
@@ -102,7 +99,7 @@ export function LibraryRecordFields({
       </div>
       {!hoursValid && (
         <p id={hoursErrorId} className="text-[13px] leading-snug text-red-400">
-          Use um valor entre 0 e 9999,99.
+          Use um valor entre 0 e 9999,9.
         </p>
       )}
 

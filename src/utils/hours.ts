@@ -16,6 +16,11 @@ const hoursCompactFormat = new Intl.NumberFormat('pt-BR', {
   maximumFractionDigits: 0,
 })
 
+/** Campo de horas: sem zeros à esquerda e com no máximo uma casa decimal (5,53 vira 5,5). */
+export function sanitizeHoursInput(raw: string) {
+  return raw.replace(/^0+(?=\d)/, '').replace(/([.,]\d).*$/, '$1')
+}
+
 export const NO_HOURS_LABEL = 'sem horas registradas'
 
 export function formatHours(hours: number) {

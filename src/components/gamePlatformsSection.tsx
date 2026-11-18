@@ -20,6 +20,7 @@ import {
   formatHours,
   formatHoursOrNone,
   isUnderOneHour,
+  sanitizeHoursInput,
 } from '../utils/hours'
 import {
   getAvailableLibraryPlatforms,
@@ -42,7 +43,7 @@ import { ConfirmDialog } from './confirmDialog'
 import { IconButton } from './iconButton'
 import { TotalsStrip } from './totalsGrid'
 
-const MAX_HOURS = 9999.99
+const MAX_HOURS = 9999.9
 
 const PLATFORM_QUESTION: Record<number, string> = {
   [STATUS.PLAYED]: 'Onde você jogou?',
@@ -53,10 +54,6 @@ const PLATFORM_QUESTION: Record<number, string> = {
 }
 
 const today = () => new Date().toISOString().slice(0, 10)
-
-function stripLeadingZeros(raw: string) {
-  return raw.replace(/^0+(?=\d)/, '')
-}
 
 const inputClass = `rounded-md bg-dark-bg px-2 py-1 text-sm text-white ${inlineFieldFocus} disabled:opacity-50`
 
@@ -87,13 +84,15 @@ export function PlatformEditor({
 }) {
   const option = getLibraryPlatform(entry.platform)
   const name = option ? entryDisplayName(entry, option.label) : ''
-  const [hours, setHours] = useState(entry.hoursPlayed?.toString() ?? '')
+  const [hours, setHours] = useState(
+    sanitizeHoursInput(entry.hoursPlayed?.toString() ?? '')
+  )
   const [date, setDate] = useState(entry.completedAt ?? '')
   const [showCompletions, setShowCompletions] = useState(false)
   const dateId = useId()
 
   useEffect(() => {
-    setHours(entry.hoursPlayed?.toString() ?? '')
+    setHours(sanitizeHoursInput(entry.hoursPlayed?.toString() ?? ''))
   }, [entry.hoursPlayed])
 
   useEffect(() => {
@@ -139,7 +138,7 @@ export function PlatformEditor({
             step="any"
             placeholder="—"
             value={hours}
-            onChange={e => setHours(stripLeadingZeros(e.target.value))}
+            onChange={e => setHours(sanitizeHoursInput(e.target.value))}
             disabled={disabled}
             aria-label={`Horas jogadas em ${name}${entry.hoursPlayed === null ? `, ${NO_HOURS_LABEL}` : ''}`}
             aria-invalid={!hoursValid}

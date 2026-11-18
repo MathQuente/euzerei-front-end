@@ -7,6 +7,7 @@ import {
   formatHoursSpoken,
   isUnderOneHour,
   playedWord,
+  sanitizeHoursInput,
 } from './hours'
 
 const NBSP = '\u00a0'
@@ -103,5 +104,20 @@ describe('isUnderOneHour', () => {
     expect(isUnderOneHour(1)).toBe(false)
     expect(isUnderOneHour(4.2)).toBe(false)
     expect(isUnderOneHour(0.999)).toBe(false)
+  })
+})
+
+describe('sanitizeHoursInput', () => {
+  it('keeps a single decimal place', () => {
+    expect(sanitizeHoursInput('5.53')).toBe('5.5')
+    expect(sanitizeHoursInput('5,53')).toBe('5,5')
+    expect(sanitizeHoursInput('5.5')).toBe('5.5')
+    expect(sanitizeHoursInput('5.')).toBe('5.')
+    expect(sanitizeHoursInput('12')).toBe('12')
+  })
+
+  it('drops leading zeros but keeps 0.5', () => {
+    expect(sanitizeHoursInput('007')).toBe('7')
+    expect(sanitizeHoursInput('0.55')).toBe('0.5')
   })
 })
