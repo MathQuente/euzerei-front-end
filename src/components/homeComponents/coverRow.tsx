@@ -1,8 +1,16 @@
+import Autoplay from 'embla-carousel-autoplay'
 import useEmblaCarousel from 'embla-carousel-react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { type ReactNode, useCallback, useEffect, useState } from 'react'
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { Link } from 'react-router-dom'
 import { twMerge } from 'tailwind-merge'
+import { prefersReducedMotion } from '../../hooks/usePrefersReducedMotion'
 import { focusRing } from '../../styles/focus'
 import type { GameCardData } from '../../types/games'
 import { gamePath } from '../../utils/gamePath'
@@ -20,7 +28,7 @@ interface CoverRowProps<T extends GameCardData> {
   edgeClassName?: string
 }
 
-const arrowClass = `absolute top-[calc(50%-1.75rem)] z-10 hidden size-9 place-items-center rounded-full border border-dark-border bg-dark-bg/90 text-white shadow-lg shadow-black/40 transition-opacity hover:border-primary-light disabled:pointer-events-none disabled:opacity-0 motion-reduce:transition-none sm:grid ${focusRing}`
+const arrowClass = `absolute top-[calc(50%-1.75rem)] z-10 grid size-9 place-items-center rounded-full border border-dark-border bg-dark-bg/90 text-white shadow-lg shadow-black/40 transition-opacity hover:border-primary-light disabled:pointer-events-none disabled:opacity-0 motion-reduce:transition-none ${focusRing}`
 
 export function CoverRow<T extends GameCardData>({
   games,
@@ -30,11 +38,29 @@ export function CoverRow<T extends GameCardData>({
   bleedClassName = '-mx-4 sm:-mx-6',
   edgeClassName = 'px-4 sm:px-6',
 }: CoverRowProps<T>) {
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    align: 'start',
-    dragFree: true,
-    containScroll: 'trimSnaps',
-  })
+  const [scrollable, setScrollable] = useState(true)
+  const plugins = useMemo(
+    () =>
+      prefersReducedMotion()
+        ? []
+        : [
+            Autoplay({
+              delay: 3500,
+              stopOnInteraction: false,
+              stopOnMouseEnter: true,
+            }),
+          ],
+    []
+  )
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    {
+      align: 'start',
+      dragFree: true,
+      loop: true,
+      watchDrag: scrollable,
+    },
+    plugins
+  )
   const [canPrev, setCanPrev] = useState(false)
   const [canNext, setCanNext] = useState(false)
 
@@ -42,6 +68,7 @@ export function CoverRow<T extends GameCardData>({
     if (!emblaApi) return
     setCanPrev(emblaApi.canScrollPrev())
     setCanNext(emblaApi.canScrollNext())
+    setScrollable(emblaApi.canScrollPrev() || emblaApi.canScrollNext())
   }, [emblaApi])
 
   useEffect(() => {
@@ -60,24 +87,28 @@ export function CoverRow<T extends GameCardData>({
 
   return (
     <div className={twMerge('relative', bleedClassName, className)}>
-      <button
-        type="button"
-        aria-label="Capas anteriores"
-        disabled={!canPrev}
-        onClick={() => emblaApi?.scrollPrev()}
-        className={`${arrowClass} left-1.5`}
-      >
-        <ChevronLeft className="size-[18px]" aria-hidden="true" />
-      </button>
-      <button
-        type="button"
-        aria-label="Próximas capas"
-        disabled={!canNext}
-        onClick={() => emblaApi?.scrollNext()}
-        className={`${arrowClass} right-1.5`}
-      >
-        <ChevronRight className="size-[18px]" aria-hidden="true" />
-      </button>
+      {scrollable && (
+        <>
+          <button
+            type="button"
+            aria-label="Capas anteriores"
+            disabled={!canPrev}
+            onClick={() => emblaApi?.scrollPrev()}
+            className={`${arrowClass} left-1.5`}
+          >
+            <ChevronLeft className="size-[18px]" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            aria-label="Próximas capas"
+            disabled={!canNext}
+            onClick={() => emblaApi?.scrollNext()}
+            className={`${arrowClass} right-1.5`}
+          >
+            <ChevronRight className="size-[18px]" aria-hidden="true" />
+          </button>
+        </>
+      )}
 
       <div
         ref={emblaRef}

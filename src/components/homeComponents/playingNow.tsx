@@ -97,7 +97,7 @@ export function PlayingNow({
       )}
 
       {shown.length > 1 && (
-        <ul className="mt-4 grid grid-cols-3 gap-3 lg:flex lg:gap-6">
+        <ul className="mt-4 grid max-w-lg grid-cols-3 gap-3 lg:flex lg:max-w-none lg:gap-6">
           {shown.map((game, index) => (
             <li
               key={game.igdbId}
