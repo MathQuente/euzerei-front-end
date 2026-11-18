@@ -15,8 +15,6 @@ export const SUCCESS_MESSAGES = {
   reviewRemoved: 'Resenha removida.',
   gameRemoved: 'Jogo removido.',
   platformDisconnected: (label: string) => `${label} desconectada.`,
-  xboxConsoleSaved: 'Console salvo. Vale a partir da próxima importação.',
-  listCopied: 'Lista copiada.',
   verificationLinkSent: (email?: string) =>
     `Enviamos um novo link para ${email || 'o seu email'}.`,
   accountDeleted: 'Sua conta foi excluída.',
@@ -44,7 +42,6 @@ export const ERROR_MESSAGES = {
   requestEmailChange: cannot('pedir a troca de e-mail'),
   resendEmailChange: cannot('reenviar o link'),
   cancelEmailChange: cannot('cancelar a troca'),
-  copyList: 'Não foi possível copiar a lista. Selecione e copie à mão.',
   sendEmail:
     'Não foi possível enviar o email agora. Tente de novo em instantes.',
   updateEndless: cannot('atualizar a marca Infinito'),
@@ -53,7 +50,6 @@ export const ERROR_MESSAGES = {
   saveRating: cannot('salvar a nota'),
   removeRating: cannot('remover a nota'),
   saveCompletedAt: cannot('salvar a data'),
-  saveXboxConsole: cannot('salvar o console'),
   saveProfile: cannot('salvar o perfil'),
   saveReview: cannot('salvar a resenha'),
   removeReview: cannot('remover a resenha'),

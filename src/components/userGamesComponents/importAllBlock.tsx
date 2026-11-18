@@ -2,7 +2,7 @@ import { RefreshCw } from 'lucide-react'
 import { type ReactNode, useEffect, useState } from 'react'
 import type { ImportStatusResponse } from '../../types/import'
 import { Button } from '../button'
-import { formatWhen } from '../importResultSummary'
+import { formatWhen } from '../../utils/formatWhen'
 import { SettingsCardHeader, settingsCardClass } from '../settingsCard'
 import { type BrandStore, StoreTile } from '../storeBrand'
 

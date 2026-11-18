@@ -6,10 +6,12 @@ import {
 } from '../../constants/importMessages'
 import type { PlatformImport } from '../../hooks/usePlatformImport'
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion'
-import type { ImportSectionResult } from '../../types/import'
+import type {
+  ImportResultSection,
+  ImportSectionResult,
+} from '../../types/import'
 import type { LibraryPlatform } from '../../types/platform'
 import { Button } from '../button'
-import type { ImportResultSection } from '../importResultSummary'
 import { CompletionSuggestionsBlock } from './completionSuggestions'
 import {
   IMPORT_FINISH_MS,
