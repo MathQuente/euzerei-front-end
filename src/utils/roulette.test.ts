@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
+  POINTER_PHYSICS,
+  type PointerState,
   ROULETTE_COLORS,
   WHEEL_MAX,
   baseLabelFont,
@@ -7,9 +9,11 @@ import {
   finalRotation,
   fitLabelFont,
   indexUnderPointer,
+  isPointerSettled,
   paletteIndex,
   pickWinnerIndex,
   randomInt,
+  stepPointer,
 } from './roulette'
 
 function sequence(...values: number[]) {
@@ -149,5 +153,61 @@ describe('label font', () => {
   it('shrinks in proportion but never below 62% of the base', () => {
     expect(fitLabelFont(20, 200, 150)).toBeCloseTo(15, 5)
     expect(fitLabelFont(20, 1000, 150)).toBeCloseTo(12.4, 5)
+  })
+})
+
+describe('stepPointer', () => {
+  const rest = { angle: 0, velocity: 0 }
+
+  function run(state: PointerState, seconds: number, kicksPerSecond = 0) {
+    let current = state
+    const frames = Math.round(seconds * 60)
+    let owed = 0
+    let peak = 0
+    for (let i = 0; i < frames; i++) {
+      owed += kicksPerSecond / 60
+      const kicks = Math.floor(owed)
+      owed -= kicks
+      current = stepPointer(current, 1 / 60, kicks)
+      peak = Math.max(peak, current.angle)
+    }
+    return { current, peak }
+  }
+
+  it('stays still when nothing hits it', () => {
+    expect(run(rest, 1).current).toEqual(rest)
+  })
+
+  it('swings forward on one hit and comes back to rest', () => {
+    const hit = stepPointer(rest, 1 / 60, 1)
+    expect(hit.angle).toBeGreaterThan(0)
+    const { current, peak } = run(hit, 1.5)
+    expect(peak).toBeGreaterThan(hit.angle)
+    expect(isPointerSettled(current)).toBe(true)
+  })
+
+  it('never goes past its stop, even with a hit on every frame', () => {
+    const { peak } = run(rest, 2, 360)
+    expect(peak).toBeLessThanOrEqual(POINTER_PHYSICS.maxDeflection)
+  })
+
+  it('stays pressed near the stop at a high rate and relaxes at a low one', () => {
+    const fast = run(rest, 2, 80).current.angle
+    const slow = run(rest, 2, 3).current.angle
+    expect(fast).toBeGreaterThan(POINTER_PHYSICS.maxDeflection * 0.4)
+    expect(slow).toBeLessThan(fast)
+  })
+
+  it('never swings backwards past the rest position', () => {
+    const { current } = run(stepPointer(rest, 1 / 60, 2), 2)
+    expect(current.angle).toBeGreaterThanOrEqual(0)
+  })
+})
+
+describe('isPointerSettled', () => {
+  it('needs both a tiny angle and a tiny speed', () => {
+    expect(isPointerSettled({ angle: 0.01, velocity: 0.2 })).toBe(true)
+    expect(isPointerSettled({ angle: 3, velocity: 0 })).toBe(false)
+    expect(isPointerSettled({ angle: 0, velocity: 50 })).toBe(false)
   })
 })

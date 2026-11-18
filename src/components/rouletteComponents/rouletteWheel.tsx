@@ -10,23 +10,31 @@ import {
 import type { UserGameEntry } from '../../types/games'
 import {
   MIN_LABEL_FONT,
+  type PointerState,
   ROULETTE_COLORS,
   baseLabelFont,
   easeOutSpin,
   finalRotation,
   fitLabelFont,
   indexUnderPointer,
+  isPointerSettled,
   paletteIndex,
   randomInt,
+  stepPointer,
 } from '../../utils/roulette'
+import {
+  cancelSpinSound,
+  isSoundEnabled,
+  scheduleSpin,
+} from '../../utils/rouletteAudio'
+import { crossingTimes } from '../../utils/rouletteSound'
 
 const RIM_COLOR = '#f3f0ff'
 const HOVER_COLOR = '#f7b71d'
 const DROP_COLOR = '#14151d'
-const MARK_COLOR = '#ffffff'
+const DIM_COLOR = 'rgba(12, 13, 19, 0.55)'
 const SKELETON_COLORS = ['#2a2c38', '#323443']
 const SKELETON_SLICES = 24
-const FLICK_SLICES_PER_SECOND = 24
 
 export interface RouletteWheelHandle {
   spinTo: (index: number, durationMs: number, turns: number) => Promise<void>
@@ -137,6 +145,7 @@ function drawWheel(
   context.stroke()
 }
 
+/** Escurece todas as fatias, menos a sorteada: o foco vem do contraste, sem traço por cima. */
 function drawMark(
   canvas: HTMLCanvasElement,
   size: number,
@@ -147,20 +156,21 @@ function drawMark(
   if (!context || index === null || count < 1) return
   const { radius, center } = geometry(size)
   const slice = (Math.PI * 2) / count
-  context.beginPath()
-  context.moveTo(center, center)
-  context.arc(
-    center,
-    center,
-    radius - 2,
-    -Math.PI / 2 + index * slice,
-    -Math.PI / 2 + (index + 1) * slice
-  )
-  context.closePath()
-  context.lineJoin = 'round'
-  context.lineWidth = Math.max(3, size * 0.008)
-  context.strokeStyle = MARK_COLOR
-  context.stroke()
+  context.fillStyle = DIM_COLOR
+  for (let i = 0; i < count; i++) {
+    if (i === index) continue
+    context.beginPath()
+    context.moveTo(center, center)
+    context.arc(
+      center,
+      center,
+      radius,
+      -Math.PI / 2 + i * slice,
+      -Math.PI / 2 + (i + 1) * slice
+    )
+    context.closePath()
+    context.fill()
+  }
 }
 
 export const RouletteWheel = forwardRef<
@@ -180,6 +190,10 @@ export const RouletteWheel = forwardRef<
   const settle = useRef<(() => void) | null>(null)
   const readout = useRef(onReadout)
   const sample = useRef(games)
+  const pointer = useRef<PointerState>({ angle: 0, velocity: 0 })
+  const pendingKicks = useRef(0)
+  const pointerFrame = useRef(0)
+  const spinning = useRef(false)
   const [size, setSize] = useState(0)
   const [hovered, setHovered] = useState(false)
 
@@ -198,14 +212,44 @@ export const RouletteWheel = forwardRef<
     return () => observer.disconnect()
   }, [])
 
+  const applyPointer = useCallback((angle: number) => {
+    if (dropRef.current) dropRef.current.style.transform = `rotate(${angle}deg)`
+  }, [])
+
   const cancelSpin = useCallback(() => {
     cancelAnimationFrame(frame.current)
+    cancelAnimationFrame(pointerFrame.current)
+    cancelSpinSound()
+    spinning.current = false
+    pendingKicks.current = 0
+    pointer.current = { angle: 0, velocity: 0 }
+    applyPointer(0)
     const done = settle.current
     settle.current = null
     done?.()
-  }, [])
+  }, [applyPointer])
 
   useEffect(() => cancelSpin, [cancelSpin])
+
+  const runPointer = useCallback(() => {
+    let last = performance.now()
+    const loop = (now: number) => {
+      const seconds = Math.min(0.05, (now - last) / 1000)
+      last = now
+      const kicks = pendingKicks.current
+      pendingKicks.current = 0
+      pointer.current = stepPointer(pointer.current, seconds, kicks)
+      applyPointer(pointer.current.angle)
+      if (spinning.current || !isPointerSettled(pointer.current)) {
+        pointerFrame.current = requestAnimationFrame(loop)
+      } else {
+        pointer.current = { angle: 0, velocity: 0 }
+        applyPointer(0)
+      }
+    }
+    cancelAnimationFrame(pointerFrame.current)
+    pointerFrame.current = requestAnimationFrame(loop)
+  }, [applyPointer])
 
   const redraw = useCallback(() => {
     if (!wheelCanvasRef.current || size === 0) return
@@ -242,15 +286,6 @@ export const RouletteWheel = forwardRef<
     if (rotorRef.current) rotorRef.current.style.transform = 'rotate(0deg)'
   })
 
-  const flick = useCallback(() => {
-    const drop = dropRef.current
-    if (!drop || typeof drop.animate !== 'function') return
-    drop.animate(
-      [{ transform: 'rotate(-14deg)' }, { transform: 'rotate(0deg)' }],
-      { duration: 130, easing: 'cubic-bezier(.2,.8,.2,1)' }
-    )
-  }, [])
-
   const spinTo = useCallback(
     (index: number, durationMs: number, turns: number) =>
       new Promise<void>(resolve => {
@@ -277,13 +312,20 @@ export const RouletteWheel = forwardRef<
         }
 
         const sliceAngle = 360 / count
-        const startedAt = performance.now()
+        const startedAt =
+          (isSoundEnabled()
+            ? scheduleSpin(crossingTimes(from, to, durationMs, count))
+            : null) ?? performance.now()
         let lastIndex = -1
-        let lastAt = startedAt
         let lastAngle = from
+        spinning.current = true
+        runPointer()
 
         const tick = (now: number) => {
-          const progress = Math.min(1, (now - startedAt) / durationMs)
+          const progress = Math.min(
+            1,
+            Math.max(0, (now - startedAt) / durationMs)
+          )
           const angle = from + (to - from) * easeOutSpin(progress)
           rotation.current = angle
           apply(angle)
@@ -292,13 +334,11 @@ export const RouletteWheel = forwardRef<
           if (under !== lastIndex) {
             lastIndex = under
             readout.current(games[under].name)
-            const slicesPerSecond =
-              ((Math.abs(angle - lastAngle) / Math.max(1, now - lastAt)) *
-                1000) /
-              sliceAngle
-            if (slicesPerSecond < FLICK_SLICES_PER_SECOND) flick()
           }
-          lastAt = now
+          pendingKicks.current += Math.abs(
+            Math.floor(-angle / sliceAngle) -
+              Math.floor(-lastAngle / sliceAngle)
+          )
           lastAngle = angle
 
           if (progress < 1) {
@@ -306,12 +346,13 @@ export const RouletteWheel = forwardRef<
           } else {
             rotation.current = to
             apply(to)
+            spinning.current = false
             finish()
           }
         }
         frame.current = requestAnimationFrame(tick)
       }),
-    [games, flick, cancelSpin]
+    [games, runPointer, cancelSpin]
   )
 
   useImperativeHandle(ref, () => ({ spinTo }), [spinTo])
@@ -327,7 +368,12 @@ export const RouletteWheel = forwardRef<
         className="absolute inset-0 will-change-transform"
       >
         <canvas ref={wheelCanvasRef} className="absolute inset-0 size-full" />
-        <canvas ref={markCanvasRef} className="absolute inset-0 size-full" />
+        <canvas
+          ref={markCanvasRef}
+          className={`absolute inset-0 size-full transition-opacity duration-300 motion-reduce:transition-none ${
+            winnerIndex !== null && !loading ? 'opacity-100' : 'opacity-0'
+          }`}
+        />
       </div>
       <button
         ref={hubRef}

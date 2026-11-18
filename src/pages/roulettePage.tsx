@@ -11,18 +11,15 @@ import {
   RouletteWheel,
   type RouletteWheelHandle,
 } from '../components/rouletteComponents/rouletteWheel'
+import { SoundToggle } from '../components/rouletteComponents/soundToggle'
 import { StartPlayingButton } from '../components/startPlayingButton'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { prefersReducedMotion } from '../hooks/usePrefersReducedMotion'
 import { useRoulette } from '../hooks/useRoulette'
 import type { UserGameEntry } from '../types/games'
 import { gamePath } from '../utils/gamePath'
-import {
-  ROULETTE_COLORS,
-  WHEEL_MAX,
-  paletteIndex,
-  pickWinnerIndex,
-} from '../utils/roulette'
+import { WHEEL_MAX, pickWinnerIndex } from '../utils/roulette'
+import { playResult, unlock } from '../utils/rouletteAudio'
 
 const FIRST_SPIN_MS = 7000
 const AGAIN_SPIN_MS = 4000
@@ -103,8 +100,9 @@ export function RoulettePage() {
     if (!reduced) {
       await wait(CELEBRATE_DELAY_MS)
       if (!mountedRef.current) return
-      setConfetti(count => count + 1)
     }
+    playResult()
+    if (!reduced) setConfetti(count => count + 1)
     spinningRef.current = false
     setSettling(false)
     setDialogOpen(true)
@@ -136,10 +134,12 @@ export function RoulettePage() {
   }
 
   function handleSpin() {
+    unlock()
     void startSpin(games, false)
   }
 
   function handleAgain() {
+    unlock()
     closeDialog()
     if (total > WHEEL_MAX) {
       setExclude(lastWinnerId.current ?? undefined)
@@ -168,18 +168,16 @@ export function RoulettePage() {
     setAnnouncement(`${game.name} agora está em Jogando e saiu da roleta.`)
   }
 
-  const winnerColor =
-    winner === null
-      ? ROULETTE_COLORS[0].background
-      : ROULETTE_COLORS[paletteIndex(winner.index, games.length)].background
-
   return (
     <div className="mt-2 flex flex-col gap-5">
       <BackButton className="mb-0 mt-2" />
       <header className="flex flex-col gap-1.5">
-        <h1 className="font-display text-2xl font-extrabold tracking-tight text-white lg:text-3xl">
-          Roleta
-        </h1>
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="font-display text-2xl font-extrabold tracking-tight text-white lg:text-3xl">
+            Roleta
+          </h1>
+          <SoundToggle />
+        </div>
         <p className="text-gray-400">Sorteie o próximo jogo da sua fila.</p>
         {hasData && (
           <p className="flex flex-wrap gap-x-3 text-gray-400">
@@ -326,7 +324,6 @@ export function RoulettePage() {
 
       <RouletteResultDialog
         game={winner?.game ?? null}
-        color={winnerColor}
         open={dialogOpen}
         returnFocusRef={hubRef}
         onClose={closeDialog}

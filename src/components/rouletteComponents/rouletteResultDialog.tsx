@@ -1,5 +1,5 @@
 import * as Dialog from '@radix-ui/react-dialog'
-import { Dices, X } from 'lucide-react'
+import { ChevronRight, Dices, X } from 'lucide-react'
 import { type RefObject, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { focusRing } from '../../styles/focus'
@@ -12,7 +12,6 @@ import { StartPlayingButton } from '../startPlayingButton'
 
 interface RouletteResultDialogProps {
   game: UserGameEntry | null
-  color: string
   open: boolean
   returnFocusRef: RefObject<HTMLElement>
   onClose: () => void
@@ -22,7 +21,6 @@ interface RouletteResultDialogProps {
 
 export function RouletteResultDialog({
   game,
-  color,
   open,
   returnFocusRef,
   onClose,
@@ -50,8 +48,7 @@ export function RouletteResultDialog({
             event.preventDefault()
             returnFocusRef.current?.focus()
           }}
-          style={{ borderColor: color }}
-          className="fixed left-1/2 top-1/2 z-confirm-content max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-[520px] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border-[5px] bg-dark-bg-lighter px-6 pb-6 pt-8 text-center text-white shadow-2xl shadow-black/60"
+          className="fixed left-1/2 top-1/2 z-confirm-content max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-[520px] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl bg-dark-bg-lighter px-6 pb-6 pt-8 text-center text-white shadow-2xl shadow-black/60"
         >
           {game && (
             <div className="flex animate-swap-in flex-col items-center gap-1.5 motion-reduce:animate-none">
@@ -91,9 +88,10 @@ export function RouletteResultDialog({
                 </Button>
                 <Link
                   to={gamePath(game)}
-                  className={`inline-flex min-h-11 items-center px-1 underline underline-offset-4 ${textLink}`}
+                  className={`inline-flex min-h-11 items-center gap-0.5 px-1 ${textLink}`}
                 >
                   Ver o jogo
+                  <ChevronRight className="size-4" aria-hidden="true" />
                 </Link>
               </div>
             </div>

@@ -99,3 +99,54 @@ export function fitLabelFont(
   if (longest <= available) return base
   return Math.max(base * 0.62, (base * available) / longest)
 }
+
+/**
+ * Palheta (o ponteiro em forma de gota): uma mola com amortecimento que cada
+ * divisória da roleta empurra ao passar. Devagar, vemos cada batida; rápido, as
+ * batidas se emendam e a palheta fica pressionada perto do limite, tremendo,
+ * como uma palheta de verdade contra os pinos.
+ */
+export const POINTER_PHYSICS = {
+  maxDeflection: 16,
+  stiffness: 900,
+  damping: 26,
+  kick: 300,
+  maxKicksPerFrame: 6,
+  maxStep: 0.004,
+}
+
+export interface PointerState {
+  angle: number
+  velocity: number
+}
+
+export function stepPointer(
+  state: PointerState,
+  seconds: number,
+  kicks: number
+): PointerState {
+  const physics = POINTER_PHYSICS
+  let { angle, velocity } = state
+  velocity += Math.min(kicks, physics.maxKicksPerFrame) * physics.kick
+
+  let remaining = Math.max(0, seconds)
+  while (remaining > 0) {
+    const dt = Math.min(remaining, physics.maxStep)
+    remaining -= dt
+    const acceleration = -physics.stiffness * angle - physics.damping * velocity
+    velocity += acceleration * dt
+    angle += velocity * dt
+    if (angle > physics.maxDeflection) {
+      angle = physics.maxDeflection
+      velocity = Math.min(velocity, 0)
+    } else if (angle < 0) {
+      angle = 0
+      velocity = Math.max(velocity, 0)
+    }
+  }
+  return { angle, velocity }
+}
+
+export function isPointerSettled(state: PointerState): boolean {
+  return Math.abs(state.angle) < 0.05 && Math.abs(state.velocity) < 1
+}
