@@ -5,6 +5,7 @@ import {
   formatHoursCompact,
   formatHoursOrNone,
   formatHoursSpoken,
+  isUnderOneHour,
   playedWord,
 } from './hours'
 
@@ -91,5 +92,16 @@ describe('playedWord', () => {
     [0.999, 'jogadas'],
   ])('%s h -> %s', (hours, expected) => {
     expect(playedWord(hours)).toBe(expected)
+  })
+})
+
+describe('isUnderOneHour', () => {
+  it('is true only for a positive time that shows up as minutes', () => {
+    expect(isUnderOneHour(0.03)).toBe(true)
+    expect(isUnderOneHour(0.77)).toBe(true)
+    expect(isUnderOneHour(0)).toBe(false)
+    expect(isUnderOneHour(1)).toBe(false)
+    expect(isUnderOneHour(4.2)).toBe(false)
+    expect(isUnderOneHour(0.999)).toBe(false)
   })
 })

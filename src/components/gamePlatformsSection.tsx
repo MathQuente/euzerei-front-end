@@ -15,7 +15,12 @@ import {
   hasAccountBreakdown,
   hasNoHours,
 } from '../utils/accountHours'
-import { NO_HOURS_LABEL, formatHoursOrNone } from '../utils/hours'
+import {
+  NO_HOURS_LABEL,
+  formatHours,
+  formatHoursOrNone,
+  isUnderOneHour,
+} from '../utils/hours'
 import {
   getAvailableLibraryPlatforms,
   getLibraryPlatform,
@@ -119,6 +124,13 @@ export function PlatformEditor({
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs text-gray-400">Horas jogadas</span>
         <div className="flex items-center gap-2">
+          {hoursValid &&
+            parsedHours !== null &&
+            isUnderOneHour(parsedHours) && (
+              <span className="text-xs text-gray-400">
+                ≈ {formatHours(parsedHours)}
+              </span>
+            )}
           <input
             type="number"
             inputMode="decimal"

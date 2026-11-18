@@ -7,7 +7,8 @@ function wholeMinutes(hours: number) {
   return Math.round(hours * 60)
 }
 
-function isUnderOneHour(hours: number) {
+/** Dura menos de 1 h (e mais de zero): aparece como minutos. */
+export function isUnderOneHour(hours: number) {
   return hours > 0 && wholeMinutes(hours) < 60
 }
 
