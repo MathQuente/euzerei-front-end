@@ -14,7 +14,7 @@ import { gamePath } from '../../utils/gamePath'
 import { hiResCover } from '../../utils/hiResCover'
 import {
   daysUntilRelease,
-  formatReleaseDate,
+  formatReleaseLabel,
   releaseYear as yearOf,
 } from '../../utils/releaseDate'
 import { Button } from '../button'
@@ -60,6 +60,8 @@ export function GameInfo({ game, onClose }: GameInfoProps) {
   const inWishlist = statusId === STATUS.WISHLIST
 
   const releaseDate = details?.game.releaseDate ?? game.releaseDate ?? null
+  const releasePrecision =
+    details?.game.releaseDatePrecision ?? game.releaseDatePrecision
   const releaseYear = releaseDate ? yearOf(releaseDate) : null
   const isUpcoming = releaseDate ? daysUntilRelease(releaseDate) > 0 : false
   const endless = endlessControl(statusId, isUpcoming)
@@ -153,10 +155,16 @@ export function GameInfo({ game, onClose }: GameInfoProps) {
               <p className="flex flex-wrap items-baseline gap-x-2 text-[13px] text-gray-400">
                 {inWishlist && isUpcoming && releaseDate && (
                   <span>
-                    Lança em{' '}
-                    <b className="font-display font-extrabold tabular-nums text-[13px] text-white">
-                      {formatReleaseDate(releaseDate)}
-                    </b>
+                    {releasePrecision === 'tbd' ? (
+                      'Data a confirmar'
+                    ) : (
+                      <>
+                        Lança em{' '}
+                        <b className="font-display font-extrabold tabular-nums text-[13px] text-white">
+                          {formatReleaseLabel(releaseDate, releasePrecision)}
+                        </b>
+                      </>
+                    )}
                   </span>
                 )}
                 {!inWishlist && hasCommunityAverage && (

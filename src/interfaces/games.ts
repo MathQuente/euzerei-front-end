@@ -9,6 +9,7 @@ import type {
   SimilarGamesResponse,
 } from '../types/games'
 import type { LibraryPlatform } from '../types/platform'
+import type { ReleasePrecision } from '../utils/releaseDate'
 
 export type SortField =
   | 'name'
@@ -94,6 +95,7 @@ export interface DlcAndOriginalGameAreaProps {
 export interface GameLaunchersDivProps {
   platformName: string
   date: number | null
+  precision?: ReleasePrecision
 }
 
 export interface RatingAverageProps {

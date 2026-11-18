@@ -1,3 +1,5 @@
+import type { ReleasePrecision } from '../utils/releaseDate'
+
 export enum GameStatusEnum {
   Played = 'PLAYED',
   Playing = 'PLAYING',
@@ -13,6 +15,7 @@ export interface GameCardData {
   name: string
   coverUrl: string | null
   releaseDate?: number | null
+  releaseDatePrecision?: ReleasePrecision
   summary?: string
   category?: number
   parentGameId?: number | null
@@ -39,6 +42,7 @@ export interface GameBase extends GameCardData {
 export interface GameReleaseDate {
   platformName: string
   date: number | null
+  precision?: ReleasePrecision
 }
 
 export interface GameScreenshot {

@@ -1,16 +1,22 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { Star } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { useRating } from '../../hooks/useRating'
+import { useReleaseCountdown } from '../../hooks/useReleaseCountdown'
 import type { SectionType } from '../../interfaces/games'
 import type { GameBase } from '../../types/games'
 import { gamePath } from '../../utils/gamePath'
 import { shortPlatforms } from '../../utils/platformLabel'
 import {
-  daysUntilRelease,
-  formatReleaseDate,
+  countdownSpoken,
+  formatCountdown,
   formatReleaseDayMonth,
-  releaseCountdown,
+  formatReleaseLabel,
+  isFarAway,
   releaseYear,
+  shortCountdown,
+  shortReleaseLabel,
 } from '../../utils/releaseDate'
 import { GameCard } from '../gamesComponents/gameCard'
 import { rowLink } from './styles'
@@ -76,46 +82,74 @@ export function RatedScore({
   )
 }
 
-function countdownInfo(releaseDate: number | null) {
-  const label = releaseDate ? releaseCountdown(releaseDate) : null
-  if (!releaseDate || !label) return null
-  const days = daysUntilRelease(releaseDate)
-  return { label, days, soon: days <= SOON_DAYS, word: days <= 1 }
-}
+function CountdownColumn({ game }: { game: GameBase }) {
+  const queryClient = useQueryClient()
+  const countdown = useReleaseCountdown(
+    game.releaseDate,
+    game.releaseDatePrecision,
+    {
+      granularity: 'minute',
+      onRelease: () =>
+        queryClient.invalidateQueries(
+          { queryKey: ['comingSoon'] },
+          { cancelRefetch: false }
+        ),
+    }
+  )
+  const ts = game.releaseDate
 
-function CountdownColumn({ releaseDate }: { releaseDate: number | null }) {
-  const info = countdownInfo(releaseDate)
-
-  if (!info) {
-    return (
-      <span className="w-10 shrink-0 text-center text-xs tabular-nums text-gray-400">
-        {releaseDate ? formatReleaseDayMonth(releaseDate) : '—'}
+  const column = (spoken: string, visual: ReactNode) => (
+    <span className="flex w-10 shrink-0 flex-col items-center leading-none">
+      <span className="sr-only">{spoken}</span>
+      <span aria-hidden="true" className="flex flex-col items-center">
+        {visual}
       </span>
+    </span>
+  )
+
+  if (countdown.kind === 'later' && !isFarAway(countdown.days)) {
+    const tone =
+      countdown.days <= SOON_DAYS ? 'text-primary-link' : 'text-gray-300'
+    return column(
+      `em ${countdown.days} dias`,
+      <>
+        <span
+          className={`font-display text-xl font-extrabold tabular-nums ${tone}`}
+        >
+          {countdown.days}
+        </span>
+        <span className="mt-1 text-[10px] tracking-wide text-gray-400">
+          dias
+        </span>
+      </>
     )
   }
 
-  const tone = info.soon ? 'text-primary-link' : 'text-gray-300'
+  if (countdown.kind === 'last-day') {
+    const short = shortCountdown(countdown.ms)
+    return column(
+      `faltam ${countdownSpoken(countdown.ms)}`,
+      <>
+        <span className="font-display text-xl font-extrabold tabular-nums text-amber-400">
+          {short.value}
+        </span>
+        <span className="mt-1 text-[10px] tracking-wide text-gray-400">
+          {short.unit}
+        </span>
+      </>
+    )
+  }
+
+  if (countdown.kind === 'today') {
+    return column(
+      'chegou o dia',
+      <span className="text-xs font-semibold text-amber-400">saiu!</span>
+    )
+  }
+
   return (
-    <span className="flex w-10 shrink-0 flex-col items-center leading-none">
-      <span className="sr-only">{info.label}</span>
-      <span aria-hidden="true" className="flex flex-col items-center">
-        {info.word ? (
-          <span className={`text-xs font-semibold ${tone}`}>
-            {info.days === 0 ? 'hoje' : 'amanhã'}
-          </span>
-        ) : (
-          <>
-            <span
-              className={`font-display text-xl font-extrabold tabular-nums ${tone}`}
-            >
-              {info.days}
-            </span>
-            <span className="mt-1 text-[10px] tracking-wide text-gray-400">
-              dias
-            </span>
-          </>
-        )}
-      </span>
+    <span className="w-10 shrink-0 text-center text-xs tabular-nums text-gray-400">
+      {ts ? shortReleaseLabel(ts, game.releaseDatePrecision) : '—'}
     </span>
   )
 }
@@ -131,7 +165,9 @@ function supportText(game: GameBase, type: SectionType) {
 
   if (type === 'coming') {
     parts.push(
-      game.releaseDate ? formatReleaseDate(game.releaseDate) : undefined
+      game.releaseDate
+        ? formatReleaseLabel(game.releaseDate, game.releaseDatePrecision)
+        : undefined
     )
   } else {
     if (type === 'trending' && game.releaseDate) {
@@ -148,7 +184,7 @@ function featureLines(game: GameBase, type: SectionType) {
   const year = !game.releaseDate
     ? ''
     : type === 'coming'
-      ? formatReleaseDate(game.releaseDate)
+      ? formatReleaseLabel(game.releaseDate, game.releaseDatePrecision)
       : type === 'trending'
         ? String(releaseYear(game.releaseDate))
         : ''
@@ -161,31 +197,66 @@ function featureLines(game: GameBase, type: SectionType) {
 }
 
 function FeaturedCountdown({ game }: { game: GameBase }) {
-  const info = countdownInfo(game.releaseDate)
-  const tone = info?.soon ? 'text-primary-link' : 'text-gray-300'
+  const queryClient = useQueryClient()
+  const countdown = useReleaseCountdown(
+    game.releaseDate,
+    game.releaseDatePrecision,
+    {
+      granularity: 'second',
+      onRelease: () =>
+        queryClient.invalidateQueries(
+          { queryKey: ['comingSoon'] },
+          { cancelRefetch: false }
+        ),
+    }
+  )
+  const big = 'font-display text-2xl font-extrabold tracking-tight tabular-nums'
 
-  if (!info) {
+  if (countdown.kind === 'later' && !isFarAway(countdown.days)) {
+    const tone =
+      countdown.days <= SOON_DAYS ? 'text-primary-link' : 'text-gray-300'
     return (
-      <p className="font-display text-2xl font-extrabold tracking-tight tabular-nums text-white">
-        {game.releaseDate ? formatReleaseDayMonth(game.releaseDate) : '—'}
+      <p className="flex items-baseline gap-2">
+        <span className="sr-only">em {countdown.days} dias</span>
+        <span aria-hidden="true" className={`${big} ${tone}`}>
+          {countdown.days}
+        </span>
+        <span aria-hidden="true" className="text-sm text-gray-400">
+          dias
+        </span>
+      </p>
+    )
+  }
+
+  if (countdown.kind === 'last-day') {
+    return (
+      <p>
+        <span className="sr-only">faltam {countdownSpoken(countdown.ms)}</span>
+        <span aria-hidden="true" className={`${big} text-amber-400`}>
+          {formatCountdown(countdown.ms)}
+        </span>
+      </p>
+    )
+  }
+
+  if (countdown.kind === 'today') {
+    return (
+      <p>
+        <span className="sr-only">chegou o dia</span>
+        <span aria-hidden="true" className={`${big} text-amber-400`}>
+          saiu!
+        </span>
       </p>
     )
   }
 
   return (
-    <p className="flex items-baseline gap-2">
-      <span className="sr-only">{info.label}</span>
-      <span
-        aria-hidden="true"
-        className={`font-display text-2xl font-extrabold tracking-tight tabular-nums ${tone}`}
-      >
-        {info.word ? info.label : info.days}
-      </span>
-      {!info.word && (
-        <span aria-hidden="true" className="text-sm text-gray-400">
-          dias
-        </span>
-      )}
+    <p className={`${big} text-white`}>
+      {game.releaseDate
+        ? countdown.kind === 'uncertain'
+          ? formatReleaseLabel(game.releaseDate, game.releaseDatePrecision)
+          : formatReleaseDayMonth(game.releaseDate)
+        : '—'}
     </p>
   )
 }
@@ -209,7 +280,7 @@ export function GameRow({
           {rank}
         </span>
       )}
-      {type === 'coming' && <CountdownColumn releaseDate={game.releaseDate} />}
+      {type === 'coming' && <CountdownColumn game={game} />}
       <GameCard game={game} size="row" interactive={false} />
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <p className="truncate text-sm font-medium text-white">{game.name}</p>

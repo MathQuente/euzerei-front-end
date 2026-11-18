@@ -1,10 +1,11 @@
 import type { GameLaunchersDivProps } from '../interfaces/games'
 import { getPlatformIcon } from '../utils/platformIcon'
-import { formatReleaseDate } from '../utils/releaseDate'
+import { formatReleaseLabel } from '../utils/releaseDate'
 
 export function GameLaunchersDiv({
   platformName,
   date,
+  precision,
 }: GameLaunchersDivProps) {
   const Icon = getPlatformIcon(platformName)
 
@@ -13,7 +14,11 @@ export function GameLaunchersDiv({
       <Icon className="size-4 text-gray-400 flex-shrink-0" />
       <span className="text-gray-400">{platformName}:</span>
       <span className="text-gray-300">
-        {date ? formatReleaseDate(date) : 'Data desconhecida'}
+        {date
+          ? formatReleaseLabel(date, precision)
+          : precision === 'tbd'
+            ? 'A confirmar'
+            : 'Data desconhecida'}
       </span>
     </div>
   )

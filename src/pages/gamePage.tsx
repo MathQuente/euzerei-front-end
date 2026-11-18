@@ -9,6 +9,7 @@ import { DlcAndOriginalGameArea } from '../components/dlcAndOriginalGameArea'
 import { GameLaunchersDiv } from '../components/gameLaunchersDiv'
 import { GameMediaGallery } from '../components/gameMediaGallery'
 import { GameForm } from '../components/gamesComponents/gameForm'
+import { ReleaseCountdown } from '../components/gamesComponents/releaseCountdown'
 import { PlatformDiv } from '../components/platformDiv'
 import { PlayersInfo } from '../components/playersInfo'
 import { RatingAverage } from '../components/ratingAverage'
@@ -25,7 +26,6 @@ import { useGameRef } from '../hooks/useGameRef'
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion'
 import { focusRing } from '../styles/focus'
 import { hiResCover } from '../utils/hiResCover'
-import { formatReleaseDate } from '../utils/releaseDate'
 
 export function GamePage() {
   const { user } = useAuth()
@@ -215,14 +215,10 @@ export function GamePage() {
             )}
 
             {game.releaseDate && (
-              <div>
-                <p className="text-xs text-gray-400 uppercase tracking-widest mb-2">
-                  Lançamento
-                </p>
-                <span className="inline-flex items-center px-2.5 py-1 bg-dark-bg-lighter border border-dark-border rounded-full text-sm text-gray-300">
-                  {formatReleaseDate(game.releaseDate)}
-                </span>
-              </div>
+              <ReleaseCountdown
+                releaseDate={game.releaseDate}
+                precision={game.releaseDatePrecision}
+              />
             )}
 
             {game.releaseDates && game.releaseDates.length > 0 && (
@@ -236,6 +232,7 @@ export function GamePage() {
                       key={releaseDate.platformName}
                       platformName={releaseDate.platformName}
                       date={releaseDate.date}
+                      precision={releaseDate.precision}
                     />
                   ))}
                 </div>
