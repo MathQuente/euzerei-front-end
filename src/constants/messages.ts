@@ -51,6 +51,8 @@ export const ERROR_MESSAGES = {
   removeRating: cannot('remover a nota'),
   saveCompletedAt: cannot('salvar a data'),
   saveProfile: cannot('salvar o perfil'),
+  imageRejected:
+    'Essa imagem não foi aceita. Selecione um JPG, PNG, GIF ou WebP menor.',
   saveReview: cannot('salvar a resenha'),
   removeReview: cannot('remover a resenha'),
   requestPasswordReset: cannot('pedir a redefinição'),

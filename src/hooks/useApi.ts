@@ -38,6 +38,7 @@ import type {
   UndoSuggestionResponse,
 } from '../types/suggestion'
 import type {
+  ImageUploadSignature,
   PublicUserProfileResponse,
   UpdateUserPayload,
   UserProfileResponse,
@@ -73,6 +74,13 @@ http.interceptors.response.use(
     return Promise.reject(error)
   }
 )
+
+export class ImageRejectedError extends Error {
+  constructor() {
+    super('Image rejected by the upload service')
+    this.name = 'ImageRejectedError'
+  }
+}
 
 export type SignInProvider = 'google' | 'discord'
 
@@ -431,15 +439,34 @@ export const api = {
     return response
   },
   uploadFile: async (file: File) => {
+    const { data: signed } = await http.post<ImageUploadSignature>(
+      '/users/image-upload-signature'
+    )
+
+    // Cloudinary rejects any field that is not signed, so these are exactly
+    // the signed ones plus api_key and signature.
     const formData = new FormData()
     formData.append('file', file)
-    formData.append('upload_preset', 'images_preset')
+    formData.append('api_key', signed.apiKey)
+    formData.append('timestamp', String(signed.timestamp))
+    formData.append('folder', signed.folder)
+    formData.append('public_id', signed.publicId)
+    formData.append('allowed_formats', signed.allowedFormats)
+    formData.append('upload_preset', signed.uploadPreset)
+    formData.append('signature', signed.signature)
 
-    const response = await axios.post(
-      'https://api.cloudinary.com/v1_1/dtdkzusmw/image/upload',
-      formData
-    )
-    return response.data.secure_url
+    try {
+      const response = await axios.post<{ secure_url: string }>(
+        `https://api.cloudinary.com/v1_1/${signed.cloudName}/image/upload`,
+        formData
+      )
+      return response.data.secure_url
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 400) {
+        throw new ImageRejectedError()
+      }
+      throw error
+    }
   },
   updateUser: async (payload: UpdateUserPayload) => {
     const body: Record<string, string | null> = {}

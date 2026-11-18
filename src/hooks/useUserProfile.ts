@@ -7,7 +7,7 @@ import {
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants/messages'
 import type { UpdateUserProfileData, UserProfileResponse } from '../types/user'
 import { notify } from '../utils/notify'
-import { api } from './useApi'
+import { ImageRejectedError, api } from './useApi'
 import { useAuth } from './useAuth'
 
 interface UseUserProfileOptions {
@@ -122,7 +122,12 @@ export const useUserProfile = (options?: UseUserProfileOptions) => {
       if (context?.previousProfile) {
         queryClient.setQueryData(queryKey, context.previousProfile)
       }
-      notify.failure(error, ERROR_MESSAGES.saveProfile)
+      notify.failure(
+        error,
+        error instanceof ImageRejectedError
+          ? ERROR_MESSAGES.imageRejected
+          : ERROR_MESSAGES.saveProfile
+      )
     },
     onSettled: () => {
       queryClient.invalidateQueries({

@@ -15,7 +15,7 @@ import { SettingsCardHeader, settingsCardClass } from '../settingsCard'
 
 type ProfileForm = z.infer<typeof updateProfileSchema>
 
-const IMAGE_ACCEPT = 'image/png,image/jpeg,image/gif'
+const IMAGE_ACCEPT = 'image/png,image/jpeg,image/gif,image/webp'
 const bannerButton =
   'border-gray-600 bg-dark-bg-lighter text-white shadow-md shadow-black/50 hover:bg-dark-border'
 
@@ -260,7 +260,7 @@ export function UserProfileForm({
           </div>
         </div>
         <p className="px-4 pb-3 text-xs text-gray-500 sm:px-5">
-          Banner e foto: PNG, JPEG ou GIF, até 3 MB.
+          Banner e foto: PNG, JPEG, GIF ou WebP, até 3 MB.
         </p>
       </div>
 

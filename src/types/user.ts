@@ -98,3 +98,14 @@ export type UpdateUserPayload = {
     UpdateUserProfileData[K]
   >
 }
+
+export interface ImageUploadSignature {
+  cloudName: string
+  apiKey: string
+  timestamp: number
+  folder: string
+  publicId: string
+  allowedFormats: string
+  uploadPreset: string
+  signature: string
+}
