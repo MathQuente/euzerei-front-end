@@ -8,7 +8,7 @@ import { usePlayedCount } from '../../hooks/usePlayedCount'
 import { useRating } from '../../hooks/useRating'
 import type { GameCardData } from '../../types/games'
 import { formatHours, playedWord } from '../../utils/hours'
-import { formatReleaseDate } from '../../utils/releaseDate'
+import { formatReleaseLabel } from '../../utils/releaseDate'
 import { RatingAverage } from '../ratingAverage'
 import { PlatformList } from './platformList'
 
@@ -66,7 +66,9 @@ export function LibraryStats({
   )
   const doneDate = doneAt ? dayjs(doneAt).format('DD/MM/YYYY') : null
   const upcomingDate =
-    !isReleased && game.releaseDate ? formatReleaseDate(game.releaseDate) : null
+    !isReleased && game.releaseDate
+      ? formatReleaseLabel(game.releaseDate, game.releaseDatePrecision)
+      : null
   const factLabel = upcomingDate
     ? 'Lançamento'
     : times > 0

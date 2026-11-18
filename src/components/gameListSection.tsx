@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { twMerge } from 'tailwind-merge'
 import type { GameListSectionProps, SectionType } from '../interfaces/games'
 import type { GameBase } from '../types/games'
-import { formatReleaseDate } from '../utils/releaseDate'
+import { formatReleaseLabel } from '../utils/releaseDate'
 import { CoverRow } from './homeComponents/coverRow'
 import {
   FeaturedGameRow,
@@ -23,7 +23,9 @@ function GameMeta({ game, type }: { game: GameBase; type: SectionType }) {
 
   return (
     <p className="text-xs text-gray-400 mt-0.5">
-      {game.releaseDate ? formatReleaseDate(game.releaseDate) : '—'}
+      {game.releaseDate
+        ? formatReleaseLabel(game.releaseDate, game.releaseDatePrecision)
+        : '—'}
     </p>
   )
 }
