@@ -58,7 +58,13 @@ export function UserGamesPageByStatus() {
   const [sortField, setSortField] = useState<SortField>(() => {
     const url = new URL(window.location.toString())
     const v = url.searchParams.get('sortField')
-    const offered = sortFieldsFor(startsOnPlayed ? 'played' : 'library')
+    const offered = sortFieldsFor(
+      startsOnPlayed
+        ? 'played'
+        : (status && routeToEnumMap[status]) === GameStatusEnum.Wishlist
+          ? 'wishlist'
+          : 'library'
+    )
     const requested = offered.find(field => field === v)
     return requested ?? (startsOnPlayed ? 'completedAt' : 'dateAdded')
   })
@@ -97,6 +103,23 @@ export function UserGamesPageByStatus() {
       ? routeToEnumMap[status]
       : GameStatusEnum.Played
 
+  const listContext =
+    currentEnumStatus === GameStatusEnum.Played
+      ? 'played'
+      : currentEnumStatus === GameStatusEnum.Wishlist
+        ? 'wishlist'
+        : 'library'
+  const offeredSortFields = sortFieldsFor(listContext)
+  // A ordem escolhida pode não existir na aba (nota em Jogado, depois Desejos):
+  // nesse caso vale a padrão, sem apagar a escolha ao voltar para a outra aba.
+  const sortOffered = offeredSortFields.includes(sortField)
+  const activeSortField: SortField = sortOffered
+    ? sortField
+    : currentEnumStatus === GameStatusEnum.Played
+      ? 'completedAt'
+      : 'dateAdded'
+  const activeSortOrder: SortOrder = sortOffered ? sortOrder : 'desc'
+
   // Desejos não tem plataformas registradas (mover para lá as apaga), então o
   // filtro não vale ali: o controle some e o filtro volta nas outras abas.
   const platformFilterApplies = currentEnumStatus !== GameStatusEnum.Wishlist
@@ -109,8 +132,8 @@ export function UserGamesPageByStatus() {
       currentEnumStatus === GameStatusEnum.Backlog
         ? QUEUE_FILTER
         : currentEnumStatus,
-      sortOrder,
-      sortField,
+      activeSortOrder,
+      activeSortField,
       platformFilter
     )
 
@@ -186,9 +209,9 @@ export function UserGamesPageByStatus() {
           page={page}
           pageSize={ITEMS_PER_PAGE}
           setPage={setPage}
-          sortOrder={sortOrder}
+          sortOrder={activeSortOrder}
           setSortOrder={setSortOrder}
-          sortField={sortField}
+          sortField={activeSortField}
           setSortField={setSortField}
           defaultSort={
             currentEnumStatus === GameStatusEnum.Played
@@ -200,9 +223,7 @@ export function UserGamesPageByStatus() {
           isChangingPage={isChangingUserGames}
           onFilterChange={handleFilterChange}
           isUserLibrary
-          sortFields={sortFieldsFor(
-            currentEnumStatus === GameStatusEnum.Played ? 'played' : 'library'
-          )}
+          sortFields={offeredSortFields}
           search={search}
           setSearch={setSearch}
           searchPlaceholder="Buscar na biblioteca"

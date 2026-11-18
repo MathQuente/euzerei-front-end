@@ -1,6 +1,6 @@
 import type { SortField, SortOrder } from '../interfaces/games'
 
-export type ListContext = 'library' | 'played' | 'games'
+export type ListContext = 'library' | 'played' | 'wishlist' | 'games'
 
 interface SortFieldMeta {
   label: string
@@ -46,6 +46,8 @@ export const SORT_FIELDS = Object.keys(SORT_FIELD_META) as SortField[]
 const FIELDS_BY_CONTEXT: Record<ListContext, SortField[]> = {
   library: ['dateAdded', 'name', 'releaseDate', 'rating', 'hoursPlayed'],
   played: ['completedAt', 'name', 'releaseDate', 'rating', 'hoursPlayed'],
+  // Jogo que você ainda não tem: sem nota sua nem horas jogadas para ordenar.
+  wishlist: ['dateAdded', 'name', 'releaseDate'],
   games: ['name', 'releaseDate', 'rating'],
 }
 
