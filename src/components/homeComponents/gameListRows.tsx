@@ -127,7 +127,7 @@ function CountdownColumn({ game }: { game: GameBase }) {
     return column(
       `faltam ${countdownSpoken(countdown.ms)}`,
       <>
-        <span className="font-display text-xl font-extrabold tabular-nums text-amber-400">
+        <span className="font-display text-xl font-extrabold tabular-nums text-primary-link">
           {short.value}
         </span>
         <span className="mt-1 text-[10px] tracking-wide text-gray-400">
@@ -140,7 +140,7 @@ function CountdownColumn({ game }: { game: GameBase }) {
   if (countdown.kind === 'today') {
     return column(
       'chegou o dia',
-      <span className="text-xs font-semibold text-amber-400">saiu!</span>
+      <span className="text-xs font-semibold text-primary-link">saiu!</span>
     )
   }
 
@@ -225,7 +225,7 @@ function FeaturedCountdown({ game }: { game: GameBase }) {
     return (
       <p>
         <span className="sr-only">faltam {countdownSpoken(countdown.ms)}</span>
-        <span aria-hidden="true" className={`${big} text-amber-400`}>
+        <span aria-hidden="true" className={`${big} text-primary-link`}>
           {formatCountdown(countdown.ms)}
         </span>
       </p>
@@ -236,7 +236,7 @@ function FeaturedCountdown({ game }: { game: GameBase }) {
     return (
       <p>
         <span className="sr-only">chegou o dia</span>
-        <span aria-hidden="true" className={`${big} text-amber-400`}>
+        <span aria-hidden="true" className={`${big} text-primary-link`}>
           saiu!
         </span>
       </p>
