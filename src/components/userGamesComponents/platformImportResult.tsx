@@ -11,6 +11,7 @@ import type {
   ImportSectionResult,
 } from '../../types/import'
 import type { LibraryPlatform } from '../../types/platform'
+import { countNotFound, notFoundMessage } from '../../utils/importNotFound'
 import { Button } from '../button'
 import { CompletionSuggestionsBlock } from './completionSuggestions'
 import {
@@ -223,6 +224,11 @@ export function PlatformImportResult<TResult>({
       ? getAccountResults(status.result)
       : []
 
+  const notFoundText =
+    status?.status === 'completed' && status.result
+      ? notFoundMessage(countNotFound(getResultSections(status.result)))
+      : null
+
   const showViewLibrary =
     justFinished && status?.status === 'completed' && Boolean(onViewLibrary)
 
@@ -235,6 +241,9 @@ export function PlatformImportResult<TResult>({
       >
         {!isImporting && status?.status === 'completed' && status.result && (
           <>
+            {notFoundText && (
+              <p className="text-xs text-gray-400">{notFoundText}</p>
+            )}
             {accountResults.some(
               account => account.warning || account.error
             ) && (

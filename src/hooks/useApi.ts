@@ -41,7 +41,6 @@ import type {
   PublicUserProfileResponse,
   UpdateUserPayload,
   UserProfileResponse,
-  XboxPreferredConsole,
 } from '../types/user'
 import type { XboxImportStatusResponse } from '../types/xbox'
 import { notify } from '../utils/notify'
@@ -682,16 +681,6 @@ export const api = {
       '/users/xbox/oauth',
       'https://login.microsoftonline.com'
     ),
-  updateXboxPreferredConsole: async (
-    accountId: string,
-    preferredConsole: XboxPreferredConsole | null
-  ) => {
-    const response = await http.patch<{
-      id: string
-      preferredConsole: XboxPreferredConsole | null
-    }>(`/users/xbox/${accountId}`, { preferredConsole })
-    return response.data
-  },
   disconnectXbox: async (accountId: string) => {
     await http.delete(`/users/xbox/${accountId}`, {})
   },

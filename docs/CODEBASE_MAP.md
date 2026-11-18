@@ -469,3 +469,6 @@ Sorteia o próximo jogo **pendente** (`BACKLOG`) da fila. Largados e pausados n�
 - **Estados:** carregando (roda cinza), erro (tentar de novo), fila vazia (link para explorar), **um só pendente** (cartão com "Começar a jogar", sem giro), normal.
 - **Entradas:** botão "Sortear" no cabeçalho da prateleira "Na fila" (`StatusShelf` ganhou `headerAction`; só no perfil próprio e com ≥ 2 pendentes, conferindo `backlogTotal`, não o `queueTotal` que soma largados) e link "Sortear na roleta" em "Para jogar em seguida" (`NextUp` ganhou `showRoulette`; a condição vem do total de pendentes da `home.tsx`, porque a lista que o `NextUp` recebe inclui os pausados e é só a prévia).
 
+## Importação: jogos não encontrados
+
+- **Contagem no resultado:** o servidor devolve `notFound: string[]` em cada seção do resultado (`ImportSectionResult`). Desde o redesenho do bloco de importação (`2cf1711`/`c9980bc`) a lista saiu da tela; `platformImportResult.tsx` mostra só a **contagem** ("N jogos não foram encontrados e ficaram de fora."), somando as seções (`utils/importNotFound.ts`: `countNotFound`, `notFoundMessage`). A lista com os nomes e o botão de copiar não voltaram.
