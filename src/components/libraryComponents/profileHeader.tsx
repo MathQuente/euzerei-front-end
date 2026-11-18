@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import userProfilePictureDefault from '../../assets/Default_pfp.svg.png'
 import { focusRing } from '../../styles/focus'
 import type { TotalPerStatus } from '../../types/games'
-import type { AchievementStats } from '../../types/user'
 import { formatMemberSince } from '../../utils/memberSince'
 import { ProfileStats } from './profileStats'
 import { type StoreAccounts, StoreChips, hasStoreAccounts } from './storeChips'
@@ -34,7 +33,6 @@ interface ProfileHeaderProps {
   totalPerStatus?: TotalPerStatus[]
   onStatsRetry?: () => unknown
   createdAt?: string | null
-  achievementStats?: AchievementStats
   followersCount: number
   followingCount: number
   onFollowersClick: () => void
@@ -54,7 +52,6 @@ export function ProfileHeader({
   totalPerStatus,
   onStatsRetry,
   createdAt,
-  achievementStats,
   followersCount,
   followingCount,
   onFollowersClick,
@@ -101,9 +98,7 @@ export function ProfileHeader({
           {userName}
         </h1>
         {(actions || memberSince) && (
-          <div
-            className={`absolute right-4 top-3 flex flex-col items-end gap-2 sm:bottom-3 sm:right-6 sm:top-auto sm:flex-row-reverse sm:items-center sm:gap-3`}
-          >
+          <div className="absolute right-4 top-3 flex flex-col items-end gap-2 sm:bottom-3 sm:right-6 sm:top-auto sm:flex-row-reverse sm:items-center sm:gap-3">
             {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
             {memberSince && (
               <p className={`text-sm text-gray-200 ${onBanner}`}>

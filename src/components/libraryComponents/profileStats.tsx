@@ -27,18 +27,14 @@ function RailCell({
   spoken: string
 }) {
   return (
-    <li className="flex flex-col items-center gap-1 border-l border-dark-border px-4 first:border-l-0 first:pl-0 last:pr-0">
-      <b
-        className="font-display text-xl font-bold leading-none tracking-tight tabular-nums text-white"
-        aria-hidden="true"
-      >
-        {value}
-      </b>
-      <span
-        className="text-[10px] uppercase tracking-widest text-gray-400"
-        aria-hidden="true"
-      >
-        {label}
+    <li className="border-l border-dark-border px-4 first:border-l-0 first:pl-0 last:pr-0">
+      <span className="flex flex-col items-center gap-1" aria-hidden="true">
+        <b className="font-display text-xl font-bold leading-none tracking-tight tabular-nums text-white">
+          {value}
+        </b>
+        <span className="text-[10px] uppercase tracking-widest text-gray-400">
+          {label}
+        </span>
       </span>
       <span className="sr-only">{spoken}</span>
     </li>

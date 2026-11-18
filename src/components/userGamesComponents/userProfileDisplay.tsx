@@ -54,7 +54,6 @@ export function UserProfileDisplay({
         totalPerStatus={totalPerStatus}
         onStatsRetry={onStatsRetry}
         createdAt={profileUser.createdAt}
-        achievementStats={profileUser.achievementStats}
         isOwn
         stores={{
           steam: (profileUser.steamAccounts ?? []).map(a => a.personaName),

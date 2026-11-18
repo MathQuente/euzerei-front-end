@@ -102,7 +102,6 @@ export function UserProfilePage() {
           isErrorGames && !hasGamesData ? () => refetchGames() : undefined
         }
         createdAt={user.createdAt}
-        achievementStats={user.achievementStats}
         stores={user.stores}
         followersCount={user.followersCount}
         followingCount={user.followingCount}

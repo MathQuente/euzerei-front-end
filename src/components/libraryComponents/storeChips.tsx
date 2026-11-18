@@ -1,11 +1,4 @@
-import { SiPlaystation, SiSteam, SiXbox } from 'react-icons/si'
-
-// Ladrilhos sólidos na cor da marca, com o logo em branco.
-const TILE_BG: Record<keyof StoreAccounts, string> = {
-  steam: '#1b2838',
-  xbox: '#107c10',
-  playstation: '#0070d1',
-}
+import { StoreTile } from '../storeBrand'
 
 export interface StoreAccounts {
   steam?: string[]
@@ -37,27 +30,17 @@ export function StoreChips({ stores }: { stores?: StoreAccounts }) {
       className="m-0 flex list-none flex-wrap gap-2 p-0"
     >
       {linked.map(({ key, label, handles }) => (
-        <li
-          key={key}
-          title={handles.join(', ')}
-          style={{ backgroundColor: TILE_BG[key] }}
-          className="relative inline-flex size-7 items-center justify-center rounded-md ring-1 ring-white/10"
-        >
-          {key === 'steam' ? (
-            <SiSteam className="size-4 text-white" aria-hidden="true" />
-          ) : key === 'xbox' ? (
-            <SiXbox className="size-4 text-white" aria-hidden="true" />
-          ) : (
-            <SiPlaystation className="size-4 text-white" aria-hidden="true" />
-          )}
-          {handles.length > 1 && (
-            <span
-              className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-white px-1 font-display text-[10px] font-bold leading-none text-black"
-              aria-hidden="true"
-            >
-              {handles.length}
-            </span>
-          )}
+        <li key={key} title={handles.join(', ')}>
+          <StoreTile store={key}>
+            {handles.length > 1 && (
+              <span
+                className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-white px-1 font-display text-[10px] font-bold leading-none text-black"
+                aria-hidden="true"
+              >
+                {handles.length}
+              </span>
+            )}
+          </StoreTile>
           <span className="sr-only">
             {label},{' '}
             {handles.length === 1 ? '1 conta' : `${handles.length} contas`}
