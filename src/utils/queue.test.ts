@@ -2,8 +2,12 @@ import { describe, expect, it } from 'vitest'
 import type { UserGameEntry } from '../types/games'
 import { mergeQueue } from './queue'
 
-const game = (igdbId: number, status: string, updatedAt?: string) =>
-  ({ igdbId, status, updatedAt }) as UserGameEntry
+const game = (
+  igdbId: number,
+  status: string,
+  updatedAt?: string,
+  droppedAt?: string
+) => ({ igdbId, status, updatedAt, droppedAt }) as UserGameEntry
 
 const ids = (games: UserGameEntry[]) => games.map(g => g.igdbId)
 
@@ -56,5 +60,58 @@ describe('mergeQueue', () => {
     const backlog = [game(1, 'BACKLOG', '2026-11-10T00:00:00Z')]
     expect(ids(mergeQueue(backlog, [], 8))).toEqual([1])
     expect(mergeQueue([], [], 8)).toEqual([])
+  })
+
+  it('orders a dropped game by when it was dropped, not by its last edit', () => {
+    const merged = mergeQueue(
+      [game(1, 'BACKLOG', '2026-11-10T00:00:00Z')],
+      [game(2, 'DROPPED', '2026-11-15T00:00:00Z', '2026-09-01T00:00:00Z')],
+      10
+    )
+
+    expect(ids(merged)).toEqual([1, 2])
+  })
+
+  it('puts a game dropped yesterday above older backlog games', () => {
+    const merged = mergeQueue(
+      [game(1, 'BACKLOG', '2026-11-10T00:00:00Z')],
+      [game(2, 'DROPPED', '2026-11-01T00:00:00Z', '2026-11-17T00:00:00Z')],
+      10
+    )
+
+    expect(ids(merged)).toEqual([2, 1])
+  })
+
+  it('falls back to the last edit for a dropped game without a dropped date', () => {
+    const merged = mergeQueue(
+      [game(1, 'BACKLOG', '2026-11-10T00:00:00Z')],
+      [game(2, 'DROPPED', '2026-11-12T00:00:00Z')],
+      10
+    )
+
+    expect(ids(merged)).toEqual([2, 1])
+  })
+
+  it('ignores a dropped date on a game that is not dropped', () => {
+    const merged = mergeQueue(
+      [game(1, 'BACKLOG', '2026-11-01T00:00:00Z', '2026-11-30T00:00:00Z')],
+      [game(2, 'DROPPED', '2026-11-12T00:00:00Z')],
+      10
+    )
+
+    expect(ids(merged)).toEqual([2, 1])
+  })
+
+  it('keeps the backend order when a date cannot be read', () => {
+    const merged = mergeQueue(
+      [
+        game(1, 'BACKLOG', 'not a date'),
+        game(2, 'BACKLOG', '2026-11-10T00:00:00Z'),
+      ],
+      [game(3, 'DROPPED', '2026-11-12T00:00:00Z')],
+      10
+    )
+
+    expect(ids(merged)).toEqual([1, 2, 3])
   })
 })

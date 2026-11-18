@@ -82,6 +82,8 @@ export interface UserGameEntry extends GameCardData {
   endless: boolean
   hundredPercent: boolean
   updatedAt?: string
+  /** Quando entrou em Larguei; só vem para jogos que estão em Larguei agora. */
+  droppedAt?: string
 }
 
 export interface RouletteResponse {
@@ -150,6 +152,8 @@ export type GameStatusResponse = {
   userGameStatus: GameStatus | null
   endless: boolean
   hundredPercent: boolean
+  /** Quando entrou em Larguei; só vem enquanto o jogo está em Larguei. */
+  droppedAt?: string
 }
 
 export interface GameResponse {

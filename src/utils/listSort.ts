@@ -1,6 +1,11 @@
 import type { SortField, SortOrder } from '../interfaces/games'
 
-export type ListContext = 'library' | 'played' | 'wishlist' | 'games'
+export type ListContext =
+  | 'library'
+  | 'played'
+  | 'dropped'
+  | 'wishlist'
+  | 'games'
 
 interface SortFieldMeta {
   label: string
@@ -16,6 +21,11 @@ export const SORT_FIELD_META: Record<SortField, SortFieldMeta> = {
   },
   completedAt: {
     label: 'Data de finalização',
+    defaultOrder: 'desc',
+    orderLabels: { desc: 'Mais recentes', asc: 'Mais antigos' },
+  },
+  droppedAt: {
+    label: 'Data de largado',
     defaultOrder: 'desc',
     orderLabels: { desc: 'Mais recentes', asc: 'Mais antigos' },
   },
@@ -46,6 +56,14 @@ export const SORT_FIELDS = Object.keys(SORT_FIELD_META) as SortField[]
 const FIELDS_BY_CONTEXT: Record<ListContext, SortField[]> = {
   library: ['dateAdded', 'name', 'releaseDate', 'rating', 'hoursPlayed'],
   played: ['completedAt', 'name', 'releaseDate', 'rating', 'hoursPlayed'],
+  dropped: [
+    'droppedAt',
+    'dateAdded',
+    'name',
+    'releaseDate',
+    'rating',
+    'hoursPlayed',
+  ],
   // Jogo que você ainda não tem: sem nota sua nem horas jogadas para ordenar.
   wishlist: ['dateAdded', 'name', 'releaseDate'],
   games: ['name', 'releaseDate', 'rating'],
@@ -69,5 +87,6 @@ export function sortLabel(field: SortField, order: SortOrder) {
   if (field === 'dateAdded') return `Adição · ${orderLabel.toLowerCase()}`
   if (field === 'completedAt')
     return `Finalização · ${orderLabel.toLowerCase()}`
+  if (field === 'droppedAt') return `Largado · ${orderLabel.toLowerCase()}`
   return `${label} · ${orderLabel.toLowerCase()}`
 }

@@ -2,6 +2,7 @@ import dayjs from 'dayjs'
 import type { ReactNode } from 'react'
 import { useCompletedAt } from '../../hooks/useCompletedAt'
 import { useGamePlatforms } from '../../hooks/useGamePlatforms'
+import { useGameStatus } from '../../hooks/useGameStatus'
 import { useHoursPlayed } from '../../hooks/useHoursPlayed'
 import { usePlayedCount } from '../../hooks/usePlayedCount'
 import { useRating } from '../../hooks/useRating'
@@ -40,6 +41,7 @@ export function LibraryStats({
   const { hoursPlayed } = useHoursPlayed(igdbId)
   const { completions } = usePlayedCount(igdbId)
   const { completedAt } = useCompletedAt(igdbId)
+  const { gameStatus } = useGameStatus(igdbId)
   const { userRating, isLoading: ratingIsLoading } = useRating(igdbId)
 
   if (isLoading) {
@@ -91,6 +93,10 @@ export function LibraryStats({
     </>
   )
 
+  const droppedDate = gameStatus?.droppedAt
+    ? dayjs(gameStatus.droppedAt).format('DD/MM/YYYY')
+    : null
+
   const ratingLabel =
     !ratingIsLoading && userRating == null ? 'Dê uma nota' : 'Nota'
 
@@ -110,6 +116,13 @@ export function LibraryStats({
       {factLabel && (
         <Row label={factLabel}>
           <span className="text-[13px] text-gray-400">{factValue}</span>
+        </Row>
+      )}
+      {droppedDate && (
+        <Row label="Largado">
+          <span className="text-[13px] text-gray-400">
+            em {dateText(droppedDate)}
+          </span>
         </Row>
       )}
       {isReleased && (

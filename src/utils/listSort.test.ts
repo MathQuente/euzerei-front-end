@@ -15,6 +15,13 @@ describe('sortFieldsFor', () => {
     expect(sortFieldsFor('library')).not.toContain('completedAt')
   })
 
+  it('offers the dropped date only to dropped games', () => {
+    expect(sortFieldsFor('dropped')[0]).toBe('droppedAt')
+    expect(sortFieldsFor('library')).not.toContain('droppedAt')
+    expect(sortFieldsFor('played')).not.toContain('droppedAt')
+    expect(sortLabel('droppedAt', 'desc')).toBe('Largado · mais recentes')
+  })
+
   it('offers wishlist games only what makes sense for a game you do not have yet', () => {
     expect(sortFieldsFor('wishlist')).toEqual([
       'dateAdded',

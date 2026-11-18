@@ -47,6 +47,8 @@ export function UserGamesPageByStatus() {
 
   const startsOnPlayed =
     (status && routeToEnumMap[status]) === GameStatusEnum.Played
+  const startsOnDropped =
+    (status && routeToEnumMap[status]) === GameStatusEnum.Dropped
 
   const [sortOrder, setSortOrder] = useState<SortOrder>(() => {
     const url = new URL(window.location.toString())
@@ -61,12 +63,21 @@ export function UserGamesPageByStatus() {
     const offered = sortFieldsFor(
       startsOnPlayed
         ? 'played'
-        : (status && routeToEnumMap[status]) === GameStatusEnum.Wishlist
-          ? 'wishlist'
-          : 'library'
+        : startsOnDropped
+          ? 'dropped'
+          : (status && routeToEnumMap[status]) === GameStatusEnum.Wishlist
+            ? 'wishlist'
+            : 'library'
     )
     const requested = offered.find(field => field === v)
-    return requested ?? (startsOnPlayed ? 'completedAt' : 'dateAdded')
+    return (
+      requested ??
+      (startsOnPlayed
+        ? 'completedAt'
+        : startsOnDropped
+          ? 'droppedAt'
+          : 'dateAdded')
+    )
   })
 
   const [platforms, setPlatforms] = useState(() =>
@@ -92,7 +103,10 @@ export function UserGamesPageByStatus() {
     if (newFilter === GameStatusEnum.Played) {
       setSortField('completedAt')
       setSortOrder('desc')
-    } else if (sortField === 'completedAt') {
+    } else if (newFilter === GameStatusEnum.Dropped) {
+      setSortField('droppedAt')
+      setSortOrder('desc')
+    } else if (sortField === 'completedAt' || sortField === 'droppedAt') {
       setSortField('dateAdded')
       setSortOrder('desc')
     }
@@ -106,18 +120,22 @@ export function UserGamesPageByStatus() {
   const listContext =
     currentEnumStatus === GameStatusEnum.Played
       ? 'played'
-      : currentEnumStatus === GameStatusEnum.Wishlist
-        ? 'wishlist'
-        : 'library'
+      : currentEnumStatus === GameStatusEnum.Dropped
+        ? 'dropped'
+        : currentEnumStatus === GameStatusEnum.Wishlist
+          ? 'wishlist'
+          : 'library'
   const offeredSortFields = sortFieldsFor(listContext)
   // A ordem escolhida pode não existir na aba (nota em Jogado, depois Desejos):
   // nesse caso vale a padrão, sem apagar a escolha ao voltar para a outra aba.
-  const sortOffered = offeredSortFields.includes(sortField)
-  const activeSortField: SortField = sortOffered
-    ? sortField
-    : currentEnumStatus === GameStatusEnum.Played
+  const defaultField: SortField =
+    currentEnumStatus === GameStatusEnum.Played
       ? 'completedAt'
-      : 'dateAdded'
+      : currentEnumStatus === GameStatusEnum.Dropped
+        ? 'droppedAt'
+        : 'dateAdded'
+  const sortOffered = offeredSortFields.includes(sortField)
+  const activeSortField: SortField = sortOffered ? sortField : defaultField
   const activeSortOrder: SortOrder = sortOffered ? sortOrder : 'desc'
 
   // Desejos não tem plataformas registradas (mover para lá as apaga), então o
@@ -213,11 +231,7 @@ export function UserGamesPageByStatus() {
           setSortOrder={setSortOrder}
           sortField={activeSortField}
           setSortField={setSortField}
-          defaultSort={
-            currentEnumStatus === GameStatusEnum.Played
-              ? { field: 'completedAt', order: 'desc' }
-              : { field: 'dateAdded', order: 'desc' }
-          }
+          defaultSort={{ field: defaultField, order: 'desc' }}
           currentStatus={currentEnumStatus}
           filterField={currentEnumStatus}
           isChangingPage={isChangingUserGames}

@@ -17,6 +17,7 @@ export type SortField =
   | 'rating'
   | 'hoursPlayed'
   | 'completedAt'
+  | 'droppedAt'
   | 'dateAdded'
 export type SortOrder = 'asc' | 'desc'
 export type SectionType = 'coming' | 'trending' | 'rateds'

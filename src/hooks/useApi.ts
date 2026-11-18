@@ -255,6 +255,7 @@ export const api = {
       rating: 'rating',
       hoursPlayed: 'hoursPlayed',
       completedAt: 'completedAt',
+      droppedAt: 'droppedAt',
       dateAdded: 'dateAdded',
     } as const
 
