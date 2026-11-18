@@ -25,6 +25,17 @@ import { GameModal } from './gameModal'
 import { GameStatusButtons } from './gameStatusButtons'
 import { LibraryStats } from './libraryStats'
 
+function SummarySkeleton() {
+  return (
+    <div className="flex flex-col gap-2 py-1 animate-pulse" aria-hidden="true">
+      <div className="h-3.5 w-full rounded bg-dark-bg" />
+      <div className="h-3.5 w-full rounded bg-dark-bg" />
+      <div className="h-3.5 w-full rounded bg-dark-bg" />
+      <div className="h-3.5 w-2/3 rounded bg-dark-bg" />
+    </div>
+  )
+}
+
 export function GameInfo({ game, onClose }: GameInfoProps) {
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -60,19 +71,6 @@ export function GameInfo({ game, onClose }: GameInfoProps) {
     navigate(detailPath)
   }
 
-  const summaryBlock = summary ? (
-    <p className="text-sm text-gray-300 leading-relaxed line-clamp-4">
-      {summary}
-    </p>
-  ) : isDetailsLoading ? (
-    <div className="flex flex-col gap-2 py-1 animate-pulse" aria-hidden="true">
-      <div className="h-3.5 w-full rounded bg-dark-bg" />
-      <div className="h-3.5 w-full rounded bg-dark-bg" />
-      <div className="h-3.5 w-full rounded bg-dark-bg" />
-      <div className="h-3.5 w-2/3 rounded bg-dark-bg" />
-    </div>
-  ) : null
-
   return (
     <div key={igdbId} className="relative flex flex-col md:flex-row gap-6 p-5">
       <GameModal.Close
@@ -84,17 +82,17 @@ export function GameInfo({ game, onClose }: GameInfoProps) {
 
       {game.coverUrl ? (
         <img
-          className="w-44 md:w-[300px] aspect-[3/4] shrink-0 self-center md:self-start rounded-md object-cover"
+          className="w-44 md:w-[320px] aspect-[3/4] shrink-0 self-center md:self-start rounded-md object-cover"
           src={hiResCover(game.coverUrl)}
           alt={`Capa do jogo ${game.name}`}
         />
       ) : (
-        <div className="w-44 md:w-[300px] aspect-[3/4] shrink-0 self-center md:self-start rounded-md bg-dark-bg flex items-center justify-center">
+        <div className="w-44 md:w-[320px] aspect-[3/4] shrink-0 self-center md:self-start rounded-md bg-dark-bg flex items-center justify-center">
           <span className="text-gray-400 text-sm">Sem capa</span>
         </div>
       )}
 
-      <div className="flex flex-col w-full md:w-[400px] md:shrink-0 gap-5">
+      <div className="flex flex-col w-full md:min-w-0 md:flex-1 gap-5">
         <div className="flex flex-col gap-2 pr-10">
           <GameModal.Title asChild>
             <h2 className="text-xl font-bold leading-snug line-clamp-2">
@@ -126,31 +124,14 @@ export function GameInfo({ game, onClose }: GameInfoProps) {
         {inLibrary ? (
           <>
             <GameStatusButtons game={game} />
-            <LibraryStats
-              game={game}
-              isPlayed={statusId === STATUS.PLAYED}
-              statusId={statusId}
-              onSeeDetails={goToDetails}
-            />
+            <LibraryStats game={game} onSeeDetails={goToDetails} />
           </>
         ) : (
           <>
-            {inWishlist && isUpcoming && releaseDate && (
-              <p className="text-sm text-primary-light">
-                Lança em {formatReleaseDate(releaseDate)}
-              </p>
-            )}
-            {!inWishlist && hasCommunityAverage && (
-              <div className="flex items-center gap-2 text-sm text-gray-400">
-                <RatingAverage game={game} justAverage />
-                média da comunidade
-              </div>
-            )}
-            {summaryBlock}
             {user ? (
               <div className="flex flex-col gap-2">
                 {!inWishlist && (
-                  <span className="text-sm text-gray-300">
+                  <span className="text-xs text-gray-400">
                     Adicione à sua biblioteca
                   </span>
                 )}
@@ -167,6 +148,32 @@ export function GameInfo({ game, onClose }: GameInfoProps) {
                 para adicionar à sua biblioteca.
               </p>
             )}
+            {((inWishlist && isUpcoming && releaseDate) ||
+              (!inWishlist && hasCommunityAverage)) && (
+              <p className="flex flex-wrap items-baseline gap-x-2 text-[13px] text-gray-400">
+                {inWishlist && isUpcoming && releaseDate && (
+                  <span>
+                    Lança em{' '}
+                    <b className="font-display font-extrabold tabular-nums text-[13px] text-white">
+                      {formatReleaseDate(releaseDate)}
+                    </b>
+                  </span>
+                )}
+                {!inWishlist && hasCommunityAverage && (
+                  <span className="inline-flex items-center gap-1.5">
+                    <RatingAverage game={game} justAverage />
+                    média da comunidade
+                  </span>
+                )}
+              </p>
+            )}
+            {summary ? (
+              <p className="text-sm text-gray-300 leading-relaxed line-clamp-5">
+                {summary}
+              </p>
+            ) : isDetailsLoading ? (
+              <SummarySkeleton />
+            ) : null}
           </>
         )}
 

@@ -9,6 +9,7 @@ import { focusRing } from '../styles/focus'
 export function RatingAverage({
   game,
   isForGamePage,
+  showValue,
   justAverage,
 }: RatingAverageProps) {
   const igdbId = game?.igdbId?.toString()
@@ -99,6 +100,12 @@ export function RatingAverage({
             }}
           />
         </div>
+        {showValue && userRating != null && (
+          <span className="font-display text-[15px] font-extrabold tabular-nums text-primary-light">
+            {String(userRating).replace('.', ',')}
+            <span className="font-normal text-gray-500">/5</span>
+          </span>
+        )}
         {userRating && (
           <button
             type="button"

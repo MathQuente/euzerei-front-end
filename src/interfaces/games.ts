@@ -90,6 +90,7 @@ export interface GameLaunchersDivProps {
 export interface RatingAverageProps {
   game: GameCardData | undefined
   isForGamePage?: boolean
+  showValue?: boolean
   justAverage?: boolean
 }
 

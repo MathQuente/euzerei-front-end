@@ -262,18 +262,13 @@ export function GameStatusButtons({ game }: GameFormProps) {
 
   return (
     <div className="flex flex-col gap-3 w-full">
-      <div className="grid gap-2 w-full grid-cols-4">
-        {buttons.map(renderStatusButton)}
+      <div
+        className={`grid gap-2 w-full ${canStop ? 'grid-cols-6' : 'grid-cols-4'}`}
+      >
+        {(canStop ? [...buttons, ...STOPPED_BUTTONS] : buttons).map(
+          renderStatusButton
+        )}
       </div>
-
-      {canStop && (
-        <div className="flex flex-col gap-2">
-          <span className="text-xs text-gray-400">Parou de jogar?</span>
-          <div className="grid w-full grid-cols-4 gap-2">
-            {STOPPED_BUTTONS.map(renderStatusButton)}
-          </div>
-        </div>
-      )}
 
       {askingCompletion && (
         <fieldset
