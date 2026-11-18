@@ -41,6 +41,7 @@ export function SteamImportPanel({
   return (
     <PlatformImportResult
       ofLabel="da Steam"
+      platform="STEAM"
       importState={importState}
       onViewLibrary={onViewLibrary}
       suggestionsPlatform="STEAM"

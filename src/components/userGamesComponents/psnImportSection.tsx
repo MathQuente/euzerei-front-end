@@ -50,6 +50,7 @@ export function PsnImportPanel({
   return (
     <PlatformImportResult
       ofLabel="do PlayStation"
+      platform="PLAYSTATION"
       importState={importState}
       onViewLibrary={onViewLibrary}
       getResultSections={result => [

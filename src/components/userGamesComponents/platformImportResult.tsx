@@ -1,6 +1,7 @@
 import { CircleAlert, TriangleAlert } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import {
+  type ImportStore,
   getImportMessage,
   getSlowImportNotice,
 } from '../../constants/importMessages'
@@ -34,6 +35,8 @@ export interface AccountImportResult {
 interface PlatformImportResultProps<TResult> {
   /** "da Steam", "do Xbox": usado nas mensagens. */
   ofLabel: string
+  /** Loja da importação: define as frases do andamento. */
+  platform: ImportStore
   importState: PlatformImport<TResult>
   getResultSections: (result: TResult) => ImportResultSection[]
   getAccountResults?: (result: TResult) => AccountImportResult[]
@@ -48,6 +51,7 @@ interface PlatformImportResultProps<TResult> {
  */
 export function PlatformImportResult<TResult>({
   ofLabel,
+  platform,
   importState,
   getResultSections,
   getAccountResults,
@@ -168,6 +172,7 @@ export function PlatformImportResult<TResult>({
   }, [isImporting, justFinished])
 
   const slowImportNotice = getSlowImportNotice(
+    platform,
     elapsedSeconds,
     messageSeedRef.current
   )
@@ -356,6 +361,7 @@ export function PlatformImportResult<TResult>({
             <div className="flex items-start justify-between gap-3">
               <span className="text-xs text-gray-300">
                 {getImportMessage(
+                  platform,
                   progress,
                   elapsedSeconds,
                   messageSeedRef.current

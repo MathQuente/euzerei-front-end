@@ -437,7 +437,7 @@ Reasons that used to live in code comments (the project keeps source files comme
 
 ## Mensagens da importação (`constants/importMessages.ts`)
 
-- Cada faixa de progresso tem 4 a 5 frases, a fila tem 5, e os avisos de espera (20 s e 90 s) têm 3 variações. A ordem é sorteada por importação (`messageSeedRef` em `platformImportResult.tsx`, semente nova a cada início) com um embaralhamento determinístico (`shuffled`), então as frases não se repetem até acabarem as da faixa, e trocam a cada 6 s. Frases neutras de plataforma (sem "console" nem "troféu"). Testes em `importMessages.test.ts`.
+- Cada loja (`ImportStore`: STEAM, PLAYSTATION, XBOX) tem a sua lista: fila (5), oito faixas de progresso (4 a 5 frases) e os avisos de espera (20 s e 90 s, 3 variações cada). Algumas frases são compartilhadas (`SHARED`); o resto cita a comunidade da loja (Valve time e Crysis na Steam, platina e PS Plus na PlayStation, gamerscore e Game Pass no Xbox). `getImportMessage(store, progress, elapsed, seed)` e `getSlowImportNotice(store, elapsed, seed)` recebem a loja, que `PlatformImportResult` ganhou como prop `platform`. A ordem é sorteada por importação (`messageSeedRef`, semente nova a cada início) com `shuffled`, então as frases não se repetem até acabarem as da faixa, e trocam a cada 6 s. Sem piadas de cartucho nem "reticulando splines". Testes em `importMessages.test.ts`.
 
 ## Desvincular Google/Discord pede a senha
 

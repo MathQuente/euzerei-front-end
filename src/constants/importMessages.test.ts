@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
-  IMPORT_MESSAGE_BANDS,
-  IMPORT_QUEUED_MESSAGES,
+  IMPORT_STORES,
   getImportMessage,
   getSlowImportNotice,
+  getStoreMessages,
   shuffled,
 } from './importMessages'
 
@@ -21,35 +21,64 @@ describe('shuffled', () => {
   })
 })
 
-describe('getImportMessage', () => {
-  it('has at least four messages in every band', () => {
-    for (const band of IMPORT_MESSAGE_BANDS) {
+describe.each(IMPORT_STORES)('messages of %s', store => {
+  const { queued, bands, slow, verySlow } = getStoreMessages(store)
+
+  it('has at least four messages in the queue and in every band', () => {
+    expect(queued.length).toBeGreaterThanOrEqual(4)
+    for (const band of bands) {
       expect(band.messages.length).toBeGreaterThanOrEqual(4)
     }
   })
 
   it('goes through every message of a band before repeating one', () => {
-    const band = IMPORT_MESSAGE_BANDS[0]
+    const band = bands[0]
     const seen = band.messages.map((_, step) =>
-      getImportMessage(band.from, step * 6, 42)
+      getImportMessage(store, band.from, step * 6, 42)
     )
     expect(new Set(seen).size).toBe(band.messages.length)
   })
 
   it('uses the queue messages before there is progress', () => {
-    expect(IMPORT_QUEUED_MESSAGES).toContain(getImportMessage(undefined, 0, 3))
+    expect(queued).toContain(getImportMessage(store, undefined, 0, 3))
   })
 
   it('picks the band by progress', () => {
-    const last = IMPORT_MESSAGE_BANDS[IMPORT_MESSAGE_BANDS.length - 1]
-    expect(last.messages).toContain(getImportMessage(99, 0, 1))
+    const last = bands[bands.length - 1]
+    expect(last.messages).toContain(getImportMessage(store, 99, 0, 1))
+    expect(bands[0].messages).toContain(getImportMessage(store, 5, 0, 1))
+  })
+
+  it('has no repeated message inside the same list', () => {
+    for (const list of [
+      queued,
+      slow,
+      verySlow,
+      ...bands.map(b => b.messages),
+    ]) {
+      expect(new Set(list).size).toBe(list.length)
+    }
+  })
+
+  it('stays quiet at first, then warns, then warns harder', () => {
+    expect(getSlowImportNotice(store, 10)).toBeNull()
+    expect(slow).toContain(getSlowImportNotice(store, 30))
+    expect(verySlow).toContain(getSlowImportNotice(store, 120))
   })
 })
 
-describe('getSlowImportNotice', () => {
-  it('stays quiet at first, then warns, then warns harder', () => {
-    expect(getSlowImportNotice(10)).toBeNull()
-    expect(getSlowImportNotice(30)).toEqual(expect.any(String))
-    expect(getSlowImportNotice(120)).not.toBe(getSlowImportNotice(30))
+describe('store flavour', () => {
+  it('names the store in the slow notices', () => {
+    expect(getStoreMessages('STEAM').slow.join(' ')).toContain('Steam')
+    expect(getStoreMessages('PLAYSTATION').slow.join(' ')).toContain('PSN')
+    expect(getStoreMessages('XBOX').slow.join(' ')).toContain('Xbox')
+  })
+
+  it('keeps cartridge and splines jokes out of every list', () => {
+    for (const store of IMPORT_STORES) {
+      const { queued, bands } = getStoreMessages(store)
+      const all = [...queued, ...bands.flatMap(b => b.messages)].join(' ')
+      expect(all).not.toMatch(/cartucho|splines/i)
+    }
   })
 })

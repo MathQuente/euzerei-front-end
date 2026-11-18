@@ -41,6 +41,7 @@ export function XboxImportPanel({
   return (
     <PlatformImportResult
       ofLabel="do Xbox"
+      platform="XBOX"
       importState={importState}
       onViewLibrary={onViewLibrary}
       getResultSections={result => [
