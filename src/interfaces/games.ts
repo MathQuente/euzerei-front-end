@@ -8,6 +8,7 @@ import type {
   GameStatusEnum,
   SimilarGamesResponse,
 } from '../types/games'
+import type { LibraryPlatform } from '../types/platform'
 
 export type SortField =
   | 'name'
@@ -67,6 +68,8 @@ export interface GameListProps {
   setSearch?: (search: string) => void
   searchPlaceholder?: string
   statusTabs?: StatusTab[]
+  platforms?: LibraryPlatform[]
+  setPlatforms?: (platforms: LibraryPlatform[]) => void
 }
 
 export interface GameListSectionProps extends ComponentProps<'div'> {
@@ -137,4 +140,8 @@ export interface ListToolbarProps {
   statusTabs?: StatusTab[]
   currentStatus?: GameStatusEnum
   onStatusChange?: (value: GameStatusEnum) => void
+  platforms?: LibraryPlatform[]
+  onPlatformsChange?: (platforms: LibraryPlatform[]) => void
+  /** "Atualizando…" ou "Carregando página N…" enquanto a lista troca. */
+  loadingLabel?: string
 }

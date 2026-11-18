@@ -111,6 +111,32 @@
     );
   }
 
+  .list-loading-bar {
+    position: absolute;
+    inset-block: 0;
+    width: 35%;
+    background: linear-gradient(90deg, transparent, #9d52e8, transparent);
+    animation: list-loading-slide 1.2s ease-in-out infinite;
+  }
+
+  @keyframes list-loading-slide {
+    from {
+      left: -35%;
+    }
+    to {
+      left: 100%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .list-loading-bar {
+      left: 0;
+      width: 100%;
+      opacity: 0.6;
+      animation: none;
+    }
+  }
+
   @keyframes favorite-wave {
     0%,
     50% {

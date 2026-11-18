@@ -8,6 +8,7 @@ import type {
   UserGamesByStatus,
   UserGamesResponse,
 } from '../types/games'
+import type { LibraryPlatform } from '../types/platform'
 import type { QUEUE_FILTER } from '../utils/queue'
 import { api } from './useApi'
 import { useAuth } from './useAuth'
@@ -26,7 +27,8 @@ export const useUserGames = (
   search?: string | undefined,
   filter?: GameStatusEnum | typeof QUEUE_FILTER | undefined,
   sortOrder?: SortOrder,
-  sortBy?: SortField
+  sortBy?: SortField,
+  platforms?: LibraryPlatform[]
 ) => {
   const { user } = useAuth()
   const userId = user?.id ?? ''
@@ -38,9 +40,18 @@ export const useUserGames = (
     isError: isErrorUserGames,
     refetch: refetchUserGames,
   } = useQuery<UserGamesResponse>({
-    queryKey: ['userGames', userId, page, search, filter, sortBy, sortOrder],
+    queryKey: [
+      'userGames',
+      userId,
+      page,
+      search,
+      filter,
+      sortBy,
+      sortOrder,
+      platforms?.length ? platforms : undefined,
+    ],
     queryFn: async () =>
-      api.getUserGames(page, search, filter, sortBy, sortOrder),
+      api.getUserGames(page, search, filter, sortBy, sortOrder, platforms),
     placeholderData: keepPreviousData,
     enabled: Boolean(userId),
   })

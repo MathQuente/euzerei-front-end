@@ -9,6 +9,7 @@ import { useUserGames } from '../hooks/useUserGames'
 import type { SortField, SortOrder, StatusTab } from '../interfaces/games'
 import { GameStatusEnum } from '../types/games'
 import type { GameListData } from '../types/games'
+import { parsePlatforms, platformsParam } from '../utils/listFilters'
 import { sortFieldsFor } from '../utils/listSort'
 import { notify } from '../utils/notify'
 import { parsePage } from '../utils/parsePage'
@@ -62,17 +63,26 @@ export function UserGamesPageByStatus() {
     return requested ?? (startsOnPlayed ? 'completedAt' : 'dateAdded')
   })
 
+  const [platforms, setPlatforms] = useState(() =>
+    parsePlatforms(
+      new URL(window.location.toString()).searchParams.get('platforms')
+    )
+  )
+
   const [search, setSearch] = useState(() => {
     const url = new URL(window.location.toString())
     return url.searchParams.get('search') ?? ''
   })
+
+  const platformsValue = platformsParam(platforms)
+  const platformsQuery = platformsValue ? `?platforms=${platformsValue}` : ''
 
   function handleFilterChange(newFilter: GameStatusEnum) {
     if (newFilter === currentEnumStatus) return
     setSearch('')
     setPage(1)
     const newRoute = enumToRouteMap[newFilter]
-    navigate(`/userLibrary/${newRoute}`)
+    navigate(`/userLibrary/${newRoute}${platformsQuery}`)
     if (newFilter === GameStatusEnum.Played) {
       setSortField('completedAt')
       setSortOrder('desc')
@@ -87,6 +97,11 @@ export function UserGamesPageByStatus() {
       ? routeToEnumMap[status]
       : GameStatusEnum.Played
 
+  // Desejos não tem plataformas registradas (mover para lá as apaga), então o
+  // filtro não vale ali: o controle some e o filtro volta nas outras abas.
+  const platformFilterApplies = currentEnumStatus !== GameStatusEnum.Wishlist
+  const platformFilter = platformFilterApplies ? platforms : undefined
+
   const { UserGamesResponse, totalPerStatus, isChangingUserGames } =
     useUserGames(
       page,
@@ -95,7 +110,8 @@ export function UserGamesPageByStatus() {
         ? QUEUE_FILTER
         : currentEnumStatus,
       sortOrder,
-      sortField
+      sortField,
+      platformFilter
     )
 
   const gamesForList: GameListData = {
@@ -132,7 +148,7 @@ export function UserGamesPageByStatus() {
       value,
       label:
         value === GameStatusEnum.Wishlist ? 'Desejos' : statusLabels[value],
-      href: `/userLibrary/${enumToRouteMap[value]}`,
+      href: `/userLibrary/${enumToRouteMap[value]}${platformsQuery}`,
       countClass: LIBRARY_STATUS_BADGES[value]?.iconColor,
       count: hasCounts
         ? value === GameStatusEnum.Backlog
@@ -191,6 +207,8 @@ export function UserGamesPageByStatus() {
           setSearch={setSearch}
           searchPlaceholder="Buscar na biblioteca"
           statusTabs={statusTabs}
+          platforms={platformFilter}
+          setPlatforms={platformFilterApplies ? setPlatforms : undefined}
         />
       )}
     </>

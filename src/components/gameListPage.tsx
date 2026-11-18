@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { INFO_MESSAGES } from '../constants/messages'
 import type { GameListProps, SortField, SortOrder } from '../interfaces/games'
 import type { GameStatusEnum } from '../types/games'
+import type { LibraryPlatform } from '../types/platform'
+import { parsePlatforms, platformsParam } from '../utils/listFilters'
 import { pushListState } from '../utils/listHistory'
 import { SORT_FIELDS } from '../utils/listSort'
 import { notify } from '../utils/notify'
@@ -13,6 +15,9 @@ import { Pagination } from './pagination'
 import { StatusMessage } from './statusMessage'
 
 const CHANGING_PAGE_DELAY_MS = 200
+/** Passou disso, as capas viram esqueleto: espera curta fica discreta, longa fica clara. */
+const SKELETON_AFTER_MS = 1500
+const NO_PLATFORMS: LibraryPlatform[] = []
 
 export function GameListPage({
   games,
@@ -35,20 +40,29 @@ export function GameListPage({
   setSearch,
   searchPlaceholder,
   statusTabs,
+  platforms = NO_PLATFORMS,
+  setPlatforms,
 }: GameListProps) {
   const gamesArray = games.games
 
-  const [showChangingPage, setShowChangingPage] = useState(false)
+  const [loadingStage, setLoadingStage] = useState<'idle' | 'soft' | 'deep'>(
+    'idle'
+  )
+  const changeKind = useRef<'page' | 'refine'>('refine')
   useEffect(() => {
     if (!isChangingPage) {
-      setShowChangingPage(false)
+      setLoadingStage('idle')
       return
     }
-    const timer = setTimeout(
-      () => setShowChangingPage(true),
+    const soft = setTimeout(
+      () => setLoadingStage('soft'),
       CHANGING_PAGE_DELAY_MS
     )
-    return () => clearTimeout(timer)
+    const deep = setTimeout(() => setLoadingStage('deep'), SKELETON_AFTER_MS)
+    return () => {
+      clearTimeout(soft)
+      clearTimeout(deep)
+    }
   }, [isChangingPage])
 
   const safeTotal =
@@ -58,11 +72,22 @@ export function GameListPage({
   const safePage =
     typeof page === 'number' && !Number.isNaN(page) && page > 0 ? page : 1
   const totalPages = Math.ceil(safeTotal / pageSize) || 1
-  const listEmptyState = search ? (
+  const loadingLabel =
+    loadingStage === 'idle'
+      ? undefined
+      : changeKind.current === 'page'
+        ? `Carregando página ${safePage}…`
+        : 'Atualizando…'
+  const hasFilters = Boolean(search) || platforms.length > 0
+  const listEmptyState = hasFilters ? (
     <StatusMessage
       variant="empty"
       title="Nenhum jogo encontrado"
-      description={`Nada com "${search}". Tente outro termo.`}
+      description={
+        search && platforms.length === 0
+          ? `Nada com "${search}". Tente outro termo.`
+          : 'Nenhum jogo com esses filtros. Tente remover algum.'
+      }
     />
   ) : (
     emptyState
@@ -97,6 +122,7 @@ export function GameListPage({
 
       setPage(parsePage(params.get('page')))
       setSearch?.(params.get('search') ?? '')
+      setPlatforms?.(parsePlatforms(params.get('platforms')))
       setSortField(
         urlField && (sortFields ?? SORT_FIELDS).includes(urlField)
           ? urlField
@@ -115,9 +141,10 @@ export function GameListPage({
       window.removeEventListener('popstate', syncFromUrl)
       window.history.scrollRestoration = previousRestoration
     }
-  }, [setPage, setSortField, setSortOrder, setSearch, sortFields])
+  }, [setPage, setSortField, setSortOrder, setSearch, setPlatforms, sortFields])
 
   function setCurrentPage(p: number) {
+    changeKind.current = 'page'
     const url = new URL(window.location.toString())
     url.searchParams.set('page', String(p))
     pushListState(url)
@@ -126,6 +153,7 @@ export function GameListPage({
   }
 
   function onSortChange(field: SortField, order: SortOrder) {
+    changeKind.current = 'refine'
     const url = new URL(window.location.toString())
     url.searchParams.set('sortField', field)
     url.searchParams.set('sortOrder', order)
@@ -134,17 +162,28 @@ export function GameListPage({
     setSortOrder(order)
   }
 
-  function onSearchChange(value: string) {
+  function replaceListParam(key: string, value: string | undefined) {
+    changeKind.current = 'refine'
     const url = new URL(window.location.toString())
-    if (value) url.searchParams.set('search', value)
-    else url.searchParams.delete('search')
+    if (value) url.searchParams.set(key, value)
+    else url.searchParams.delete(key)
     url.searchParams.delete('page')
     window.history.replaceState(window.history.state, '', url)
-    setSearch?.(value)
     setPage(1)
   }
 
+  function onSearchChange(value: string) {
+    replaceListParam('search', value)
+    setSearch?.(value)
+  }
+
+  function onPlatformsChange(value: LibraryPlatform[]) {
+    replaceListParam('platforms', platformsParam(value))
+    setPlatforms?.(value)
+  }
+
   function onStatusChange(value: GameStatusEnum) {
+    changeKind.current = 'refine'
     if (onFilterChange) onFilterChange(value)
     else setFilterField?.(value)
   }
@@ -163,6 +202,9 @@ export function GameListPage({
         statusTabs={isUserLibrary ? statusTabs : undefined}
         currentStatus={filterField}
         onStatusChange={onStatusChange}
+        platforms={platforms}
+        onPlatformsChange={setPlatforms ? onPlatformsChange : undefined}
+        loadingLabel={loadingLabel}
       />
 
       {isAwaitingPage ? (
@@ -174,26 +216,27 @@ export function GameListPage({
         />
       ) : (
         <div className="relative" aria-busy={isChangingPage}>
-          {showChangingPage && (
-            <>
-              <div
-                className="absolute inset-x-0 top-0 z-20 h-0.5 animate-pulse rounded bg-primary-light motion-reduce:animate-none"
-                aria-hidden="true"
-              />
-              <output className="absolute left-1/2 top-4 z-20 -translate-x-1/2 rounded-full border border-dark-border bg-dark-bg-light px-3 py-1 text-xs text-gray-200 shadow-lg shadow-black/40">
-                Carregando página {safePage}…
-              </output>
-            </>
+          {loadingStage !== 'idle' && (
+            <div
+              className="absolute inset-x-0 top-0 z-20 h-0.5 overflow-hidden rounded"
+              aria-hidden="true"
+            >
+              <span className="list-loading-bar" />
+            </div>
           )}
-          <div
-            className={
-              showChangingPage
-                ? 'pointer-events-none opacity-50 saturate-50 transition-opacity duration-200'
-                : 'transition-opacity duration-200'
-            }
-          >
-            <GamesGrid games={gamesArray} emptyState={listEmptyState} />
-          </div>
+          {loadingStage === 'deep' ? (
+            <GameGridSkeleton count={gamesArray.length || pageSize} />
+          ) : (
+            <div
+              className={
+                loadingStage === 'soft'
+                  ? 'pointer-events-none opacity-60 transition-opacity duration-200'
+                  : 'transition-opacity duration-200'
+              }
+            >
+              <GamesGrid games={gamesArray} emptyState={listEmptyState} />
+            </div>
+          )}
         </div>
       )}
 

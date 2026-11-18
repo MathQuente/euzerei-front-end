@@ -1,8 +1,22 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { ArrowUpDown, Check, ChevronDown, Search, X } from 'lucide-react'
+import * as Popover from '@radix-ui/react-popover'
+import {
+  ArrowUpDown,
+  Check,
+  ChevronDown,
+  Loader2,
+  Search,
+  SlidersHorizontal,
+  X,
+} from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import type { ListToolbarProps } from '../interfaces/games'
 import { fieldFocus, focusRing } from '../styles/focus'
+import type { LibraryPlatform } from '../types/platform'
+import {
+  LIBRARY_PLATFORMS,
+  getLibraryPlatform,
+} from '../utils/libraryPlatforms'
 import { SORT_FIELD_META, sortLabel, sortOrdersFor } from '../utils/listSort'
 
 const SEARCH_DELAY_MS = 300
@@ -31,7 +45,7 @@ function SortMenu({
 
   return (
     <DropdownMenu.Root>
-      <DropdownMenu.Trigger className={`${controlClass} sm:ml-auto`}>
+      <DropdownMenu.Trigger className={controlClass}>
         <ArrowUpDown className="size-3.5 shrink-0 text-gray-400" aria-hidden />
         <span className="hidden text-gray-400 sm:inline">Ordenar</span>
         <span className="truncate font-medium">
@@ -93,6 +107,100 @@ function SortMenu({
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
     </DropdownMenu.Root>
+  )
+}
+
+const chipClass = `inline-flex h-7 max-w-full items-center gap-1.5 rounded-full border border-primary/40 bg-primary/15 pl-2.5 pr-1.5 text-[13px] text-purple-100 transition-colors hover:bg-primary/25 ${focusRing}`
+
+function FiltersPanel({
+  platforms,
+  onPlatformsChange,
+  totalGames,
+}: {
+  platforms: LibraryPlatform[]
+  onPlatformsChange: (platforms: LibraryPlatform[]) => void
+  totalGames: number
+}) {
+  function toggle(value: LibraryPlatform) {
+    onPlatformsChange(
+      platforms.includes(value)
+        ? platforms.filter(platform => platform !== value)
+        : [...platforms, value]
+    )
+  }
+
+  return (
+    <Popover.Root>
+      <Popover.Trigger
+        className={controlClass}
+        aria-label={
+          platforms.length > 0
+            ? `Filtros, ${platforms.length} ${platforms.length === 1 ? 'ativo' : 'ativos'}`
+            : 'Filtros'
+        }
+      >
+        <SlidersHorizontal
+          className="size-3.5 shrink-0 text-gray-400"
+          aria-hidden
+        />
+        <span>Filtros</span>
+        {platforms.length > 0 && (
+          <span
+            className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-primary px-1 font-display text-[11px] font-bold text-white"
+            aria-hidden="true"
+          >
+            {platforms.length}
+          </span>
+        )}
+      </Popover.Trigger>
+      <Popover.Portal>
+        <Popover.Content
+          align="start"
+          sideOffset={6}
+          collisionPadding={12}
+          aria-label="Filtros"
+          className="z-[70] w-[min(18.5rem,calc(100vw-2rem))] rounded-xl border border-dark-border bg-dark-bg-light p-3 shadow-xl shadow-black/50"
+        >
+          <p className="mb-2 text-xs text-gray-400">Plataforma</p>
+          <div className="flex flex-wrap gap-1.5">
+            {LIBRARY_PLATFORMS.map(({ value, label, icon: Icon }) => {
+              const active = platforms.includes(value)
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => toggle(value)}
+                  className={`inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3 text-sm transition-colors sm:min-h-8 ${focusRing} ${
+                    active
+                      ? 'border-primary/55 bg-primary/20 text-white'
+                      : 'border-dark-border bg-dark-bg-darker text-gray-300 hover:border-gray-600 hover:text-white'
+                  }`}
+                >
+                  <Icon className="size-3.5 shrink-0" aria-hidden />
+                  {label}
+                </button>
+              )
+            })}
+          </div>
+          <div className="mt-3 flex items-center justify-between gap-3 border-t border-dark-border pt-2.5">
+            <span className="text-xs text-gray-400" aria-live="polite">
+              {totalGames.toLocaleString('pt-BR')}{' '}
+              {totalGames === 1 ? 'jogo' : 'jogos'}
+            </span>
+            {platforms.length > 0 && (
+              <button
+                type="button"
+                onClick={() => onPlatformsChange([])}
+                className={`rounded-sm px-1 text-[13px] text-primary-link transition-colors hover:text-white ${focusRing}`}
+              >
+                Limpar
+              </button>
+            )}
+          </div>
+        </Popover.Content>
+      </Popover.Portal>
+    </Popover.Root>
   )
 }
 
@@ -240,8 +348,16 @@ export function ListToolbar({
   statusTabs,
   currentStatus,
   onStatusChange,
+  platforms = [],
+  onPlatformsChange,
+  loadingLabel,
 }: ListToolbarProps) {
-  const hasControls = Boolean(onSearchChange || (sortFields && onSortChange))
+  const hasControls = Boolean(
+    onSearchChange || onPlatformsChange || (sortFields && onSortChange)
+  )
+  const chipCount =
+    (onPlatformsChange ? platforms.length : 0) +
+    (search && onSearchChange ? 1 : 0)
 
   return (
     <div className="flex flex-col gap-2.5">
@@ -262,6 +378,13 @@ export function ListToolbar({
               onSearchChange={onSearchChange}
             />
           )}
+          {onPlatformsChange && (
+            <FiltersPanel
+              platforms={platforms}
+              onPlatformsChange={onPlatformsChange}
+              totalGames={totalGames}
+            />
+          )}
           <SortMenu
             sortField={sortField}
             sortOrder={sortOrder}
@@ -279,17 +402,59 @@ export function ListToolbar({
           {totalGames.toLocaleString('pt-BR')}{' '}
           {totalGames === 1 ? 'jogo' : 'jogos'}
         </p>
+        {loadingLabel && (
+          <span className="inline-flex items-center gap-1.5 text-[13px] text-primary-link">
+            <Loader2
+              className="size-3.5 animate-spin motion-reduce:animate-none"
+              aria-hidden
+            />
+            {loadingLabel}
+          </span>
+        )}
         {search && onSearchChange && (
           <button
             type="button"
             onClick={() => onSearchChange('')}
             aria-label={`Remover busca ${search}`}
-            className={`inline-flex h-7 max-w-full items-center gap-1.5 rounded-full border border-primary/40 bg-primary/15 pl-2.5 pr-1.5 text-[13px] text-purple-100 transition-colors hover:bg-primary/25 ${focusRing}`}
+            className={chipClass}
           >
             <span className="truncate">
               <span className="text-purple-300/80">Busca:</span> {search}
             </span>
             <X className="size-3.5 shrink-0" aria-hidden />
+          </button>
+        )}
+        {onPlatformsChange &&
+          platforms.map(value => {
+            const label = getLibraryPlatform(value)?.label ?? value
+            return (
+              <button
+                key={value}
+                type="button"
+                onClick={() =>
+                  onPlatformsChange(platforms.filter(item => item !== value))
+                }
+                aria-label={`Remover filtro Plataforma: ${label}`}
+                className={chipClass}
+              >
+                <span className="truncate">
+                  <span className="text-purple-300/80">Plataforma:</span>{' '}
+                  {label}
+                </span>
+                <X className="size-3.5 shrink-0" aria-hidden />
+              </button>
+            )
+          })}
+        {chipCount > 1 && (
+          <button
+            type="button"
+            onClick={() => {
+              onSearchChange?.('')
+              onPlatformsChange?.([])
+            }}
+            className={`rounded-sm px-1.5 py-1 text-[13px] text-primary-link transition-colors hover:text-white ${focusRing}`}
+          >
+            Limpar tudo
           </button>
         )}
       </div>

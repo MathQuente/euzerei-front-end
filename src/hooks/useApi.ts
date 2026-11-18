@@ -246,7 +246,8 @@ export const api = {
     search?: string | undefined,
     filter?: GameStatusEnum | typeof QUEUE_FILTER,
     sortBy?: SortField,
-    sortOrder?: SortOrder
+    sortOrder?: SortOrder,
+    platforms?: LibraryPlatform[]
   ) => {
     const USER_GAMES_SORT_BY_MAP = {
       name: 'gameName',
@@ -262,6 +263,7 @@ export const api = {
         pageIndex: page ? page - 1 : undefined,
         query: search || undefined,
         filter: filter,
+        platforms: platforms?.length ? platforms.join(',') : undefined,
         sortBy: sortBy ? USER_GAMES_SORT_BY_MAP[sortBy] : undefined,
         sortOrder,
       },
