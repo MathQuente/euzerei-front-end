@@ -1,105 +1,46 @@
-import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { CircleAlert, MoreVertical, TriangleAlert } from 'lucide-react'
+import { UserPlus } from 'lucide-react'
 import { type ReactNode, useEffect, useId, useRef, useState } from 'react'
-import {
-  getImportMessage,
-  getSlowImportNotice,
-} from '../../constants/importMessages'
-import { useHiddenImportResult } from '../../hooks/useHiddenImportResult'
 import type { PlatformImport } from '../../hooks/usePlatformImport'
-import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion'
 import { fieldFocus, focusRing } from '../../styles/focus'
-import type { ImportSectionResult } from '../../types/import'
-import type { LibraryPlatform } from '../../types/platform'
 import { Button } from '../button'
 import { ConfirmDialog } from '../confirmDialog'
-import {
-  type ImportResultSection,
-  ImportResultSummary,
-} from '../importResultSummary'
-import { CompletionSuggestionsBlock } from './completionSuggestions'
-import { HiddenImportRow } from './hiddenImportRow'
-import {
-  IMPORT_FINISH_MS,
-  IMPORT_LEAVE_MS,
-  ImportFinishBurst,
-} from './importFinishBurst'
 
 const POLLING_STATUSES = ['waiting', 'active', 'delayed']
 
-const MIN_IMPORTING_VISIBLE_MS = 1500
-
-const CONNECTED_DESCRIPTION =
-  'Importe para trazer seus jogos. Os que já estão na biblioteca continuam lá.'
-
-const MULTI_ACCOUNT_DESCRIPTION = `${CONNECTED_DESCRIPTION} Horas do mesmo jogo em contas diferentes são somadas.`
-
-function plural(count: number, one: string, many: string) {
-  return count === 1 ? one : many
-}
-
-function formatAccountResult({
-  imported,
-  updated,
-  notFound,
-}: ImportSectionResult) {
-  return [
-    `${imported} ${plural(imported, 'novo', 'novos')}`,
-    `${updated} ${plural(updated, 'atualizado', 'atualizados')}`,
-    `${notFound.length} ${plural(notFound.length, 'não encontrado', 'não encontrados')}`,
-  ].join(' · ')
-}
+const MULTI_ACCOUNT_NOTE =
+  'Horas do mesmo jogo em contas diferentes são somadas.'
 
 interface PlatformAccount {
   id: string
   name: string
-  extra?: ReactNode
 }
 
-interface AccountImportResult {
-  name: string
-  result?: ImportSectionResult
-  error?: string
-  warning?: string
-}
-
-function StatusPill({
-  connectedId,
-  connectedName,
-  hideConnectedId,
-  accountCount,
+function StatusLine({
+  names,
   isImporting,
+  idleText,
 }: {
-  connectedId: string | null
-  connectedName: string | null
-  hideConnectedId: boolean
-  accountCount: number
+  names: string[]
   isImporting: boolean
+  idleText: string
 }) {
-  const dotClass = isImporting
-    ? 'bg-primary-light animate-pulse motion-reduce:animate-none'
-    : connectedId
-      ? 'bg-green-400'
-      : 'bg-gray-500'
-  const text = isImporting
-    ? 'Importando'
-    : connectedId && accountCount > 1
-      ? `${accountCount} contas conectadas`
-      : connectedId
-        ? connectedName
-          ? `Conectada como ${connectedName}`
-          : hideConnectedId
-            ? 'Conectada'
-            : `Conectada como ${connectedId}`
-        : 'Não conectada'
-
+  if (isImporting) {
+    return (
+      <span className="flex items-center gap-1.5 text-xs text-gray-300">
+        <span
+          className="size-2 shrink-0 animate-pulse rounded-full bg-primary-light motion-reduce:animate-none"
+          aria-hidden="true"
+        />
+        Importando
+      </span>
+    )
+  }
+  if (names.length === 0) {
+    return <span className="block text-xs text-gray-400">{idleText}</span>
+  }
   return (
-    <span className="flex min-w-0 items-center gap-1.5 text-xs text-gray-300">
-      <span
-        className={`size-2 shrink-0 rounded-full ${dotClass}`}
-        aria-hidden="true"
-      />
-      <span className="break-words">{text}</span>
+    <span className="block break-words text-xs text-green-400">
+      {names.join(' · ')}
     </span>
   )
 }
@@ -107,53 +48,40 @@ function StatusPill({
 interface PlatformImportSectionProps<TResult> {
   icon: ReactNode
   label: string
+  /** Frase curta que aparece sob o nome enquanto a loja não está conectada. */
+  tagline: string
   masculine?: boolean
   connectedId: string | null
   connectedName?: string | null
-  hideConnectedId?: boolean
   accounts?: PlatformAccount[]
   maxAccounts?: number
-  addAccountHint?: string
   inputPlaceholder?: string
   inputValidation?: { pattern: RegExp; message: string }
   connectLabel?: string
   verificationHint?: string
   disconnectedDescription: string
   importState: PlatformImport<TResult>
-  getResultSections: (result: TResult) => ImportResultSection[]
-  getAccountResults?: (result: TResult) => AccountImportResult[]
-  onViewLibrary?: () => void
-  suggestionsPlatform?: LibraryPlatform
-  connectedNote?: string
 }
 
 export function PlatformImportSection<TResult>({
   icon,
   label,
+  tagline,
   masculine = false,
   connectedId,
   connectedName = null,
-  hideConnectedId = false,
   accounts,
   maxAccounts = 1,
-  addAccountHint,
   inputPlaceholder,
   inputValidation,
   connectLabel,
   verificationHint,
   disconnectedDescription,
   importState,
-  getResultSections,
-  getAccountResults,
-  onViewLibrary,
-  suggestionsPlatform,
-  connectedNote,
 }: PlatformImportSectionProps<TResult>) {
   const article = masculine ? 'o' : 'a'
-  const ofLabel = `${masculine ? 'do' : 'da'} ${label}`
   const {
     status,
-    refetchStatus,
     connect,
     isConnecting,
     redirectsAway,
@@ -161,211 +89,21 @@ export function PlatformImportSection<TResult>({
     isRequestingVerification,
     disconnect,
     isDisconnecting,
-    startImport,
-    isStarting,
-    refreshAfterImport,
   } = importState
 
   const [profileInput, setProfileInput] = useState('')
   const [verificationCode, setVerificationCode] = useState<string | null>(null)
   const [addingAccount, setAddingAccount] = useState(false)
-  const [justFinished, setJustFinished] = useState(false)
-  const [celebrating, setCelebrating] = useState(false)
-  const [leaving, setLeaving] = useState(false)
-  const celebrationTimer = useRef<ReturnType<typeof setTimeout>>()
-  const finishTimer = useRef<ReturnType<typeof setTimeout>>()
-  const reducedMotion = usePrefersReducedMotion()
+  const [connectOpen, setConnectOpen] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
   const [disconnectTarget, setDisconnectTarget] =
     useState<PlatformAccount | null>(null)
-  const previousStatus = useRef<string | undefined>(undefined)
-  const progressRef = useRef<HTMLDivElement>(null)
-  const resultRef = useRef<HTMLOutputElement>(null)
-  const restoreRef = useRef<HTMLButtonElement>(null)
-  const focusAfterToggle = useRef<'restore' | 'first' | null>(null)
-  const skipMenuRefocus = useRef(false)
-  const menuTriggerRef = useRef<HTMLButtonElement>(null)
-  const [hideAnnouncement, setHideAnnouncement] = useState('')
-  const isFirstStatusLoad = useRef(true)
-
-  const [visuallyImporting, setVisuallyImporting] = useState(false)
-  const importStartedAtRef = useRef<number | null>(null)
-  const messageSeedRef = useRef(0)
-
-  const rawIsImporting = POLLING_STATUSES.includes(status?.status ?? '')
+  const disconnectTriggerRef = useRef<HTMLElement | null>(null)
+  const isImporting = POLLING_STATUSES.includes(status?.status ?? '')
 
   useEffect(() => {
-    if (rawIsImporting && !visuallyImporting) {
-      setVisuallyImporting(true)
-      importStartedAtRef.current = Date.now()
-      messageSeedRef.current = Math.floor(Math.random() * 2 ** 31)
-    }
-  }, [rawIsImporting, visuallyImporting])
-
-  useEffect(() => {
-    if (status?.status === undefined) return
-
-    if (isFirstStatusLoad.current) {
-      isFirstStatusLoad.current = false
-      previousStatus.current = status.status
-      return
-    }
-
-    const wasTerminal =
-      previousStatus.current === 'completed' ||
-      previousStatus.current === 'failed'
-    const isDone = status.status === 'completed' || status.status === 'failed'
-
-    previousStatus.current = status.status
-
-    if (wasTerminal || !isDone) return
-
-    const startedAt = importStartedAtRef.current ?? Date.now()
-    const remaining = Math.max(
-      MIN_IMPORTING_VISIBLE_MS - (Date.now() - startedAt),
-      0
-    )
-
-    const timer = setTimeout(
-      () => finishImport(status.status === 'completed'),
-      remaining
-    )
-
-    return () => clearTimeout(timer)
-  }, [status?.status])
-
-  useEffect(
-    () => () => {
-      clearTimeout(celebrationTimer.current)
-      clearTimeout(finishTimer.current)
-    },
-    []
-  )
-
-  function finishImport(completed: boolean) {
-    clearTimeout(celebrationTimer.current)
-    if (!completed || reducedMotion) {
-      showImportResult()
-      return
-    }
-    setCelebrating(true)
-    celebrationTimer.current = setTimeout(() => {
-      setLeaving(true)
-      celebrationTimer.current = setTimeout(showImportResult, IMPORT_LEAVE_MS)
-    }, IMPORT_FINISH_MS)
-  }
-
-  function showImportResult() {
-    setCelebrating(false)
-    setLeaving(false)
-    setVisuallyImporting(false)
-    importStartedAtRef.current = null
-    setJustFinished(true)
-    refreshAfterImport()
-  }
-
-  const isImporting = visuallyImporting
-
-  const [elapsedSeconds, setElapsedSeconds] = useState(0)
-  useEffect(() => {
-    if (!isImporting) {
-      setElapsedSeconds(0)
-      return
-    }
-    const interval = setInterval(() => {
-      const startedAt = importStartedAtRef.current ?? Date.now()
-      setElapsedSeconds(Math.floor((Date.now() - startedAt) / 1000))
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [isImporting])
-
-  useEffect(() => {
-    const focusLost =
-      !document.activeElement || document.activeElement === document.body
-    if (!focusLost) return
-    if (isImporting) progressRef.current?.focus()
-    else if (justFinished) resultRef.current?.focus()
-  }, [isImporting, justFinished])
-
-  const hiddenResult = useHiddenImportResult(
-    label.toLowerCase(),
-    status?.finishedAt
-  )
-  const showHiddenRow = !justFinished && hiddenResult.hidden
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: roda quando o resultado é ocultado ou mostrado
-  useEffect(() => {
-    const target = focusAfterToggle.current
-    focusAfterToggle.current = null
-    if (target === 'restore') restoreRef.current?.focus()
-    else if (target === 'first') {
-      resultRef.current?.querySelector('button')?.focus()
-    }
-  }, [showHiddenRow])
-
-  function hideResult() {
-    skipMenuRefocus.current = true
-    focusAfterToggle.current = 'restore'
-    setHideAnnouncement('Resultado da última importação oculto.')
-    hiddenResult.hide()
-  }
-
-  function showResult() {
-    focusAfterToggle.current = 'first'
-    setHideAnnouncement('Resultado da última importação visível.')
-    hiddenResult.show()
-  }
-
-  const slowImportNotice = getSlowImportNotice(
-    elapsedSeconds,
-    messageSeedRef.current
-  )
-  const progress =
-    status?.status === 'active' ? (status.progress ?? 0) : undefined
-
-  async function handleStartImport() {
-    setVisuallyImporting(true)
-    setJustFinished(false)
-    importStartedAtRef.current = Date.now()
-    messageSeedRef.current = Math.floor(Math.random() * 2 ** 31)
-    try {
-      await startImport()
-      const fresh = await refetchStatus()
-      if (fresh?.status === 'completed' || fresh?.status === 'failed') {
-        previousStatus.current = fresh.status
-        clearTimeout(finishTimer.current)
-        finishTimer.current = setTimeout(
-          () => finishImport(fresh.status === 'completed'),
-          MIN_IMPORTING_VISIBLE_MS
-        )
-      } else {
-        previousStatus.current = fresh?.status
-      }
-    } catch {
-      setVisuallyImporting(false)
-      importStartedAtRef.current = null
-    }
-  }
-
-  const cooldownUntil =
-    status?.status === 'completed' ? status.cooldownUntil : undefined
-
-  const [now, setNow] = useState(() => Date.now())
-  useEffect(() => {
-    if (!cooldownUntil) return
-    const interval = setInterval(() => setNow(Date.now()), 1000)
-    return () => clearInterval(interval)
-  }, [cooldownUntil])
-
-  const cooldownRemainingMs = cooldownUntil ? cooldownUntil - now : 0
-  const isOnCooldown = cooldownRemainingMs > 0
-  const cooldownLabel = isOnCooldown
-    ? (() => {
-        const totalMinutes = Math.ceil(cooldownRemainingMs / 60000)
-        const hours = Math.floor(totalMinutes / 60)
-        const minutes = totalMinutes % 60
-        return hours > 0 ? `${hours}h ${minutes}min` : `${minutes}min`
-      })()
-    : null
+    if (connectOpen || addingAccount) inputRef.current?.focus()
+  }, [connectOpen, addingAccount])
 
   async function handleConnect() {
     if (redirectsAway) {
@@ -377,6 +115,7 @@ export function PlatformImportSection<TResult>({
       await connect(profileInput.trim())
       setProfileInput('')
       setAddingAccount(false)
+      setConnectOpen(false)
       return
     }
     const { code } = await requestVerification(profileInput.trim())
@@ -388,10 +127,12 @@ export function PlatformImportSection<TResult>({
     setVerificationCode(null)
     setProfileInput('')
     setAddingAccount(false)
+    setConnectOpen(false)
   }
 
   function handleCancelAdding() {
     setAddingAccount(false)
+    setConnectOpen(false)
     setVerificationCode(null)
     setProfileInput('')
   }
@@ -400,15 +141,7 @@ export function PlatformImportSection<TResult>({
     setVerificationCode(null)
   }
 
-  const accountResults =
-    status?.status === 'completed' && status.result && getAccountResults
-      ? getAccountResults(status.result)
-      : []
-
-  const showViewLibrary =
-    justFinished && status?.status === 'completed' && Boolean(onViewLibrary)
-
-  const wantsNewAccount = !connectedId || addingAccount
+  const wantsNewAccount = addingAccount || (!connectedId && connectOpen)
   const needsInput = wantsNewAccount && !redirectsAway
   const inputHintId = useId()
   const trimmedInput = profileInput.trim()
@@ -430,22 +163,6 @@ export function PlatformImportSection<TResult>({
     setDisconnectTarget(null)
   }
 
-  function askDisconnect() {
-    setDisconnectTarget(accountList[0] ?? { id: '', name: label })
-  }
-
-  const canHideResult =
-    Boolean(connectedId) &&
-    !isImporting &&
-    status?.status === 'completed' &&
-    Boolean(status.result) &&
-    !showHiddenRow &&
-    !justFinished &&
-    hiddenResult.canHide
-  const canAddFromMenu =
-    hasAccountList && maxAccounts > 1 && canAddAccount && !addingAccount
-  const hasMenu = Boolean(connectedId)
-
   const primaryButtonProps = {
     type: 'button' as const,
     variant: 'primary' as const,
@@ -454,177 +171,147 @@ export function PlatformImportSection<TResult>({
   }
 
   const primaryAction =
-    connectedId && !isImporting ? (
-      showViewLibrary ? (
-        <Button {...primaryButtonProps} onClick={onViewLibrary}>
-          Ver na biblioteca
-        </Button>
-      ) : !isOnCooldown ? (
-        <Button
-          {...primaryButtonProps}
-          onClick={handleStartImport}
-          loading={isStarting}
-        >
-          {status?.status === 'failed'
-            ? 'Tentar novamente'
-            : `Importar ${ofLabel}`}
-        </Button>
-      ) : null
-    ) : !connectedId && redirectsAway ? (
+    !connectedId && redirectsAway ? (
       <Button
         {...primaryButtonProps}
         onClick={handleConnect}
         loading={isConnectBusy}
         disabled={isConnectBusy}
       >
-        {connectLabel ?? `Entrar com ${article} ${label}`}
+        {connectLabel ?? 'Conectar'}
+      </Button>
+    ) : !connectedId && !connectOpen ? (
+      <Button {...primaryButtonProps} onClick={() => setConnectOpen(true)}>
+        Conectar
       </Button>
     ) : null
 
-  const menuItemClass =
-    'flex w-full cursor-pointer select-none flex-col items-start gap-0.5 rounded-md px-2.5 py-2 text-left text-[13.5px] text-gray-200 outline-none data-[highlighted]:bg-dark-bg-lighter data-[disabled]:cursor-not-allowed data-[disabled]:opacity-55 [@media(max-width:639px)]:min-h-11'
+  const accountNames =
+    accountList.length > 0
+      ? accountList.map(account => account.name)
+      : connectedId
+        ? [connectedName ?? connectedId]
+        : []
 
-  const destructiveItemClass = `${menuItemClass} text-red-300 data-[highlighted]:bg-red-400/10`
+  function askDisconnectOf(
+    account: PlatformAccount,
+    trigger: HTMLElement | null
+  ) {
+    disconnectTriggerRef.current = trigger
+    setDisconnectTarget(account)
+  }
 
-  const menu = hasMenu ? (
-    <DropdownMenu.Root>
-      <DropdownMenu.Trigger asChild>
-        <button
-          ref={menuTriggerRef}
-          type="button"
-          aria-label={`Mais ações de ${label}`}
-          disabled={isImporting}
-          className={`grid size-9 shrink-0 place-items-center rounded-lg border border-transparent text-gray-300 transition-colors disabled:cursor-not-allowed disabled:opacity-40 hover:border-dark-border hover:bg-dark-bg-lighter hover:text-white data-[state=open]:border-dark-border data-[state=open]:bg-dark-bg-lighter [@media(max-width:639px)]:size-11 ${focusRing}`}
-        >
-          <MoreVertical className="size-[18px]" aria-hidden="true" />
-        </button>
-      </DropdownMenu.Trigger>
-      <DropdownMenu.Portal>
-        <DropdownMenu.Content
-          align="end"
-          onCloseAutoFocus={event => {
-            if (skipMenuRefocus.current) {
-              event.preventDefault()
-              skipMenuRefocus.current = false
-            }
-          }}
-          sideOffset={6}
-          className="z-50 w-[min(20rem,calc(100vw-2rem))] rounded-xl border border-dark-border bg-dark-bg-light p-1.5 shadow-xl"
-        >
-          {canAddFromMenu && (
-            <DropdownMenu.Item
-              className={menuItemClass}
-              disabled={isConnectBusy}
-              onSelect={() =>
-                redirectsAway ? handleConnect() : setAddingAccount(true)
-              }
-            >
-              Adicionar outra conta
-              {addAccountHint && (
-                <span className="text-xs font-normal leading-snug text-gray-400">
-                  {addAccountHint}
-                </span>
-              )}
-            </DropdownMenu.Item>
-          )}
-          {isAtAccountLimit && (
-            <DropdownMenu.Item className={menuItemClass} disabled>
-              Adicionar outra conta
-              <span className="text-xs font-normal text-gray-400">
-                Limite de {maxAccounts} contas {label}.
-              </span>
-            </DropdownMenu.Item>
-          )}
-          {canHideResult && (
-            <DropdownMenu.Item className={menuItemClass} onSelect={hideResult}>
-              Ocultar até a próxima importação
-            </DropdownMenu.Item>
-          )}
-          {(canAddFromMenu || isAtAccountLimit || canHideResult) && (
-            <DropdownMenu.Separator className="mx-1 my-1.5 h-px bg-dark-border" />
-          )}
-          {hasAccountList && accountList.length > 0 ? (
-            accountList.map(account => (
-              <DropdownMenu.Item
-                key={account.id}
-                className={destructiveItemClass}
-                onSelect={() => setDisconnectTarget(account)}
-              >
-                Desconectar {account.name}
-              </DropdownMenu.Item>
-            ))
-          ) : (
-            <DropdownMenu.Item
-              className={destructiveItemClass}
-              onSelect={askDisconnect}
-            >
-              Desconectar {connectedName ?? connectedId ?? label}
-            </DropdownMenu.Item>
-          )}
-        </DropdownMenu.Content>
-      </DropdownMenu.Portal>
-    </DropdownMenu.Root>
-  ) : null
+  const disconnectButtonClass =
+    'border-red-400/30 text-red-300 hover:bg-red-400/10 hover:text-red-200'
+
+  const canOfferAddAccount =
+    Boolean(connectedId) && canAddAccount && maxAccounts > 1 && !addingAccount
 
   return (
-    <section className="flex flex-col gap-3.5 rounded-xl border border-dark-border bg-dark-bg-darker p-4">
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-3">
-        <span
-          className="grid size-10 shrink-0 place-items-center rounded-[10px] border border-dark-border bg-dark-bg-light"
-          aria-hidden="true"
-        >
+    <li className="flex flex-col gap-3.5 border-t border-dark-border px-4 py-4 first:border-t-0 sm:px-5">
+      <div className="flex flex-wrap items-start gap-x-3 gap-y-3">
+        <span className="relative shrink-0" aria-hidden="true">
           {icon}
+          {connectedId && (
+            <span className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-dark-bg-darker bg-green-400" />
+          )}
         </span>
         <div className="min-w-0 flex-1">
-          <h2 className="text-[15px] font-semibold leading-tight text-white">
+          <h3 className="text-[15px] font-semibold leading-tight text-white">
             {label}
-          </h2>
-          <StatusPill
-            connectedId={connectedId}
-            connectedName={connectedName}
-            hideConnectedId={hideConnectedId}
-            accountCount={accountList.length}
+          </h3>
+          <StatusLine
+            names={accountNames}
             isImporting={isImporting}
+            idleText={tagline}
           />
+          {canOfferAddAccount && (
+            <button
+              type="button"
+              disabled={isConnectBusy || isImporting}
+              onClick={() =>
+                redirectsAway ? handleConnect() : setAddingAccount(true)
+              }
+              className={`mt-1 inline-flex min-h-7 items-center gap-1.5 rounded-sm text-[13px] text-gray-400 transition-colors hover:text-white disabled:opacity-50 ${focusRing}`}
+            >
+              <UserPlus className="size-3.5" aria-hidden="true" />
+              Adicionar outra conta
+            </button>
+          )}
+          {isAtAccountLimit && (
+            <p className="mt-1.5 text-xs text-gray-500">
+              Limite de {maxAccounts} contas {label}.
+            </p>
+          )}
         </div>
         {primaryAction && (
           <div className="[@media(max-width:480px)]:order-last [@media(max-width:480px)]:basis-full">
             {primaryAction}
           </div>
         )}
-        {menu}
+        {connectedId && accountList.length <= 1 && (
+          <Button
+            type="button"
+            variant="secondary"
+            size="md"
+            className={`text-sm [@media(max-width:480px)]:w-full ${disconnectButtonClass}`}
+            disabled={isImporting}
+            onClick={event =>
+              askDisconnectOf(
+                accountList[0] ?? { id: '', name: label },
+                event.currentTarget
+              )
+            }
+          >
+            Desconectar
+          </Button>
+        )}
       </div>
 
-      {(!connectedId || accountList.length > 1) && (
-        <p className="text-xs leading-relaxed text-gray-400">
-          {connectedId ? MULTI_ACCOUNT_DESCRIPTION : disconnectedDescription}
-        </p>
-      )}
-
-      {connectedId &&
-        hasAccountList &&
-        maxAccounts > 1 &&
-        (accountList.length > 1 ||
-          accountList.some(account => account.extra)) && (
-          <ul className="flex flex-col">
+      {connectedId && accountList.length > 1 && (
+        <>
+          <ul className="flex flex-col rounded-lg border border-dark-border">
             {accountList.map(account => (
               <li
                 key={account.id}
-                className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 border-t border-dark-border py-2"
+                className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 border-t border-dark-border px-3 py-2 first:border-t-0"
               >
                 <span className="min-w-0 break-words text-[13.5px] font-medium text-white">
                   {account.name}
                 </span>
-                {account.extra}
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className={disconnectButtonClass}
+                  disabled={isImporting}
+                  aria-label={`Desconectar ${account.name}`}
+                  onClick={event =>
+                    askDisconnectOf(account, event.currentTarget)
+                  }
+                >
+                  Desconectar
+                </Button>
               </li>
             ))}
           </ul>
-        )}
+          <p className="text-xs leading-relaxed text-gray-400">
+            {MULTI_ACCOUNT_NOTE}
+          </p>
+        </>
+      )}
+
+      {!connectedId && wantsNewAccount && needsInput && (
+        <p className="text-xs leading-relaxed text-gray-400">
+          {disconnectedDescription}
+        </p>
+      )}
 
       {wantsNewAccount && (needsInput || addingAccount) && (
         <div className="flex items-center gap-2 [@media(max-width:480px)]:flex-col [@media(max-width:480px)]:items-stretch">
           {needsInput && (
             <input
+              ref={inputRef}
               type="text"
               placeholder={inputPlaceholder}
               aria-label={inputPlaceholder}
@@ -655,7 +342,7 @@ export function PlatformImportSection<TResult>({
                 : 'Conectar'}
             </Button>
           )}
-          {addingAccount && !isAwaitingVerification && (
+          {(addingAccount || connectOpen) && !isAwaitingVerification && (
             <Button
               type="button"
               variant="secondary"
@@ -710,155 +397,6 @@ export function PlatformImportSection<TResult>({
         </div>
       )}
 
-      <output className="sr-only">{hideAnnouncement}</output>
-
-      <output
-        ref={resultRef}
-        tabIndex={-1}
-        className="flex flex-col gap-2.5 outline-none empty:hidden"
-      >
-        {connectedId &&
-          !isImporting &&
-          status?.status === 'completed' &&
-          status.result && (
-            <>
-              <div
-                className={`flex flex-col gap-2.5 border-t border-dark-border pt-3.5 ${justFinished ? 'animate-import-result' : ''}`}
-              >
-                {showHiddenRow ? (
-                  <HiddenImportRow
-                    ref={restoreRef}
-                    platform={suggestionsPlatform}
-                    memoryOnly={hiddenResult.memoryOnly}
-                    onShow={showResult}
-                  />
-                ) : (
-                  <ImportResultSummary
-                    platformLabelOf={ofLabel}
-                    sections={getResultSections(status.result)}
-                    variant={justFinished ? 'fresh' : 'last'}
-                    finishedAt={status.finishedAt}
-                  />
-                )}
-              </div>
-              {!showHiddenRow &&
-                (accountResults.length > 1 ||
-                  accountResults.some(
-                    account => account.warning || account.error
-                  )) && (
-                  <ul className="flex flex-col">
-                    {accountResults.map(account => (
-                      <li
-                        key={account.name}
-                        className="flex flex-col gap-0.5 border-t border-dark-border py-2 text-xs"
-                      >
-                        <span className="text-primary-link">
-                          {account.name}
-                        </span>
-                        <span
-                          className={
-                            account.error ? 'text-red-300' : 'text-gray-300'
-                          }
-                        >
-                          {account.error ??
-                            (account.result
-                              ? formatAccountResult(account.result)
-                              : '')}
-                        </span>
-                        {account.warning && (
-                          <span className="flex items-start gap-1.5 text-amber-400">
-                            <TriangleAlert
-                              className="mt-0.5 size-3.5 shrink-0"
-                              aria-hidden="true"
-                            />
-                            {account.warning}
-                          </span>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              {suggestionsPlatform && (
-                <div hidden={showHiddenRow}>
-                  <CompletionSuggestionsBlock
-                    platform={suggestionsPlatform}
-                    variant={justFinished ? 'fresh' : 'last'}
-                    expectedCount={
-                      getResultSections(status.result)[0]?.result.suggestions ??
-                      0
-                    }
-                  />
-                </div>
-              )}
-            </>
-          )}
-        {connectedId && !isImporting && status?.status === 'failed' && (
-          <div className="flex items-start gap-2.5 rounded-lg border border-red-400/30 bg-red-400/10 px-3 py-2.5">
-            <CircleAlert
-              className="mt-0.5 size-[18px] shrink-0 text-red-400"
-              aria-hidden="true"
-            />
-            <div>
-              <p className="text-[13.5px] font-semibold text-white">
-                Não foi possível importar {ofLabel}
-              </p>
-              <p className="mt-0.5 text-xs text-gray-300">
-                {status.error ??
-                  'Erro desconhecido ao importar sua biblioteca.'}
-              </p>
-            </div>
-          </div>
-        )}
-      </output>
-
-      {connectedId && !isImporting && connectedNote && (
-        <p className="text-xs text-gray-400">{connectedNote}</p>
-      )}
-
-      {connectedId && !isImporting && isOnCooldown && (
-        <p className="text-xs text-gray-400">
-          Você pode importar de novo em {cooldownLabel}.
-        </p>
-      )}
-
-      {isImporting && (
-        <div
-          ref={progressRef}
-          tabIndex={-1}
-          className={`flex flex-col gap-2 border-t border-dark-border pt-3.5 outline-none transition-opacity duration-500 ${leaving ? 'opacity-0' : ''}`}
-          aria-live="polite"
-        >
-          {celebrating && <ImportFinishBurst />}
-          {!celebrating && progress !== undefined && (
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-dark-bg">
-              <div
-                className="h-full rounded-full bg-primary transition-[width] duration-300"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-          )}
-          {!celebrating && (
-            <div className="flex items-start justify-between gap-3">
-              <span className="text-xs text-gray-300">
-                {getImportMessage(
-                  progress,
-                  elapsedSeconds,
-                  messageSeedRef.current
-                )}
-              </span>
-              {progress !== undefined && (
-                <span className="shrink-0 text-xs tabular-nums text-gray-300">
-                  {progress}%
-                </span>
-              )}
-            </div>
-          )}
-          {slowImportNotice && !celebrating && (
-            <span className="text-xs text-gray-500">{slowImportNotice}</span>
-          )}
-        </div>
-      )}
-
       <ConfirmDialog
         open={disconnectTarget !== null}
         onOpenChange={open => !open && setDisconnectTarget(null)}
@@ -871,8 +409,8 @@ export function PlatformImportSection<TResult>({
         confirmLabel="Desconectar"
         onConfirm={handleDisconnect}
         isLoading={isDisconnecting}
-        returnFocusTo={menuTriggerRef}
+        returnFocusTo={disconnectTriggerRef}
       />
-    </section>
+    </li>
   )
 }

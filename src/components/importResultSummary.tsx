@@ -4,7 +4,7 @@ import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants/messages'
 import { useCountUp } from '../hooks/useCountUp'
 import { focusRing } from '../styles/focus'
 import type { ImportSectionResult } from '../types/import'
-import { groupNotFound } from '../utils/groupNotFound'
+import { type NotFoundGroupKey, groupNotFound } from '../utils/groupNotFound'
 import { notify } from '../utils/notify'
 import { Button } from './button'
 
@@ -28,7 +28,7 @@ function plural(count: number, one: string, many: string) {
   return count === 1 ? one : many
 }
 
-function formatWhen(timestamp: number) {
+export function formatWhen(timestamp: number) {
   const date = new Date(timestamp)
   const time = date.toLocaleTimeString('pt-BR', {
     hour: '2-digit',
@@ -68,6 +68,7 @@ export function ImportResultSummary({
   finishedAt,
 }: ImportResultSummaryProps) {
   const [expanded, setExpanded] = useState(false)
+  const [filter, setFilter] = useState<NotFoundGroupKey | 'all'>('all')
   const detailId = useId()
 
   const [library, ...others] = sections
@@ -119,9 +120,16 @@ export function ImportResultSummary({
     })
   }
 
+  const activeGroup = groups.find(group => group.key === filter)
+  const shownItems = activeGroup
+    ? activeGroup.items
+    : groups.flatMap(group => group.items)
+
   async function copyList() {
     try {
-      await navigator.clipboard.writeText(notFound.join('\n'))
+      await navigator.clipboard.writeText(
+        shownItems.map(item => item.name).join('\n')
+      )
       notify.success(SUCCESS_MESSAGES.listCopied)
     } catch {
       notify.error(ERROR_MESSAGES.copyList)
@@ -143,65 +151,84 @@ export function ImportResultSummary({
   const toggleLabel =
     variant === 'last'
       ? expanded
-        ? 'Ocultar detalhes'
-        : 'Ver detalhes'
+        ? 'Ocultar a lista'
+        : `Ver os ${missing} sem correspondência`
       : `${missing} sem correspondência no catálogo`
 
   const details = (
     <div id={detailId} className="flex flex-col gap-3 pt-1">
-      {variant === 'last' && supportLine}
       {skipped > 0 && (
         <p className="text-xs text-gray-400">
           Se algum jogo seu tem mais de um console da mesma plataforma, a
-          importação não o atualiza e ele entra nessa contagem. Ajuste as horas
-          direto no jogo.
+          importação não o atualiza e ele entra na contagem de "já na
+          biblioteca". Ajuste as horas direto no jogo.
         </p>
       )}
       {missing > 0 && (
-        <>
-          <p className="text-xs text-gray-400">
-            Betas, testes, ferramentas e itens removidos {platformLabelOf}{' '}
-            costumam não ter ficha no catálogo de jogos.
-          </p>
-          {groups.map(group => (
-            <div key={group.key} className="flex flex-col gap-1">
-              <p className="text-xs font-bold text-gray-300">
-                {group.label} ({group.items.length})
-              </p>
-              <ul className="flex flex-col text-xs text-gray-300">
-                {group.items.map(item => (
-                  <li
-                    key={item.name}
-                    className="flex items-baseline justify-between gap-3 border-t border-dark-border py-1 first:border-t-0"
-                  >
-                    <span className="min-w-0 break-words">{item.name}</span>
-                    {item.appId !== undefined && (
-                      <a
-                        href={`https://store.steampowered.com/app/${item.appId}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className={`shrink-0 rounded-sm text-primary-link hover:underline ${focusRing}`}
-                      >
-                        Ver na loja
-                      </a>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-          <div>
+        <div className="overflow-hidden rounded-lg border border-dark-border bg-dark-bg-light">
+          <div className="flex flex-wrap items-center gap-2 border-b border-dark-border px-3.5 py-3">
+            <fieldset className="m-0 flex min-w-0 flex-1 flex-wrap gap-1.5 border-0 p-0">
+              <legend className="sr-only">Filtrar por tipo</legend>
+              {[
+                { key: 'all' as const, label: 'Todos', count: missing },
+                ...groups.map(group => ({
+                  key: group.key,
+                  label: group.label,
+                  count: group.items.length,
+                })),
+              ].map(chip => (
+                <button
+                  key={chip.key}
+                  type="button"
+                  aria-pressed={filter === chip.key}
+                  onClick={() => setFilter(chip.key)}
+                  className={`rounded-full border px-2.5 py-0.5 text-xs transition-colors [@media(max-width:639px)]:min-h-9 ${focusRing} ${
+                    filter === chip.key
+                      ? 'border-primary-light/50 bg-primary/20 text-white'
+                      : 'border-dark-border text-gray-400 hover:text-white'
+                  }`}
+                >
+                  {chip.label}
+                  <b className="ml-1.5 font-display font-semibold tabular-nums text-white">
+                    {chip.count}
+                  </b>
+                </button>
+              ))}
+            </fieldset>
             <Button
               type="button"
               variant="secondary"
               size="sm"
-              className="[@media(max-width:480px)]:w-full"
               onClick={copyList}
             >
               Copiar lista
             </Button>
           </div>
-        </>
+          <ul className="m-0 max-h-56 list-none overflow-y-auto p-0">
+            {shownItems.map(item => (
+              <li
+                key={item.name}
+                className="flex items-baseline justify-between gap-3 border-t border-dark-border px-3.5 py-2 text-[13.5px] text-gray-200 first:border-t-0"
+              >
+                <span className="min-w-0 break-words">{item.name}</span>
+                {item.appId !== undefined && (
+                  <a
+                    href={`https://store.steampowered.com/app/${item.appId}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={`shrink-0 rounded-sm text-xs text-primary-link hover:underline ${focusRing}`}
+                  >
+                    Ver na loja ›
+                  </a>
+                )}
+              </li>
+            ))}
+          </ul>
+          <p className="border-t border-dark-border px-3.5 py-2.5 text-xs text-gray-500">
+            Betas, testes e itens removidos {platformLabelOf} costumam não ter
+            ficha no catálogo de jogos.
+          </p>
+        </div>
       )}
     </div>
   )
@@ -231,35 +258,81 @@ export function ImportResultSummary({
   )
 
   if (variant === 'last') {
+    const stats: {
+      key: string
+      value: number
+      label: string
+      tone?: string
+    }[] = [
+      {
+        key: 'imported',
+        value: imported,
+        label: plural(imported, 'Novo', 'Novos'),
+        tone: 'text-green-400',
+      },
+      {
+        key: 'updated',
+        value: updated,
+        label: plural(updated, 'Atualizado', 'Atualizados'),
+      },
+      {
+        key: 'skipped',
+        value: skipped,
+        label: 'Já na biblioteca',
+      },
+      ...others.map(section => ({
+        key: section.title,
+        value: section.result.imported,
+        label: SUPPORT_LABELS[section.title]
+          ? 'Na lista de desejos'
+          : section.title,
+      })),
+      {
+        key: 'missing',
+        value: missing,
+        label: 'Sem correspondência',
+        tone: missing > 0 ? 'text-amber-400' : undefined,
+      },
+    ]
     return (
-      <div className="flex flex-col gap-2.5">
+      <div className="flex flex-col gap-3">
         <p className="text-xs text-gray-400">
           Última importação{finishedAt ? `, ${formatWhen(finishedAt)}` : ''}
         </p>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-baseline gap-1.5 rounded-full border border-green-400/30 bg-green-400/10 px-2.5 py-1 text-xs text-gray-200">
-            <Count className="text-green-400">{imported}</Count>
-            {plural(imported, 'jogo novo', 'jogos novos')}
-          </span>
-          {missing > 0 && (
-            <span className="inline-flex items-baseline gap-1.5 rounded-full border border-dark-border bg-dark-bg-lighter px-2.5 py-1 text-xs text-gray-200">
-              <Count>{missing}</Count> sem correspondência
-            </span>
-          )}
-          <button
-            type="button"
-            onClick={() => setExpanded(value => !value)}
-            aria-expanded={expanded}
-            aria-controls={expanded ? detailId : undefined}
-            className={`ml-auto inline-flex min-h-8 items-center gap-1 rounded px-1 text-[13px] font-medium text-primary-link hover:underline [@media(max-width:639px)]:min-h-11 ${focusRing}`}
-          >
-            {toggleLabel}
-            <ChevronRight
-              className={`size-4 transition-transform motion-reduce:transition-none ${expanded ? 'rotate-90' : ''}`}
-              aria-hidden="true"
-            />
-          </button>
-        </div>
+        <ul className="m-0 flex list-none flex-wrap gap-y-3 p-0">
+          {stats.map(stat => (
+            <li
+              key={stat.key}
+              className="flex flex-col gap-1 border-l border-dark-border px-4 first:border-l-0 first:pl-0"
+            >
+              <b
+                className={`font-display text-xl font-bold leading-none tracking-tight tabular-nums ${stat.tone ?? 'text-white'}`}
+              >
+                {stat.value}
+              </b>
+              <span className="text-[10px] uppercase tracking-widest text-gray-400">
+                {stat.label}
+              </span>
+            </li>
+          ))}
+        </ul>
+        {missing > 0 && (
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t border-dark-border pt-2.5">
+            <button
+              type="button"
+              onClick={() => setExpanded(value => !value)}
+              aria-expanded={expanded}
+              aria-controls={expanded ? detailId : undefined}
+              className={`ml-auto inline-flex min-h-8 items-center gap-1 rounded px-1 text-[13px] font-medium text-primary-link hover:underline [@media(max-width:639px)]:min-h-11 ${focusRing}`}
+            >
+              {toggleLabel}
+              <ChevronRight
+                className={`size-4 transition-transform motion-reduce:transition-none ${expanded ? 'rotate-90' : ''}`}
+                aria-hidden="true"
+              />
+            </button>
+          </div>
+        )}
         {expanded && details}
       </div>
     )

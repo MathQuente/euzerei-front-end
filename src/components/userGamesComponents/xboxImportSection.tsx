@@ -1,34 +1,46 @@
-import { FaXbox } from 'react-icons/fa'
 import { useXboxImport } from '../../hooks/useXboxImport'
 import type { XboxAccount } from '../../types/user'
+import { StoreTile } from '../storeBrand'
+import { PlatformImportResult } from './platformImportResult'
 import { PlatformImportSection } from './platformImportSection'
-import { XboxConsoleSelect } from './xboxConsoleSelect'
 
 const MAX_XBOX_ACCOUNTS = 2
 
 export function XboxImportSection({
   xboxAccounts,
-  onViewLibrary,
 }: {
   xboxAccounts: XboxAccount[]
-  onViewLibrary?: () => void
 }) {
   const importState = useXboxImport()
 
   return (
     <PlatformImportSection
-      icon={<FaXbox className="size-5 text-[#6cc24a]" aria-hidden="true" />}
+      icon={<StoreTile store="xbox" size="lg" />}
+      tagline="Gamerscore, jogos e tempo de jogo"
       label="Xbox"
       masculine
-      connectLabel="Entrar com a Microsoft"
       connectedId={xboxAccounts[0]?.gamertag ?? null}
       accounts={xboxAccounts.map(account => ({
         id: account.id,
         name: account.gamertag,
-        extra: <XboxConsoleSelect account={account} />,
       }))}
       maxAccounts={MAX_XBOX_ACCOUNTS}
-      disconnectedDescription="Entre com a sua conta Microsoft pra confirmar que o perfil é seu e importar os jogos do Xbox. Seu perfil e o histórico de jogos precisam estar públicos."
+      disconnectedDescription="Entre com a sua conta Microsoft pra confirmar que o perfil é seu e importar os jogos do Xbox."
+      importState={importState}
+    />
+  )
+}
+
+export function XboxImportPanel({
+  onViewLibrary,
+}: {
+  onViewLibrary?: () => void
+}) {
+  const importState = useXboxImport()
+
+  return (
+    <PlatformImportResult
+      ofLabel="do Xbox"
       importState={importState}
       onViewLibrary={onViewLibrary}
       getResultSections={result => [
