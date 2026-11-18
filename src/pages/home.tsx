@@ -1,19 +1,19 @@
 import { useEffect, useMemo } from 'react'
-import { Link } from 'react-router-dom'
 
 import { GameListSection } from '../components/gameListSection'
 import { CoverRow } from '../components/homeComponents/coverRow'
+import { Greeting } from '../components/homeComponents/greeting'
 import { LibrarySummary } from '../components/homeComponents/librarySummary'
 import { LoggedOutHero } from '../components/homeComponents/loggedOutHero'
 import { NextUp } from '../components/homeComponents/nextUp'
 import { PlayingNow } from '../components/homeComponents/playingNow'
-import { sectionTitle, textLink } from '../components/homeComponents/styles'
+import { sectionTitle } from '../components/homeComponents/styles'
+import { Welcome } from '../components/homeComponents/welcome'
 import { useAuth } from '../hooks/useAuth'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useGames } from '../hooks/useGames'
 import { useStartCelebration } from '../hooks/useStartCelebration'
 import { useUserGames } from '../hooks/useUserGames'
-import { focusRing } from '../styles/focus'
 import type { GamesFromHomePageResponse } from '../types/games'
 
 const WALL_LIMIT = 60
@@ -37,6 +37,7 @@ function saveManyPlaying(many: boolean) {
 }
 
 function LoggedInTop() {
+  const { user } = useAuth()
   const {
     UserGamesResponse,
     isLoadingUserGames,
@@ -62,30 +63,36 @@ function LoggedInTop() {
   if (!UserGamesResponse) {
     if (isErrorUserGames) {
       return (
-        <p className="mt-4 text-gray-400">
-          Não foi possível carregar sua biblioteca agora.
-        </p>
+        <>
+          <h1 className="sr-only">Início</h1>
+          <p className="mt-4 text-gray-400">
+            Não foi possível carregar sua biblioteca agora.
+          </p>
+        </>
       )
     }
 
     const manyPlaying = readManyPlaying()
 
     return (
-      <div
-        className={`mt-2 grid grid-cols-1 gap-10 lg:gap-14 ${
-          manyPlaying
-            ? 'lg:grid-cols-[auto_minmax(0,880px)] lg:justify-start'
-            : 'lg:grid-cols-[7fr_5fr]'
-        }`}
-        aria-busy={isLoadingUserGames}
-      >
+      <>
+        <h1 className="sr-only">Início</h1>
         <div
-          className={`h-56 rounded-lg bg-dark-bg-light lg:h-80 ${
-            manyPlaying ? 'lg:w-[528px] xl:w-[576px]' : ''
+          className={`mt-2 grid grid-cols-1 gap-10 lg:gap-14 ${
+            manyPlaying
+              ? 'lg:grid-cols-[auto_minmax(0,880px)] lg:justify-start'
+              : 'lg:grid-cols-[7fr_5fr]'
           }`}
-        />
-        <div className="h-56 rounded-lg bg-dark-bg-light lg:h-80" />
-      </div>
+          aria-busy={isLoadingUserGames}
+        >
+          <div
+            className={`h-56 rounded-lg bg-dark-bg-light lg:h-80 ${
+              manyPlaying ? 'lg:w-[528px] xl:w-[576px]' : ''
+            }`}
+          />
+          <div className="h-56 rounded-lg bg-dark-bg-light lg:h-80" />
+        </div>
+      </>
     )
   }
 
@@ -106,25 +113,7 @@ function LoggedInTop() {
 
     return (
       <div className="mt-2 grid grid-cols-1 gap-10 lg:grid-cols-[7fr_5fr] lg:gap-14">
-        <section className="min-w-0">
-          <h2 className="max-w-md text-balance font-display text-2xl font-extrabold leading-tight tracking-tight text-white lg:text-3xl">
-            Sua biblioteca ainda está vazia.
-          </h2>
-          <p className="mt-3 max-w-md text-gray-400">
-            Os jogos que você marcar como Jogando ou Na fila aparecem aqui.
-          </p>
-          <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
-            <Link
-              to="/games"
-              className={`inline-flex items-center justify-center whitespace-nowrap rounded-md bg-primary px-4 py-2 text-base font-bold text-white transition-colors duration-200 hover:bg-primary-light ${focusRing} active:scale-[0.98]`}
-            >
-              Explorar jogos
-            </Link>
-            <Link to="/userLibrary" className={textLink}>
-              Importar da Steam, PSN ou Xbox
-            </Link>
-          </div>
-        </section>
+        <Welcome name={user?.userName} />
         {(hasSuggestion || celebration.celebrate) && (
           <NextUp
             backlog={backlog}
@@ -144,8 +133,13 @@ function LoggedInTop() {
 
   return (
     <>
+      <Greeting
+        name={user?.userName}
+        playing={playingTotal}
+        backlog={backlogTotal}
+      />
       <div
-        className={`mt-2 grid grid-cols-1 gap-10 lg:gap-14 ${
+        className={`mt-6 grid grid-cols-1 gap-10 lg:gap-14 ${
           playing.length > 1
             ? 'lg:grid-cols-[auto_minmax(0,880px)] lg:justify-start'
             : 'lg:grid-cols-[7fr_5fr]'
@@ -272,14 +266,7 @@ export function Home() {
 
   return (
     <>
-      {isLogged ? (
-        <>
-          <h1 className="sr-only">Início</h1>
-          <LoggedInTop />
-        </>
-      ) : (
-        <LoggedOutHero covers={wallCovers} />
-      )}
+      {isLogged ? <LoggedInTop /> : <LoggedOutHero covers={wallCovers} />}
 
       <Discovery featured={gamesFeatured} isLoading={isLoadingFeatured} />
     </>
