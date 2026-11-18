@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Star } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { refreshAfterRelease } from '../../hooks/invalidateGameLists'
 import { useRating } from '../../hooks/useRating'
 import { useReleaseCountdown } from '../../hooks/useReleaseCountdown'
 import type { SectionType } from '../../interfaces/games'
@@ -89,11 +90,7 @@ function CountdownColumn({ game }: { game: GameBase }) {
     game.releaseDatePrecision,
     {
       granularity: 'minute',
-      onRelease: () =>
-        queryClient.invalidateQueries(
-          { queryKey: ['comingSoon'] },
-          { cancelRefetch: false }
-        ),
+      onRelease: () => refreshAfterRelease(queryClient),
     }
   )
   const ts = game.releaseDate
@@ -203,11 +200,7 @@ function FeaturedCountdown({ game }: { game: GameBase }) {
     game.releaseDatePrecision,
     {
       granularity: 'second',
-      onRelease: () =>
-        queryClient.invalidateQueries(
-          { queryKey: ['comingSoon'] },
-          { cancelRefetch: false }
-        ),
+      onRelease: () => refreshAfterRelease(queryClient),
     }
   )
   const big = 'font-display text-2xl font-extrabold tracking-tight tabular-nums'
