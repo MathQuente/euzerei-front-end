@@ -7,6 +7,7 @@ import { fieldFocus, fieldFocusError } from '../../styles/focus'
 import { isReauthRequired } from '../../utils/isReauthRequired'
 import { Button } from '../button'
 import { ConfirmDialog } from '../confirmDialog'
+import { SettingsCardHeader, settingsCardClass } from '../settingsCard'
 
 const ICONS = {
   google: (
@@ -221,32 +222,28 @@ export function ProviderSection({
   const isLastMethod = methods <= 1
 
   return (
-    <section
-      aria-labelledby="providers-title"
-      className="flex flex-col gap-3.5 rounded-xl border border-dark-border bg-dark-bg-darker p-5"
-    >
-      <div>
-        <h2 id="providers-title" className="text-base font-semibold text-white">
-          Entrar com
-        </h2>
-        <p className="mt-0.5 text-sm text-gray-400">
-          Além do e-mail e senha, você pode entrar com estas contas.
-        </p>
+    <section aria-labelledby="providers-title" className={settingsCardClass}>
+      <SettingsCardHeader
+        id="providers-title"
+        title="Entrar com"
+        description="Além do e-mail e senha, você pode entrar com estas contas."
+      />
+      <div className="flex flex-col gap-3.5 px-4 pb-4 sm:px-5">
+        <ul className="flex flex-col">
+          <ProviderRow
+            provider="google"
+            linked={googleLinked}
+            isLastMethod={isLastMethod}
+            needsPassword={hasPassword && !discordLinked}
+          />
+          <ProviderRow
+            provider="discord"
+            linked={discordLinked}
+            isLastMethod={isLastMethod}
+            needsPassword={hasPassword && !googleLinked}
+          />
+        </ul>
       </div>
-      <ul className="flex flex-col">
-        <ProviderRow
-          provider="google"
-          linked={googleLinked}
-          isLastMethod={isLastMethod}
-          needsPassword={hasPassword && !discordLinked}
-        />
-        <ProviderRow
-          provider="discord"
-          linked={discordLinked}
-          isLastMethod={isLastMethod}
-          needsPassword={hasPassword && !googleLinked}
-        />
-      </ul>
     </section>
   )
 }

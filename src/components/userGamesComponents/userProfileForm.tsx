@@ -10,6 +10,7 @@ import { updateProfileSchema } from '../../schemas/profileSchema'
 import { fieldFocus, focusRing, focusRingWithin } from '../../styles/focus'
 import { buildProfileUpdate } from '../../utils/profileUpdate'
 import { Button, buttonClasses } from '../button'
+import { SettingsCardHeader, settingsCardClass } from '../settingsCard'
 
 type ProfileForm = z.infer<typeof updateProfileSchema>
 
@@ -166,79 +167,104 @@ export function UserProfileForm({
     (Boolean(UserProfileResponse?.user?.userBanner) && !shouldRemoveBanner) ||
     Boolean(userBannerPreview)
 
+  const previewName = (watchedUserName ?? '').trim() || originalValues.userName
+  const nameLength = (watchedUserName ?? '').length
+
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      aria-label="Perfil"
-      className="overflow-hidden rounded-xl border border-dark-border bg-dark-bg-darker"
+      aria-labelledby="perfil-publico-titulo"
+      className={settingsCardClass}
     >
-      <h2 className="sr-only">Perfil</h2>
-      <p className="px-5 pt-4 text-sm text-gray-400">
-        Como as outras pessoas veem você.
-      </p>
+      <SettingsCardHeader
+        id="perfil-publico-titulo"
+        title="Seu perfil público"
+        description="Como as outras pessoas veem você. O nome muda aqui em tempo real, do jeito que ficará no perfil."
+      />
 
-      <div className="relative mt-3.5 h-32 bg-dark-border">
-        {bannerSrc && (
-          <img
-            src={bannerSrc}
-            alt="Banner"
-            className="size-full object-cover"
-          />
-        )}
-        <div className="absolute right-3 bottom-3 flex gap-2">
-          <label className={fileButton}>
-            <Camera className="size-4" aria-hidden="true" />
-            Trocar banner
-            <input
-              type="file"
-              accept={IMAGE_ACCEPT}
-              className="sr-only"
-              {...registerField('userBanner', {
-                onChange: handleBannerChange,
-              })}
+      <div className="mx-4 overflow-hidden rounded-[10px] border border-dark-border bg-dark-bg sm:mx-5">
+        <div className="relative h-36 bg-dark-border sm:h-40">
+          {bannerSrc && (
+            <img
+              src={bannerSrc}
+              alt="Banner"
+              className="size-full object-cover"
             />
-          </label>
-          {showRemoveBanner && (
-            <button
-              type="button"
-              onClick={handleRemoveBanner}
-              aria-label="Remover banner"
-              className={`${buttonClasses({ variant: 'secondary', className: removeBannerButton })} ${focusRing}`}
-            >
-              <X className="size-4" aria-hidden="true" />
-            </button>
           )}
-        </div>
-      </div>
-
-      <div className="relative ml-5 -mt-10 size-[84px]">
-        <img
-          src={profilePicSrc}
-          alt="Foto de perfil"
-          className="size-full rounded-full border-[3px] border-dark-bg-darker bg-dark-bg object-cover"
-        />
-        <label
-          className={`absolute -right-2 -bottom-1 grid size-9 cursor-pointer place-items-center rounded-full border border-dark-border bg-dark-bg-light text-gray-200 hover:text-white [@media(max-width:639px)]:size-11 ${focusRingWithin}`}
-          title="Trocar foto de perfil"
-        >
-          <Camera className="size-4" aria-hidden="true" />
-          <span className="sr-only">Trocar foto de perfil</span>
-          <input
-            type="file"
-            accept={IMAGE_ACCEPT}
-            className="sr-only"
-            {...registerField('profilePicture', {
-              onChange: e => {
-                const file = e.target.files?.[0]
-                if (file) setProfilePicturePreview(URL.createObjectURL(file))
-              },
-            })}
+          <div
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-3/4"
+            style={{
+              background:
+                'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 30%, rgba(0,0,0,0.16) 62%, rgba(0,0,0,0) 100%)',
+            }}
+            aria-hidden="true"
           />
-        </label>
+          <p
+            aria-hidden="true"
+            className="absolute bottom-3 left-[6.5rem] right-4 break-words font-display text-2xl font-extrabold leading-tight tracking-tight text-white [text-shadow:0_1px_2px_rgb(0_0_0/0.85),0_0_10px_rgb(0_0_0/0.55)] sm:left-[8.5rem] sm:text-[1.75rem]"
+          >
+            {previewName}
+          </p>
+          <div className="absolute right-3 top-3 flex gap-2">
+            <label className={fileButton}>
+              <Camera className="size-4" aria-hidden="true" />
+              Trocar banner
+              <input
+                type="file"
+                accept={IMAGE_ACCEPT}
+                className="sr-only"
+                {...registerField('userBanner', {
+                  onChange: handleBannerChange,
+                })}
+              />
+            </label>
+            {showRemoveBanner && (
+              <button
+                type="button"
+                onClick={handleRemoveBanner}
+                aria-label="Remover banner"
+                className={`${buttonClasses({ variant: 'secondary', className: removeBannerButton })} ${focusRing}`}
+              >
+                <X className="size-4" aria-hidden="true" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="flex h-11 px-4 sm:px-5">
+          <div className="relative -mt-12 size-20 shrink-0 sm:size-[92px]">
+            <img
+              src={profilePicSrc}
+              alt="Foto de perfil"
+              className="size-full rounded-full border-4 border-dark-bg bg-dark-bg object-cover"
+            />
+            <label
+              className={`absolute -bottom-0.5 -right-1 grid size-9 cursor-pointer place-items-center rounded-full border border-dark-border bg-dark-bg-light text-gray-200 hover:text-white [@media(max-width:639px)]:size-11 ${focusRingWithin}`}
+              title="Trocar foto de perfil"
+            >
+              <Camera className="size-4" aria-hidden="true" />
+              <span className="sr-only">Trocar foto de perfil</span>
+              <input
+                type="file"
+                accept={IMAGE_ACCEPT}
+                className="sr-only"
+                {...registerField('profilePicture', {
+                  onChange: e => {
+                    const file = e.target.files?.[0]
+                    if (file)
+                      setProfilePicturePreview(URL.createObjectURL(file))
+                  },
+                })}
+              />
+            </label>
+          </div>
+        </div>
+        <p className="px-4 pb-3 text-xs text-gray-500 sm:px-5">
+          Banner e foto: PNG, JPEG ou GIF, até 3 MB.
+        </p>
       </div>
 
-      <div className="flex flex-col gap-3.5 px-5 pt-3.5 pb-5">
-        <p className="text-xs text-gray-400">PNG, JPEG ou GIF, até 3 MB.</p>
+      <div className="flex flex-col gap-3.5 px-4 pb-4 pt-4 sm:px-5">
         {errors.profilePicture && (
           <output className="block text-xs text-red-300">
             Foto de perfil: {errors.profilePicture.message}
@@ -267,32 +293,40 @@ export function UserProfileForm({
             } ${fieldFocus}`}
             {...registerField('userName')}
           />
-          <p
-            id="userName-hint"
-            className={`mt-1.5 text-xs ${errors.userName ? 'text-red-300' : 'text-gray-400'}`}
-          >
-            {errors.userName?.message ??
-              '1 a 30 caracteres. Fica do jeito que você digitar.'}
-          </p>
+          <div className="mt-1.5 flex items-start justify-between gap-3">
+            <p
+              id="userName-hint"
+              className={`text-xs ${errors.userName ? 'text-red-300' : 'text-gray-400'}`}
+            >
+              {errors.userName?.message ??
+                '1 a 30 caracteres. Fica do jeito que você digitar.'}
+            </p>
+            <span
+              className="shrink-0 font-display text-xs tabular-nums text-gray-500"
+              aria-hidden="true"
+            >
+              {nameLength}/30
+            </span>
+          </div>
         </div>
+      </div>
 
-        <div className="flex flex-wrap justify-end gap-2.5 border-t border-dark-border pt-3.5 [@media(max-width:639px)]:[&>button]:flex-1">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={handleDiscard}
-            disabled={!hasChanges || isUpdatingProfile}
-          >
-            Descartar
-          </Button>
-          <Button
-            variant="primary"
-            loading={isUpdatingProfile}
-            disabled={!hasChanges || isUpdatingProfile}
-          >
-            Salvar
-          </Button>
-        </div>
+      <div className="flex flex-wrap justify-end gap-2.5 border-t border-dark-border px-4 py-3 sm:px-5 [@media(max-width:639px)]:[&>button]:flex-1">
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={handleDiscard}
+          disabled={!hasChanges || isUpdatingProfile}
+        >
+          Descartar
+        </Button>
+        <Button
+          variant="primary"
+          loading={isUpdatingProfile}
+          disabled={!hasChanges || isUpdatingProfile}
+        >
+          Salvar
+        </Button>
       </div>
     </form>
   )
