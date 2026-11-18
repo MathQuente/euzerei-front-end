@@ -134,6 +134,7 @@ export function GameCard({
   enableModal,
   interactive = true,
   hoverEffects = true,
+  eager = false,
   statusBar = true,
   favorite = false,
 }: GameCardProps) {
@@ -316,7 +317,7 @@ export function GameCard({
               !bare && hoverEffects && coverLoaded && 'group-hover:opacity-20'
             )}
             src={coverSrc}
-            loading="lazy"
+            loading={eager ? 'eager' : 'lazy'}
             alt={game?.name ?? ''}
             onLoad={() => setLoadedSrc(coverSrc)}
             onError={() => setFailedSrc(coverSrc)}

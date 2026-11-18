@@ -29,6 +29,8 @@ export interface GameCardProps {
   enableModal?: boolean
   interactive?: boolean
   hoverEffects?: boolean
+  /** Carrega a capa já, sem esperar entrar na tela (carrosséis). */
+  eager?: boolean
   statusBar?: boolean
   favorite?: boolean
 }
