@@ -18,6 +18,7 @@ const SORT_FIELDS: SortField[] = [
   'rating',
   'hoursPlayed',
   'completedAt',
+  'dateAdded',
 ]
 
 export function GameListPage({

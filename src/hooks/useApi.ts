@@ -254,6 +254,7 @@ export const api = {
       rating: 'rating',
       hoursPlayed: 'hoursPlayed',
       completedAt: 'completedAt',
+      dateAdded: 'dateAdded',
     } as const
 
     const response = await http.get('/users/userGames', {

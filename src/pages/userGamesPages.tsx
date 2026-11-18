@@ -49,7 +49,7 @@ export function UserGamesPageByStatus() {
     const url = new URL(window.location.toString())
     const v = url.searchParams.get('sortOrder')
     if (v === 'asc' || v === 'desc') return v
-    return startsOnPlayed ? 'desc' : 'asc'
+    return 'desc'
   })
 
   const [sortField, setSortField] = useState<SortField>(() => {
@@ -60,11 +60,12 @@ export function UserGamesPageByStatus() {
       v === 'rating' ||
       v === 'name' ||
       v === 'hoursPlayed' ||
-      v === 'completedAt'
+      v === 'completedAt' ||
+      v === 'dateAdded'
     ) {
       return v
     }
-    return startsOnPlayed ? 'completedAt' : 'name'
+    return startsOnPlayed ? 'completedAt' : 'dateAdded'
   })
 
   const [filterField, setFilterField] = useState<GameStatusEnum>(() => {
@@ -77,8 +78,8 @@ export function UserGamesPageByStatus() {
     if (!newFilter) {
       navigate('/userLibrary')
       if (sortField === 'completedAt') {
-        setSortField('name')
-        setSortOrder('asc')
+        setSortField('dateAdded')
+        setSortOrder('desc')
       }
       return
     }
@@ -89,8 +90,8 @@ export function UserGamesPageByStatus() {
       setSortField('completedAt')
       setSortOrder('desc')
     } else if (sortField === 'completedAt') {
-      setSortField('name')
-      setSortOrder('asc')
+      setSortField('dateAdded')
+      setSortOrder('desc')
     }
   }
 
@@ -160,7 +161,7 @@ export function UserGamesPageByStatus() {
           defaultSort={
             currentEnumStatus === GameStatusEnum.Played
               ? { field: 'completedAt', order: 'desc' }
-              : { field: 'name', order: 'asc' }
+              : { field: 'dateAdded', order: 'desc' }
           }
           currentStatus={currentEnumStatus}
           filterField={filterField}
