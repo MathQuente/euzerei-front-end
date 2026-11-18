@@ -2,7 +2,11 @@ import { Clock, Gamepad2, LayoutGrid, Library, Play } from 'lucide-react'
 import { type ReactNode, useState } from 'react'
 import { focusRing } from '../../styles/focus'
 import type { TotalPerStatus } from '../../types/games'
-import { formatHoursCompact, formatHoursSpoken } from '../../utils/hours'
+import {
+  formatHoursCompact,
+  formatHoursSpoken,
+  playedWord,
+} from '../../utils/hours'
 
 interface ProfileStatsProps {
   gamesAmount: number
@@ -137,7 +141,7 @@ export function ProfileStats({
         <RailCell
           value={formatHoursCompact(totalHoursPlayed)}
           label="Horas"
-          spoken={`${formatHoursSpoken(totalHoursPlayed)} jogadas`}
+          spoken={`${formatHoursSpoken(totalHoursPlayed)} ${playedWord(totalHoursPlayed)}`}
         />
       </ul>
     )
@@ -193,10 +197,9 @@ export function ProfileStats({
           icon={<Clock className={iconClass} />}
           value={formatHoursCompact(totalHoursPlayed)}
           label="Horas"
-          spoken={`${formatHoursSpoken(totalHoursPlayed)} jogadas`}
+          spoken={`${formatHoursSpoken(totalHoursPlayed)} ${playedWord(totalHoursPlayed)}`}
         />
       </ul>
-      {retryBlock}
     </>
   )
 }

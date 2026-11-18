@@ -7,6 +7,7 @@ import type { z } from 'zod'
 import userProfilePictureDefault from '../../assets/Default_pfp.svg.png'
 import { useUserProfile } from '../../hooks/useUserProfile'
 import { updateProfileSchema } from '../../schemas/profileSchema'
+import { BANNER_FADE } from '../../styles/bannerFade'
 import { fieldFocus, focusRing, focusRingWithin } from '../../styles/focus'
 import { buildProfileUpdate } from '../../utils/profileUpdate'
 import { Button, buttonClasses } from '../button'
@@ -194,8 +195,7 @@ export function UserProfileForm({
           <div
             className="pointer-events-none absolute inset-x-0 bottom-0 h-3/4"
             style={{
-              background:
-                'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 30%, rgba(0,0,0,0.16) 62%, rgba(0,0,0,0) 100%)',
+              background: BANNER_FADE,
             }}
             aria-hidden="true"
           />

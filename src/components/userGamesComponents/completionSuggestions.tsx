@@ -8,7 +8,7 @@ import {
 import { focusRing } from '../../styles/focus'
 import type { LibraryPlatform } from '../../types/platform'
 import type { CompletionSuggestion } from '../../types/suggestion'
-import { formatHours } from '../../utils/hours'
+import { formatHours, playedWord } from '../../utils/hours'
 import { notify } from '../../utils/notify'
 import { Button } from '../button'
 
@@ -54,7 +54,7 @@ function Evidence({ suggestion }: { suggestion: CompletionSuggestion }) {
   return (
     <p className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-gray-300 tabular-nums">
       <span>
-        {formatHours(hoursPlayed)} jogadas
+        {formatHours(hoursPlayed)} {playedWord(hoursPlayed)}
         {normallyHours ? `, costuma levar ${formatHours(normallyHours)}` : ''}
       </span>
       {achieved !== null && total !== null && (
@@ -326,7 +326,7 @@ export function CompletionSuggestionsBlock({
           )}
 
           {empty && isError && (
-            <div className="flex flex-col gap-1.5 rounded-md border border-dark-border border-l-4 border-l-red-400 bg-dark-bg-light px-3 py-2">
+            <div className="flex flex-col gap-1.5 rounded-md border border-red-400/30 bg-red-400/10 px-3 py-2">
               <p className="text-sm font-bold text-white">
                 Não foi possível carregar as sugestões
               </p>

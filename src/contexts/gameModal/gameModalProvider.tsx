@@ -74,7 +74,7 @@ export function GameModalProvider({ children }: { children: ReactNode }) {
         onCloseAutoFocus={handleCloseAutoFocus}
       >
         {game && (
-          <GameModalBoundary key={game.igdbId} onClose={close}>
+          <GameModalBoundary key={game.igdbId} game={game} onClose={close}>
             <GameInfo game={game} onClose={close} />
           </GameModalBoundary>
         )}

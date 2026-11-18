@@ -22,7 +22,7 @@ export function GameModal({
         </Dialog.Description>
         <Dialog.Content
           onCloseAutoFocus={onCloseAutoFocus}
-          className="w-[calc(100vw-2rem)] max-w-[420px] md:max-w-[764px] fixed bg-dark-bg-lighter text-white top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-lg z-50 overflow-y-auto max-h-[calc(100vh-2rem)]"
+          className="w-[calc(100vw-2rem)] max-w-[420px] md:max-w-[900px] fixed bg-dark-bg-lighter text-white top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-lg z-50 overflow-y-auto max-h-[calc(100vh-2rem)]"
         >
           {children}
         </Dialog.Content>

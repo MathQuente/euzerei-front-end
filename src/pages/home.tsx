@@ -11,6 +11,7 @@ import { sectionTitle, textLink } from '../components/homeComponents/styles'
 import { useAuth } from '../hooks/useAuth'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useGames } from '../hooks/useGames'
+import { useStartCelebration } from '../hooks/useStartCelebration'
 import { useUserGames } from '../hooks/useUserGames'
 import { focusRing } from '../styles/focus'
 import type { GamesFromHomePageResponse } from '../types/games'
@@ -51,6 +52,7 @@ function LoggedInTop() {
     [UserGamesResponse]
   )
 
+  const celebration = useStartCelebration()
   const playingCount = gamesByStatus.PLAYING.length
   const hasResponse = Boolean(UserGamesResponse)
   useEffect(() => {
@@ -72,7 +74,7 @@ function LoggedInTop() {
       <div
         className={`mt-2 grid grid-cols-1 gap-10 lg:gap-14 ${
           manyPlaying
-            ? 'lg:grid-cols-[auto_minmax(0,640px)] lg:justify-start'
+            ? 'lg:grid-cols-[auto_minmax(0,1fr)] lg:justify-start'
             : 'lg:grid-cols-[7fr_5fr]'
         }`}
         aria-busy={isLoadingUserGames}
@@ -121,13 +123,17 @@ function LoggedInTop() {
             </Link>
           </div>
         </section>
-        {hasSuggestion && (
+        {(hasSuggestion || celebration.celebrate) && (
           <NextUp
             backlog={backlog}
             libraryIds={libraryIds}
             suggestion={GamesToDisplay}
             title="Uma sugestão para começar"
             showEmptyNote={false}
+            wide={false}
+            celebrate={celebration.celebrate}
+            celebrationFinished={celebration.finished}
+            onStarted={celebration.start}
           />
         )}
       </div>
@@ -139,7 +145,7 @@ function LoggedInTop() {
       <div
         className={`mt-2 grid grid-cols-1 gap-10 lg:gap-14 ${
           playing.length > 1
-            ? 'lg:grid-cols-[auto_minmax(0,640px)] lg:justify-start'
+            ? 'lg:grid-cols-[auto_minmax(0,1fr)] lg:justify-start'
             : 'lg:grid-cols-[7fr_5fr]'
         }`}
       >
@@ -149,6 +155,9 @@ function LoggedInTop() {
           libraryIds={libraryIds}
           suggestion={GamesToDisplay}
           loadingSuggestion={isLoadingRecommendation}
+          celebrate={celebration.celebrate}
+          celebrationFinished={celebration.finished}
+          onStarted={celebration.start}
         />
       </div>
       <LibrarySummary totalPerStatus={totalPerStatus} />

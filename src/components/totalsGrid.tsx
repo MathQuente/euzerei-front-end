@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import { NO_HOURS_LABEL, formatHours } from '../utils/hours'
+import { NO_HOURS_LABEL, formatHours, playedWord } from '../utils/hours'
 
 function Cell({
   value,
@@ -48,7 +48,7 @@ export function TotalsStrip({
         (noHours ? (
           <Cell value="—" label={NO_HOURS_LABEL} />
         ) : (
-          <Cell value={formatHours(hours)} label="jogadas" />
+          <Cell value={formatHours(hours)} label={playedWord(hours)} />
         ))}
       {completions > 0 && <Cell value={`${completions}×`} label="zerado" />}
       {completedAt && (

@@ -6,37 +6,34 @@ import type { FollowSummary } from '../types/follow'
 
 export function FollowList({
   users,
-  emptyMessage = 'Ninguém por aqui ainda.',
   renderAction,
 }: {
   users: FollowSummary[]
-  emptyMessage?: string
   renderAction?: (user: FollowSummary) => ReactNode
 }) {
-  if (users.length === 0) {
-    return <p className="text-sm text-gray-400">{emptyMessage}</p>
-  }
-
   return (
-    <div className="flex flex-col divide-y divide-dark-border">
+    <ul className="m-0 flex list-none flex-col p-0">
       {users.map(user => (
-        <div key={user.id} className="flex items-center gap-3 py-2.5">
+        <li
+          key={user.id}
+          className="flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-white/[0.03]"
+        >
           <Link
             to={`/users/${user.id}`}
-            className={`flex items-center gap-2.5 min-w-0 flex-1 ${focusRing} rounded-sm`}
+            className={`flex min-w-0 flex-1 items-center gap-3 rounded-sm ${focusRing}`}
           >
             <img
               src={user.profilePicture || userProfilePictureDefault}
               alt=""
-              className="size-8 rounded-full object-cover border border-dark-border shrink-0"
+              className="size-10 shrink-0 rounded-full border border-dark-border object-cover"
             />
-            <span className="text-sm text-gray-200 truncate hover:text-primary transition-colors">
+            <span className="truncate text-[14.5px] text-gray-100 transition-colors hover:text-primary-link">
               {user.userName ?? 'Usuário'}
             </span>
           </Link>
           {renderAction?.(user)}
-        </div>
+        </li>
       ))}
-    </div>
+    </ul>
   )
 }

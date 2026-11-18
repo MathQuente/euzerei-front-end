@@ -1,4 +1,15 @@
-const hoursFormat = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 })
+const hoursFormat = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 })
+
+const NBSP = '\u00a0'
+
+/** Minutos inteiros de uma duração abaixo de 1 h; 0 quando não chega a meio minuto. */
+function wholeMinutes(hours: number) {
+  return Math.round(hours * 60)
+}
+
+function isUnderOneHour(hours: number) {
+  return hours > 0 && wholeMinutes(hours) < 60
+}
 
 const hoursCompactFormat = new Intl.NumberFormat('pt-BR', {
   maximumFractionDigits: 0,
@@ -7,11 +18,15 @@ const hoursCompactFormat = new Intl.NumberFormat('pt-BR', {
 export const NO_HOURS_LABEL = 'sem horas registradas'
 
 export function formatHours(hours: number) {
-  return `${hoursFormat.format(hours)} h`
+  if (isUnderOneHour(hours)) {
+    const minutes = wholeMinutes(hours)
+    return minutes < 1 ? `<1${NBSP}min` : `${minutes}${NBSP}min`
+  }
+  return `${hoursFormat.format(hours)}${NBSP}h`
 }
 
 export function formatHoursCompact(hours: number) {
-  if (hours > 0 && hours < 1) return formatHours(hours)
+  if (isUnderOneHour(hours)) return formatHours(hours)
   return `${hoursCompactFormat.format(hours)} h`
 }
 
@@ -20,6 +35,24 @@ export function formatHoursOrNone(hours: number | null) {
 }
 
 export function formatHoursSpoken(hours: number) {
+  if (isUnderOneHour(hours)) {
+    const minutes = wholeMinutes(hours)
+    if (minutes < 1) return 'menos de 1 minuto'
+    return `${minutes} ${minutes === 1 ? 'minuto' : 'minutos'}`
+  }
   const value = hoursFormat.format(hours)
   return `${value} ${value === '1' ? 'hora' : 'horas'}`
+}
+
+/**
+ * "jogados" com minutos ("46 min jogados") e "jogadas" com horas ("4,2 h
+ * jogadas"): o particípio concorda com o gênero da palavra, e a abreviatura
+ * segue o gênero da palavra inteira (minuto é masculino, hora é feminino).
+ */
+export function playedWord(hours: number) {
+  return isUnderOneHour(hours) ? 'jogados' : 'jogadas'
+}
+
+export function formatHoursPlayedSpoken(hours: number) {
+  return `${formatHoursSpoken(hours)} ${playedWord(hours)}`
 }

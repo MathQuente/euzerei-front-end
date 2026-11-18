@@ -7,7 +7,7 @@ import { REVIEW_STATUS_LABEL } from '../constants/gameStatus'
 import { useIsClamped } from '../hooks/useIsClamped'
 import { focusRing } from '../styles/focus'
 import type { CommunityReview } from '../types/review'
-import { formatHours, formatHoursSpoken } from '../utils/hours'
+import { formatHours, formatHoursPlayedSpoken } from '../utils/hours'
 import { ReviewMarkdown } from './reviewMarkdown'
 
 function ExpandableText({ text }: { text: string }) {
@@ -98,7 +98,7 @@ export function CommunityReviewCard({
             <span
               className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-dark-bg border border-dark-border"
               title="Horas jogadas"
-              aria-label={`${formatHoursSpoken(review.hoursPlayed)} jogadas`}
+              aria-label={formatHoursPlayedSpoken(review.hoursPlayed)}
             >
               <Clock className="size-3 text-primary-link" aria-hidden="true" />
               {formatHours(review.hoursPlayed)}

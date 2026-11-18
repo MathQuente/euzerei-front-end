@@ -1,4 +1,4 @@
-import { Settings, UserMinus, UserPlus } from 'lucide-react'
+import { Settings } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useFollow } from '../../hooks/useFollow'
@@ -8,7 +8,7 @@ import { useUserProfile } from '../../hooks/useUserProfile'
 import type { FollowSummary } from '../../types/follow'
 import type { TotalPerStatus } from '../../types/games'
 import { buttonClasses } from '../button'
-import { IconButton } from '../iconButton'
+import { FollowToggleButton } from '../followToggleButton'
 import { ProfileHeader } from '../libraryComponents/profileHeader'
 import { UserListModal } from '../userListModal'
 
@@ -82,6 +82,8 @@ export function UserProfileDisplay({
         open={followersModalOpen}
         onOpenChange={setFollowersModalOpen}
         title="Seguidores"
+        subtitle="Quem acompanha você"
+        emptyDescription="Quando alguém seguir você, o perfil aparece nesta lista."
         users={followers}
         renderAction={user =>
           !followingIds.has(user.id) ? <FollowBackButton user={user} /> : null
@@ -92,8 +94,10 @@ export function UserProfileDisplay({
         open={followingModalOpen}
         onOpenChange={setFollowingModalOpen}
         title="Seguindo"
+        subtitle="Perfis que você acompanha"
+        emptyDescription="Siga alguém pelo perfil dessa pessoa e ela aparece aqui."
         users={following}
-        renderAction={user => <UnfollowButton userId={user.id} />}
+        renderAction={user => <UnfollowButton user={user} />}
       />
     </>
   )
@@ -103,33 +107,25 @@ function FollowBackButton({ user }: { user: FollowSummary }) {
   const { follow, isMutating } = useFollow(user.id)
 
   return (
-    <IconButton
-      variant="bare"
-      onClick={() => follow()}
-      disabled={isMutating}
-      title="Seguir de volta"
-      aria-label={`Seguir ${user.userName ?? 'usuário'} de volta`}
-      className="rounded-full"
-    >
-      <UserPlus className="size-3.5" aria-hidden="true" />
-    </IconButton>
+    <FollowToggleButton
+      following={false}
+      followLabel="Seguir de volta"
+      busy={isMutating}
+      onToggle={() => follow()}
+      ariaLabel={`Seguir ${user.userName ?? 'usuário'} de volta`}
+    />
   )
 }
 
-function UnfollowButton({ userId }: { userId: string }) {
-  const { unfollow, isMutating } = useFollow(userId)
+function UnfollowButton({ user }: { user: FollowSummary }) {
+  const { unfollow, isMutating } = useFollow(user.id)
 
   return (
-    <IconButton
-      variant="bare"
-      tone="danger"
-      onClick={() => unfollow()}
-      disabled={isMutating}
-      title="Deixar de seguir"
-      aria-label="Deixar de seguir"
-      className="rounded-full"
-    >
-      <UserMinus className="size-3.5" aria-hidden="true" />
-    </IconButton>
+    <FollowToggleButton
+      following
+      busy={isMutating}
+      onToggle={() => unfollow()}
+      ariaLabel={`Seguindo ${user.userName ?? 'usuário'}. Deixar de seguir`}
+    />
   )
 }

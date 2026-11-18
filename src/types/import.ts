@@ -11,7 +11,12 @@ export interface ImportSectionResult {
 }
 
 export type ImportJobStatus =
-  'idle' | 'waiting' | 'active' | 'delayed' | 'completed' | 'failed'
+  | 'idle'
+  | 'waiting'
+  | 'active'
+  | 'delayed'
+  | 'completed'
+  | 'failed'
 
 export interface ImportStatusResponse<TResult> {
   status: ImportJobStatus

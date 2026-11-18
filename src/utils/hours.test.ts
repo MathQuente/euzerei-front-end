@@ -5,33 +5,57 @@ import {
   formatHoursCompact,
   formatHoursOrNone,
   formatHoursSpoken,
+  playedWord,
 } from './hours'
 
 const NBSP = '\u00a0'
 
 describe('formatHours', () => {
   it.each([
-    [0.02, '0,02'],
-    [0.22, '0,22'],
-    [13.05, '13,05'],
-    [28.83, '28,83'],
+    [4.22, '4,2'],
+    [13.05, '13,1'],
+    [28.83, '28,8'],
     [3771.6, '3.771,6'],
     [1, '1'],
     [6.5, '6,5'],
     [0, '0'],
-  ])('shows every stored decimal, up to two: %s', (hours, expected) => {
-    expect(formatHours(hours)).toBe(`${expected}${NBSP}h`)
+  ])(
+    'uses one decimal, and "<0,1" for almost nothing: %s',
+    (hours, expected) => {
+      expect(formatHours(hours)).toBe(`${expected}${NBSP}h`)
+    }
+  )
+
+  it.each([
+    [0.77, '46'],
+    [0.8, '48'],
+    [0.22, '13'],
+    [0.5, '30'],
+    [0.02, '1'],
+  ])('shows minutes under one hour: %s h -> %s min', (hours, minutes) => {
+    expect(formatHours(hours)).toBe(`${minutes}${NBSP}min`)
   })
 
-  it('rounds beyond the two decimals the database keeps', () => {
-    expect(formatHours(13.054)).toBe(`13,05${NBSP}h`)
+  it('does not show zero minutes for almost nothing', () => {
+    expect(formatHours(0.001)).toBe(`<1${NBSP}min`)
+  })
+
+  it('keeps one hour as hours when minutes round up to 60', () => {
+    expect(formatHours(0.999)).toBe(`1${NBSP}h`)
+  })
+
+  it('rounds to one decimal', () => {
+    expect(formatHours(13.054)).toBe(`13,1${NBSP}h`)
   })
 })
 
 describe('formatHoursCompact', () => {
+  it('uses minutes under one hour', () => {
+    expect(formatHoursCompact(0.4)).toBe(`24${NBSP}min`)
+  })
+
   it.each([
     [3771.78, '3.772'],
-    [0.4, '0,4'],
     [12.5, '13'],
     [0, '0'],
   ])('rounds to whole hours: %s', (hours, expected) => {
@@ -41,8 +65,10 @@ describe('formatHoursCompact', () => {
 
 describe('formatHoursSpoken', () => {
   it.each([
-    [0.22, '0,22 horas'],
-    [13.05, '13,05 horas'],
+    [0.77, '46 minutos'],
+    [0.0167, '1 minuto'],
+    [0.001, 'menos de 1 minuto'],
+    [13.05, '13,1 horas'],
     [1, '1 hora'],
   ])('%s -> %s', (hours, expected) => {
     expect(formatHoursSpoken(hours)).toBe(expected)
@@ -52,6 +78,18 @@ describe('formatHoursSpoken', () => {
 describe('formatHoursOrNone', () => {
   it('says there are no hours instead of printing zero', () => {
     expect(formatHoursOrNone(null)).toBe(NO_HOURS_LABEL)
-    expect(formatHoursOrNone(13.05)).toBe(`13,05${NBSP}h`)
+    expect(formatHoursOrNone(13.05)).toBe(`13,1${NBSP}h`)
+  })
+})
+
+describe('playedWord', () => {
+  it.each([
+    [0.77, 'jogados'],
+    [0.001, 'jogados'],
+    [1, 'jogadas'],
+    [4.22, 'jogadas'],
+    [0.999, 'jogadas'],
+  ])('%s h -> %s', (hours, expected) => {
+    expect(playedWord(hours)).toBe(expected)
   })
 })

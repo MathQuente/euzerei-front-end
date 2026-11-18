@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { SectionHeading } from './sectionHeading'
 
 /** Casca comum dos cartões das abas de Configurações. */
 export const settingsCardClass =
@@ -21,20 +22,12 @@ export function SettingsCardHeader({
   tone?: 'default' | 'danger'
   action?: ReactNode
 }) {
-  const danger = tone === 'danger'
   return (
     <header className="flex flex-wrap items-start gap-x-4 gap-y-2 px-4 pb-3.5 pt-4 sm:px-5">
       <div className="flex min-w-0 flex-1 basis-60 flex-col gap-1">
-        <h2
-          id={id}
-          className={`flex items-center gap-2.5 text-base font-semibold ${danger ? 'text-red-300' : 'text-white'}`}
-        >
-          <span
-            className={`h-4 w-[3px] rounded-sm ${danger ? 'bg-red-400' : 'bg-primary-light'}`}
-            aria-hidden="true"
-          />
+        <SectionHeading id={id} tone={tone} className="mb-0">
           {title}
-        </h2>
+        </SectionHeading>
         {description && <p className="text-sm text-gray-400">{description}</p>}
       </div>
       {action}

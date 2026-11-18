@@ -5,6 +5,7 @@ import type { GameStatusEnum } from '../types/games'
 import { pushListState } from '../utils/listHistory'
 import { notify } from '../utils/notify'
 import { parsePage } from '../utils/parsePage'
+import { GameGridSkeleton } from './gameGridSkeleton'
 import { GamesGrid } from './gamesComponents/gamesGrid'
 import { Pagination } from './pagination'
 import { SortControls } from './sorting'
@@ -150,17 +151,12 @@ export function GameListPage({
       />
 
       {isAwaitingPage ? (
-        <div
-          className="grid grid-cols-4 sm:grid-cols-6 2xl:grid-cols-8 p-2 gap-x-1 sm:gap-x-2 gap-y-4 animate-pulse"
-          aria-hidden="true"
-        >
-          {Array.from({ length: 18 }, (_, i) => `sk${i}`).map(k => (
-            <div
-              key={k}
-              className="aspect-[7/10] w-full rounded-lg bg-dark-bg-lighter"
-            />
-          ))}
-        </div>
+        <GameGridSkeleton
+          count={Math.max(
+            1,
+            Math.min(pageSize, safeTotal - (page - 1) * pageSize)
+          )}
+        />
       ) : (
         <div className="relative" aria-busy={isChangingPage}>
           {showChangingPage && (

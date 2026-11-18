@@ -1,8 +1,8 @@
 import { RefreshCw } from 'lucide-react'
 import { type ReactNode, useEffect, useState } from 'react'
 import type { ImportStatusResponse } from '../../types/import'
-import { Button } from '../button'
 import { formatWhen } from '../../utils/formatWhen'
+import { Button } from '../button'
 import { SettingsCardHeader, settingsCardClass } from '../settingsCard'
 import { type BrandStore, StoreTile } from '../storeBrand'
 
@@ -43,6 +43,7 @@ function formatCooldown(ms: number) {
 
 export function ImportAllBlock({ sources }: { sources: ImportSource[] }) {
   const [starting, setStarting] = useState(false)
+  const [startingIds, setStartingIds] = useState<string[]>([])
   const [now, setNow] = useState(() => Date.now())
 
   const hasCooldown = sources.some(source => cooldownMs(source, now) > 0)
@@ -80,11 +81,15 @@ export function ImportAllBlock({ sources }: { sources: ImportSource[] }) {
   }
 
   async function importOne(source: ImportSource) {
+    if (startingIds.includes(source.id)) return
+    setStartingIds(ids => [...ids, source.id])
     try {
       await source.state.startImport()
       await source.state.refetchStatus()
     } catch {
       // o erro já é mostrado pelo hook
+    } finally {
+      setStartingIds(ids => ids.filter(id => id !== source.id))
     }
   }
 
@@ -142,7 +147,8 @@ export function ImportAllBlock({ sources }: { sources: ImportSource[] }) {
               status?.status === 'completed' ? status.finishedAt : undefined
             const cooling = cooldownMs(source, now)
             const importing = isImporting(source)
-            const sourceBusy = importing || starting
+            const sourceBusy =
+              importing || starting || startingIds.includes(source.id)
             const subtitle = importing
               ? 'Importando agora…'
               : status?.status === 'failed'

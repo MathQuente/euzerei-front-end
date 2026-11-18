@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import userProfilePictureDefault from '../../assets/Default_pfp.svg.png'
+import { BANNER_FADE } from '../../styles/bannerFade'
 import { focusRing } from '../../styles/focus'
 import type { TotalPerStatus } from '../../types/games'
 import { formatMemberSince } from '../../utils/memberSince'
@@ -85,8 +86,7 @@ export function ProfileHeader({
           <div
             className="pointer-events-none absolute inset-x-0 bottom-0 h-4/5"
             style={{
-              background:
-                'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.67) 12%, rgba(0,0,0,0.5) 28%, rgba(0,0,0,0.32) 45%, rgba(0,0,0,0.16) 62%, rgba(0,0,0,0.06) 80%, rgba(0,0,0,0) 100%)',
+              background: BANNER_FADE,
             }}
           />
         </div>

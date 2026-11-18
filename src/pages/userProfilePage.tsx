@@ -128,6 +128,8 @@ export function UserProfilePage() {
         open={followersModalOpen}
         onOpenChange={setFollowersModalOpen}
         title="Seguidores"
+        subtitle={`Quem acompanha ${user.userName ?? 'esta pessoa'}`}
+        emptyDescription="Quando alguém seguir este perfil, aparece nesta lista."
         users={followers}
       />
 
@@ -135,6 +137,8 @@ export function UserProfilePage() {
         open={followingModalOpen}
         onOpenChange={setFollowingModalOpen}
         title="Seguindo"
+        subtitle={`Perfis que ${user.userName ?? 'esta pessoa'} acompanha`}
+        emptyDescription="Este perfil ainda não segue ninguém."
         users={following}
       />
     </>

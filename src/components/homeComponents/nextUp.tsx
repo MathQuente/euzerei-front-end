@@ -1,8 +1,11 @@
-import { useRef, useState } from 'react'
+import { Check, ChevronRight, RefreshCw } from 'lucide-react'
+import { type CSSProperties, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { USER_GAME_STATUS_ID as STATUS } from '../../constants/gameStatus'
 import { useAddGame } from '../../hooks/useAddGame'
+import { useCoverTint } from '../../hooks/useCoverTint'
 import { useGameStatus } from '../../hooks/useGameStatus'
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion'
 import { focusRing } from '../../styles/focus'
 import type {
   GameCardData,
@@ -10,19 +13,24 @@ import type {
   UserGameEntry,
 } from '../../types/games'
 import { gamePath } from '../../utils/gamePath'
+import { hiResCover } from '../../utils/hiResCover'
 import { Button } from '../button'
 import { GameCard } from '../gamesComponents/gameCard'
 import { coverLink, sectionTitle, textLink } from './styles'
 
 const QUEUE_SIZE = 3
-const SWAP_IN = 'animate-swap-in motion-reduce:animate-none'
+const LEAVE_MS = 220
 
 function StartPlayingButton({
   igdbId,
   inLibrary,
+  celebrating,
+  onStarted,
 }: {
   igdbId: number
   inLibrary: boolean
+  celebrating: boolean
+  onStarted: () => void
 }) {
   const id = String(igdbId)
   const { updateGameStatus } = useGameStatus(inLibrary ? id : undefined)
@@ -37,6 +45,7 @@ function StartPlayingButton({
       } else {
         await addGame({ statusIds: STATUS.PLAYING })
       }
+      onStarted()
     } catch {
     } finally {
       setIsSaving(false)
@@ -50,9 +59,19 @@ function StartPlayingButton({
       size="md"
       loading={isSaving}
       onClick={startPlaying}
-      className="whitespace-nowrap"
+      disabled={celebrating}
+      className={`min-h-11 whitespace-nowrap px-5 transition-[background-color,transform] duration-300 disabled:opacity-100 ${
+        celebrating ? 'bg-green-700 hover:bg-green-700' : ''
+      }`}
     >
-      Começar a jogar
+      {celebrating ? (
+        <>
+          <Check className="mr-1.5 size-4" aria-hidden="true" />
+          Jogando agora
+        </>
+      ) : (
+        'Começar a jogar'
+      )}
     </Button>
   )
 }
@@ -62,49 +81,101 @@ function Suggestion({
   message,
   inLibrary,
   onAnother,
-  swapped = false,
+  onStarted,
+  leaving = false,
+  entering = false,
+  celebrating = false,
 }: {
   game: GameCardData
   message?: string
   inLibrary: boolean
   onAnother?: () => void
-  swapped?: boolean
+  onStarted: (game: GameCardData) => void
+  leaving?: boolean
+  entering?: boolean
+  celebrating?: boolean
 }) {
+  const [from, to] = useCoverTint(
+    game.coverUrl ? hiResCover(game.coverUrl) : null
+  )
+  const backdrop: CSSProperties = {
+    background: `radial-gradient(circle at 20% 30%, ${from}, transparent 60%), radial-gradient(circle at 80% 85%, ${to}, transparent 55%)`,
+  }
+
   return (
-    <div
-      className={`mt-4 flex items-end gap-4 lg:gap-6 ${swapped ? SWAP_IN : ''}`}
-    >
-      <Link
-        to={gamePath(game)}
-        className={`w-28 flex-none sm:w-36 lg:w-44 ${coverLink}`}
-      >
-        <GameCard game={game} size="medium" interactive={false} />
-      </Link>
-      <div className="min-w-0">
-        <p className="text-lg font-semibold leading-snug text-white lg:text-xl">
-          {game.name}
-        </p>
-        {message && <p className="mt-1 text-sm text-gray-400">{message}</p>}
-        <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3">
-          <StartPlayingButton
-            key={game.igdbId}
-            igdbId={game.igdbId}
-            inLibrary={inLibrary}
-          />
-          {onAnother ? (
-            <button type="button" onClick={onAnother} className={textLink}>
-              Outra sugestão
-            </button>
-          ) : (
-            !inLibrary && (
-              <Link to="/games" className={textLink}>
-                Explorar jogos
-              </Link>
-            )
+    <article className="relative isolate overflow-hidden rounded-2xl border border-dark-border bg-dark-bg-darker">
+      <div
+        aria-hidden="true"
+        className="absolute -inset-8 -z-10 opacity-35 blur-3xl transition-[background] duration-500"
+        style={backdrop}
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 -z-10 bg-gradient-to-r from-dark-bg-darker/35 to-dark-bg-darker/85"
+      />
+      <div className="flex flex-col gap-5 p-4 sm:flex-row sm:items-end sm:gap-6 sm:p-5 lg:p-6">
+        <div
+          className={`relative w-28 flex-none rounded-lg shadow-2xl shadow-black/60 sm:w-36 lg:w-44 ${
+            leaving ? 'next-up-out' : entering ? 'next-up-cover-in' : ''
+          }`}
+        >
+          <Link to={gamePath(game)} className={coverLink}>
+            <GameCard game={game} size="medium" interactive={false} />
+          </Link>
+          {celebrating && (
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 rounded-lg"
+            >
+              <span className="follow-ring" />
+            </span>
           )}
         </div>
+        <div
+          className={`min-w-0 pb-1 ${leaving ? 'next-up-out' : entering ? 'next-up-in' : ''}`}
+        >
+          <p className="font-display text-xl font-extrabold leading-tight tracking-tight text-white lg:text-[1.65rem]">
+            {game.name}
+          </p>
+          {(celebrating || message) && (
+            <p
+              className={`mt-1 text-sm ${celebrating ? 'text-green-400' : 'text-gray-400'}`}
+            >
+              {celebrating ? 'Movido para Jogando agora' : message}
+            </p>
+          )}
+          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+            <StartPlayingButton
+              key={game.igdbId}
+              igdbId={game.igdbId}
+              inLibrary={inLibrary}
+              celebrating={celebrating}
+              onStarted={() => onStarted(game)}
+            />
+            {onAnother ? (
+              <button
+                type="button"
+                onClick={onAnother}
+                disabled={celebrating}
+                className={`group inline-flex min-h-11 items-center gap-1.5 px-1 ${textLink} disabled:opacity-50`}
+              >
+                <RefreshCw
+                  className="size-4 transition-transform duration-500 group-hover:rotate-180 motion-reduce:transition-none"
+                  aria-hidden="true"
+                />
+                Outra sugestão
+              </button>
+            ) : (
+              !inLibrary && (
+                <Link to="/games" className={textLink}>
+                  Explorar jogos
+                </Link>
+              )
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    </article>
   )
 }
 
@@ -115,6 +186,10 @@ export function NextUp({
   title = 'Para jogar em seguida',
   showEmptyNote = true,
   loadingSuggestion = false,
+  wide = true,
+  celebrate,
+  celebrationFinished,
+  onStarted,
 }: {
   backlog: UserGameEntry[]
   libraryIds: Set<number>
@@ -122,10 +197,44 @@ export function NextUp({
   title?: string
   showEmptyNote?: boolean
   loadingSuggestion?: boolean
+  /** Em coluna larga, o destaque e a fila ficam lado a lado. */
+  wide?: boolean
+  /** Jogo que acabou de começar a ser jogado (a celebração vive na home). */
+  celebrate: GameCardData | null
+  celebrationFinished: boolean
+  onStarted: (game: GameCardData) => void
 }) {
   const [offset, setOffset] = useState(0)
+  const [leaving, setLeaving] = useState(false)
+  const [advanced, setAdvanced] = useState(false)
+  const animateIn = advanced || celebrationFinished
+  const timer = useRef<ReturnType<typeof setTimeout>>()
+  const reducedMotion = usePrefersReducedMotion()
   const pinnedId = useRef<number | null>(null)
   const outsideSuggestion = useRef<GameToDisplayResponse | null>(null)
+
+  useEffect(() => () => clearTimeout(timer.current), [])
+
+  function advance(step: number) {
+    if (leaving || celebrate) return
+    clearTimeout(timer.current)
+    if (reducedMotion) {
+      setOffset(value => value + step)
+      return
+    }
+    setLeaving(true)
+    timer.current = setTimeout(() => {
+      setOffset(value => value + step)
+      setAdvanced(true)
+      setLeaving(false)
+    }, LEAVE_MS)
+  }
+
+  function handleStarted(game: GameCardData) {
+    clearTimeout(timer.current)
+    setLeaving(false)
+    onStarted(game)
+  }
 
   const suggestedId = suggestion?.game?.igdbId
   if (pinnedId.current === null && suggestion) {
@@ -150,10 +259,7 @@ export function NextUp({
     return (
       <section className="min-w-0" aria-busy="true">
         <h2 className={sectionTitle}>{title}</h2>
-        <div className="mt-4 flex items-end gap-4 lg:gap-6">
-          <div className="aspect-[7/10] w-28 flex-none rounded-lg bg-dark-bg-light sm:w-36 lg:w-44" />
-          <div className="h-24 w-48 max-w-full rounded-lg bg-dark-bg-light" />
-        </div>
+        <div className="mt-4 h-60 rounded-2xl bg-dark-bg-light" />
         <div className="mb-2 mt-6 h-4 w-32 rounded bg-dark-bg-light" />
         <div className="h-14 rounded-lg bg-dark-bg-light" />
       </section>
@@ -172,71 +278,87 @@ export function NextUp({
       { length: Math.min(QUEUE_SIZE, backlog.length - 1) },
       (_, i) => at(i + 1)
     )
+    const shown = celebrate ?? current
 
     return (
       <section className="min-w-0">
         <h2 className={sectionTitle}>{title}</h2>
-        <Suggestion
-          key={current.igdbId}
-          swapped={offset > 0}
-          game={current}
-          message={
-            current.igdbId === suggestedId ? suggestion?.message : undefined
-          }
-          inLibrary
-          onAnother={
-            backlog.length > 1 ? () => setOffset(value => value + 1) : undefined
-          }
-        />
-        {queue.length > 0 && (
-          <>
-            <p className="mb-2 mt-6 text-sm text-gray-400">
-              Também na sua fila
-            </p>
-            <ul
-              key={current.igdbId}
-              className={`-mx-2 flex flex-col gap-1 lg:flex-row lg:flex-wrap lg:gap-x-5 lg:gap-y-1 ${offset > 0 ? SWAP_IN : ''}`}
-            >
-              {queue.map(game => (
-                <li
-                  key={game.igdbId}
-                  className="min-w-0 max-w-full lg:flex-none"
-                >
-                  <Link
-                    to={gamePath(game)}
-                    className={`group flex w-fit max-w-full items-center gap-3 rounded-lg px-2 py-1 transition-colors hover:bg-dark-bg-light active:bg-dark-bg-lighter ${focusRing}`}
-                  >
-                    <span className="flex-none">
-                      <GameCard game={game} size="small" interactive={false} />
-                    </span>
-                    <span className="line-clamp-2 min-w-0 text-sm leading-snug text-gray-200 group-hover:text-white">
-                      {game.name}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
+        <div
+          className={`mt-4 grid gap-5 ${wide ? 'xl:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] xl:items-stretch' : ''}`}
+        >
+          <Suggestion
+            key={celebrate ? `done:${shown.igdbId}` : shown.igdbId}
+            game={shown}
+            message={
+              shown.igdbId === suggestedId ? suggestion?.message : undefined
+            }
+            inLibrary
+            leaving={leaving}
+            entering={animateIn && !celebrate}
+            celebrating={Boolean(celebrate)}
+            onStarted={handleStarted}
+            onAnother={backlog.length > 1 ? () => advance(1) : undefined}
+          />
+          {queue.length > 0 && (
+            <div className="flex min-w-0 flex-col gap-2.5">
+              <p className="text-sm text-gray-400">Também na sua fila</p>
+              <ul
+                key={current.igdbId}
+                className={`m-0 flex list-none flex-col gap-2.5 p-0 ${animateIn ? 'next-up-in' : ''}`}
+              >
+                {queue.map((game, index) => (
+                  <li key={game.igdbId} className="min-w-0">
+                    <button
+                      type="button"
+                      onClick={() => advance(index + 1)}
+                      disabled={Boolean(celebrate)}
+                      className={`group flex w-full items-center gap-3.5 rounded-xl border border-dark-border bg-dark-bg-light p-2.5 text-left transition-[transform,border-color,background-color] duration-200 hover:translate-x-1 hover:border-primary-light/50 hover:bg-dark-bg-lighter active:bg-dark-bg-lighter motion-reduce:transition-none motion-reduce:hover:translate-x-0 ${focusRing}`}
+                    >
+                      <span className="flex-none">
+                        <GameCard game={game} size="row" interactive={false} />
+                      </span>
+                      <span className="line-clamp-2 min-w-0 flex-1 text-[14.5px] leading-snug text-gray-100">
+                        {game.name}
+                      </span>
+                      <span className="hidden flex-none text-xs text-gray-500 transition-colors group-hover:text-primary-link sm:inline">
+                        Ver primeiro
+                        <ChevronRight
+                          className="ml-0.5 inline size-3.5 align-[-2px]"
+                          aria-hidden="true"
+                        />
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
       </section>
     )
   }
 
   const outside = outsideSuggestion.current
+  const outsideGame = celebrate ?? outside?.game ?? null
 
   return (
     <section className="min-w-0">
       <h2 className={sectionTitle}>{title}</h2>
-      {outside?.game ? (
+      {outsideGame ? (
         <>
           {showEmptyNote && (
             <p className="mt-4 text-gray-400">Sua fila está vazia.</p>
           )}
-          <Suggestion
-            game={outside.game}
-            message={outside.message}
-            inLibrary={false}
-          />
+          <div className="mt-4">
+            <Suggestion
+              game={outsideGame}
+              message={outside?.message}
+              inLibrary={false}
+              celebrating={Boolean(celebrate)}
+              entering={animateIn && !celebrate}
+              onStarted={handleStarted}
+            />
+          </div>
         </>
       ) : (
         <div className="mt-4 flex flex-col items-start gap-2">

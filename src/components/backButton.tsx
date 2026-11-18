@@ -15,7 +15,7 @@ export function BackButton({ className }: { className?: string }) {
       type="button"
       onClick={() => navigate(-(1 + listStepsInHistory()))}
       className={twMerge(
-        `inline-flex self-start items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors ${focusRing} rounded-sm`,
+        `mb-3 inline-flex self-start items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors ${focusRing} rounded-sm`,
         className
       )}
     >

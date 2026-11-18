@@ -14,6 +14,10 @@ interface CoverRowProps<T extends GameCardData> {
   renderMeta?: (game: T) => ReactNode
   className?: string
   itemClassName?: string
+  /** Quanto a faixa sangra para fora do contêiner (padrão: a margem da página). */
+  bleedClassName?: string
+  /** Recuo interno que alinha as capas com o conteúdo do contêiner. */
+  edgeClassName?: string
 }
 
 const arrowClass = `absolute top-[calc(50%-1.75rem)] z-10 hidden size-9 place-items-center rounded-full border border-dark-border bg-dark-bg/90 text-white shadow-lg shadow-black/40 transition-opacity hover:border-primary-light disabled:pointer-events-none disabled:opacity-0 motion-reduce:transition-none sm:grid ${focusRing}`
@@ -23,6 +27,8 @@ export function CoverRow<T extends GameCardData>({
   renderMeta,
   className,
   itemClassName,
+  bleedClassName = '-mx-4 sm:-mx-6',
+  edgeClassName = 'px-4 sm:px-6',
 }: CoverRowProps<T>) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: 'start',
@@ -53,7 +59,7 @@ export function CoverRow<T extends GameCardData>({
   }, [emblaApi, games.length])
 
   return (
-    <div className={twMerge('relative -mx-4 sm:-mx-6', className)}>
+    <div className={twMerge('relative', bleedClassName, className)}>
       <button
         type="button"
         aria-label="Capas anteriores"
@@ -73,7 +79,10 @@ export function CoverRow<T extends GameCardData>({
         <ChevronRight className="size-[18px]" aria-hidden="true" />
       </button>
 
-      <div ref={emblaRef} className="-my-1 overflow-hidden px-4 py-1 sm:px-6">
+      <div
+        ref={emblaRef}
+        className={twMerge('-my-1 overflow-hidden py-1', edgeClassName)}
+      >
         <ul className="flex gap-3 touch-pan-y">
           {games.map(game => (
             <li

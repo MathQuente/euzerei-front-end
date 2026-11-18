@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { BackButton } from '../components/backButton'
+import { GameGridSkeleton } from '../components/gameGridSkeleton'
 import { GameListPage } from '../components/gameListPage'
 import { StatusMessage } from '../components/statusMessage'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
@@ -43,14 +44,7 @@ export function ComingSoonPage() {
     return (
       <div className="flex flex-col gap-4 w-full mt-4 animate-pulse">
         <div className="h-8 bg-dark-bg-light rounded-lg w-48" />
-        <div className="grid grid-cols-4 sm:grid-cols-6 2xl:grid-cols-8 p-2 gap-x-1 sm:gap-x-2 gap-y-4">
-          {Array.from({ length: 18 }, (_, i) => `sk${i}`).map(k => (
-            <div
-              key={k}
-              className="aspect-[7/10] w-full rounded-lg bg-dark-bg-lighter"
-            />
-          ))}
-        </div>
+        <GameGridSkeleton count={LIMIT} />
       </div>
     )
   }
