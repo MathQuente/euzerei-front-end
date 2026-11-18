@@ -2,22 +2,18 @@ import { describe, expect, it } from 'vitest'
 import {
   cardSummary,
   completionsText,
+  countsCompletions,
   isHundredPercent,
   replayBadgeCount,
 } from './cardBadges'
 
 describe('replayBadgeCount', () => {
-  it('hides the count for a played game until the second time', () => {
-    expect(replayBadgeCount('PLAYED', 1)).toBeNull()
-    expect(replayBadgeCount('PLAYED', 2)).toBe('2×')
-    expect(replayBadgeCount('PLAYED', 4)).toBe('4×')
-  })
-
-  it.each(['BACKLOG', 'PLAYING', 'PAUSED', 'DROPPED'])(
-    'shows the count from one in %s',
+  it.each(['PLAYED', 'BACKLOG', 'PLAYING', 'PAUSED', 'DROPPED'])(
+    'hides the count in %s until the second time',
     status => {
-      expect(replayBadgeCount(status, 1)).toBe('1×')
-      expect(replayBadgeCount(status, 3)).toBe('3×')
+      expect(replayBadgeCount(status, 1)).toBeNull()
+      expect(replayBadgeCount(status, 2)).toBe('2×')
+      expect(replayBadgeCount(status, 4)).toBe('4×')
     }
   )
 
@@ -36,6 +32,15 @@ describe('replayBadgeCount', () => {
   it('caps the label at 99+ without a second multiplication sign', () => {
     expect(replayBadgeCount('BACKLOG', 99)).toBe('99×')
     expect(replayBadgeCount('BACKLOG', 150)).toBe('99+')
+  })
+})
+
+describe('countsCompletions', () => {
+  it('counts for library statuses but not for the wishlist or unknown ones', () => {
+    expect(countsCompletions('PLAYING')).toBe(true)
+    expect(countsCompletions('PLAYED')).toBe(true)
+    expect(countsCompletions('WISHLIST')).toBe(false)
+    expect(countsCompletions(undefined)).toBe(false)
   })
 })
 

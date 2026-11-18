@@ -8,13 +8,17 @@ const COUNTING_STATUSES = new Set([
 
 const MAX_COUNT = 99
 
+export function countsCompletions(status: string | undefined) {
+  return status !== undefined && COUNTING_STATUSES.has(status)
+}
+
+/** "N×" só a partir de 2: uma zerada é o normal e não merece selo. */
 export function replayBadgeCount(
   status: string | undefined,
   completions: number | undefined
 ): string | null {
-  if (!status || !COUNTING_STATUSES.has(status)) return null
-  if (!completions || completions < 1) return null
-  if (status === 'PLAYED' && completions < 2) return null
+  if (!countsCompletions(status)) return null
+  if (!completions || completions < 2) return null
   return completions > MAX_COUNT ? `${MAX_COUNT}+` : `${completions}×`
 }
 

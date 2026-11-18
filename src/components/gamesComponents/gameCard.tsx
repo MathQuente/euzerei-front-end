@@ -17,6 +17,7 @@ import type { GameCardProps } from '../../interfaces/games'
 import { focusRing } from '../../styles/focus'
 import {
   cardSummary,
+  countsCompletions,
   formatRating,
   isHundredPercent,
   replayBadgeCount,
@@ -67,6 +68,8 @@ export const LIBRARY_STATUS_BADGES: Record<
 }
 
 const MAX_CARD_PLATFORMS = 3
+// O selo "N×" divide a cápsula com as plataformas: cede espaço de 2 ícones.
+const REPLAY_BADGE_PLATFORM_COST = 2
 
 const capsuleClass =
   'inline-flex h-5 items-stretch overflow-hidden rounded-full border border-dark-border bg-dark-bg/90 shadow-sm shadow-black/40 sm:h-6 [&>*+*]:border-l [&>*+*]:border-dark-border'
@@ -161,7 +164,12 @@ export function GameCard({
         .map(getLibraryPlatform)
         .filter(p => p !== undefined)
     : []
-  const visiblePlatforms = playedOn.slice(0, MAX_CARD_PLATFORMS)
+  const visiblePlatforms = playedOn.slice(
+    0,
+    replayCount
+      ? MAX_CARD_PLATFORMS - REPLAY_BADGE_PLATFORM_COST
+      : MAX_CARD_PLATFORMS
+  )
   const hiddenPlatformCount = playedOn.length - visiblePlatforms.length
 
   const summaryText = bare
@@ -170,7 +178,7 @@ export function GameCard({
         tag,
         statusLabel: statusBadge?.label,
         rating: showRating ? game?.rating : null,
-        completions: replayCount ? game?.completions : 0,
+        completions: countsCompletions(game?.status) ? game?.completions : 0,
         endless: showEndless,
         hundredPercent: showHundred,
         favorite,
@@ -197,59 +205,50 @@ export function GameCard({
         />
       )}
 
-      {(tag || statusBadge) && (
+      {tag && (
         <div
           className="absolute left-1.5 right-2 top-2 z-10 flex items-start gap-1"
           aria-hidden="true"
         >
-          <span className="min-w-0">
-            {tag && (
-              <span className="block max-w-full truncate rounded border border-dark-border bg-dark-bg/90 px-1 py-0.5 text-[8px] font-medium text-gray-300 sm:px-1.5 sm:text-[10px]">
-                {tag}
-              </span>
-            )}
+          <span className="block max-w-full truncate rounded border border-dark-border bg-dark-bg/90 px-1 py-0.5 text-[8px] font-medium text-gray-300 sm:px-1.5 sm:text-[10px]">
+            {tag}
           </span>
-          {statusBadge && (
-            <span className={`ml-auto ${capsuleClass}`}>
-              {replayCount && (
-                <span
-                  className="inline-flex items-center gap-0.5 px-1.5 text-[10px] font-bold tabular-nums text-gray-100 sm:px-2"
-                  title={`Zerado ${game?.completions}×`}
-                >
-                  <RotateCcw
-                    className="size-3 overflow-visible text-primary-light sm:size-3.5"
-                    strokeWidth={2.5}
-                  />
-                  {replayCount}
-                </span>
-              )}
-              <span
-                className="inline-flex aspect-square items-center justify-center"
-                title={statusBadge.label}
-              >
-                {showHundred ? (
-                  <Gem
-                    className="size-3 overflow-visible fill-current text-[#dbe6ff] sm:size-3.5"
-                    strokeWidth={2.5}
-                  />
-                ) : (
-                  <statusBadge.icon
-                    className={`size-3 overflow-visible sm:size-3.5 ${statusBadge.iconColor}`}
-                    strokeWidth={2.5}
-                  />
-                )}
-              </span>
-            </span>
-          )}
         </div>
       )}
 
-      {(showRating || showEndless || visiblePlatforms.length > 0) && (
+      {(showHundred ||
+        replayCount ||
+        showRating ||
+        showEndless ||
+        visiblePlatforms.length > 0) && (
         <div
           className="absolute bottom-2 left-2 z-10 max-w-[calc(100%-1rem)]"
           aria-hidden="true"
         >
           <span className={capsuleClass}>
+            {showHundred && (
+              <span
+                className="inline-flex aspect-square items-center justify-center"
+                title="Concluído a 100%"
+              >
+                <Gem
+                  className="size-3 overflow-visible fill-current text-[#dbe6ff] sm:size-3.5"
+                  strokeWidth={2.5}
+                />
+              </span>
+            )}
+            {replayCount && (
+              <span
+                className="inline-flex items-center gap-0.5 px-1.5 text-[10px] font-bold tabular-nums text-gray-100 sm:px-2"
+                title={`Zerado ${game?.completions}×`}
+              >
+                <RotateCcw
+                  className="size-3 overflow-visible text-primary-light sm:size-3.5"
+                  strokeWidth={2.5}
+                />
+                {replayCount}
+              </span>
+            )}
             {showRating && (
               <span
                 className="inline-flex items-center gap-1 px-1.5 text-[9px] font-medium leading-none text-gray-200 sm:px-2 sm:text-[11px]"
