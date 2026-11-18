@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { BackButton } from '../components/backButton'
 import { GameListPage } from '../components/gameListPage'
+import { LIBRARY_STATUS_BADGES } from '../components/gamesComponents/gameCard'
 import { INFO_MESSAGES } from '../constants/messages'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useUserGames } from '../hooks/useUserGames'
@@ -132,6 +133,7 @@ export function UserGamesPageByStatus() {
       label:
         value === GameStatusEnum.Wishlist ? 'Desejos' : statusLabels[value],
       href: `/userLibrary/${enumToRouteMap[value]}`,
+      countClass: LIBRARY_STATUS_BADGES[value]?.iconColor,
       count: hasCounts
         ? value === GameStatusEnum.Backlog
           ? countOf(...QUEUE_STATUSES)

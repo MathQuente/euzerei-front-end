@@ -136,15 +136,10 @@ export function GameListPage({
 
   function onSearchChange(value: string) {
     const url = new URL(window.location.toString())
-    const hadSearch = url.searchParams.has('search')
     if (value) url.searchParams.set('search', value)
     else url.searchParams.delete('search')
     url.searchParams.delete('page')
-    if (hadSearch && value) {
-      window.history.replaceState(window.history.state, '', url)
-    } else {
-      pushListState(url)
-    }
+    window.history.replaceState(window.history.state, '', url)
     setSearch?.(value)
     setPage(1)
   }

@@ -121,6 +121,8 @@ export interface StatusTab {
   label: string
   href: string
   count?: number
+  /** Classe de cor do número (a cor do status). */
+  countClass?: string
 }
 
 export interface ListToolbarProps {

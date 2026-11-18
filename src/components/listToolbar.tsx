@@ -215,7 +215,9 @@ function StatusTabs({
           >
             {tab.label}
             {tab.count !== undefined && (
-              <span className="font-display text-[11px] tabular-nums text-gray-500">
+              <span
+                className={`font-display text-[11px] tabular-nums ${tab.countClass ?? 'text-gray-500'}`}
+              >
                 {tab.count}
               </span>
             )}
