@@ -11,7 +11,7 @@ export function SettingsPage() {
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-5 pb-8">
       <Link
         to="/userLibrary"
-        className={`inline-flex w-fit items-center gap-1.5 rounded text-sm text-primary-light hover:underline ${focusRing}`}
+        className={`inline-flex w-fit items-center gap-1.5 rounded-sm text-sm text-gray-400 transition-colors hover:text-white ${focusRing}`}
       >
         <ArrowLeft className="size-4" aria-hidden="true" />
         Minha biblioteca
