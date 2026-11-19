@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { BackButton } from '../components/backButton'
 import { GameListPage } from '../components/gameListPage'
@@ -79,6 +79,11 @@ export function UserGamesPageByStatus() {
     parsePlatforms(
       new URL(window.location.toString()).searchParams.get('platforms')
     )
+  )
+
+  const changePlatforms = useCallback(
+    (values: string[]) => setPlatforms(parsePlatforms(values.join(','))),
+    []
   )
 
   const [search, setSearch] = useState(() => {
@@ -235,7 +240,7 @@ export function UserGamesPageByStatus() {
           searchPlaceholder="Buscar na biblioteca"
           statusTabs={statusTabs}
           platforms={platformFilter}
-          setPlatforms={platformFilterApplies ? setPlatforms : undefined}
+          setPlatforms={platformFilterApplies ? changePlatforms : undefined}
         />
       )}
     </>

@@ -1,4 +1,5 @@
 import {
+  CalendarClock,
   CircleX,
   Gamepad2,
   Gem,
@@ -24,6 +25,7 @@ import {
 } from '../../utils/cardBadges'
 import { hiResCover } from '../../utils/hiResCover'
 import { getLibraryPlatform } from '../../utils/libraryPlatforms'
+import { formatReleaseLabel } from '../../utils/releaseDate'
 
 export const LIBRARY_STATUS_BADGES: Record<
   string,
@@ -138,6 +140,7 @@ export function GameCard({
   statusBar = true,
   favorite = false,
   showTag = true,
+  showReleaseDate = false,
 }: GameCardProps) {
   const openGame = useGameModal()
   const [loadedSrc, setLoadedSrc] = useState<string | null>(null)
@@ -151,6 +154,15 @@ export function GameCard({
       ? getGameTag(game.name, game.summary, game.category, game.parentGameId)
       : null
 
+  const releaseTs = !bare && game?.releaseDate ? game.releaseDate : null
+  const isUpcoming = releaseTs != null && releaseTs * 1000 > Date.now()
+  // Nos cards sem tag (favoritos) só entra a data pedida de propósito.
+  const releaseLabel =
+    releaseTs != null && ((isUpcoming && showTag) || showReleaseDate)
+      ? formatReleaseLabel(releaseTs, game?.releaseDatePrecision)
+      : null
+  const releasingLabel = isUpcoming ? releaseLabel : null
+  const releasedLabel = isUpcoming ? null : releaseLabel
   const showRating = !bare && game?.rating != null
   const ratingText = game?.rating != null ? formatRating(game.rating) : ''
   const showEndless = !bare && game?.endless === true
@@ -187,6 +199,8 @@ export function GameCard({
         hundredPercent: showHundred,
         favorite,
         platforms: playedOn.map(platform => platform.label),
+        releasing: releasingLabel,
+        released: releasedLabel,
       })
 
   const lifts = !bare && hoverEffects
@@ -209,14 +223,32 @@ export function GameCard({
         />
       )}
 
-      {tag && (
+      {(tag || releaseLabel) && (
         <div
-          className="absolute left-1.5 right-2 top-2 z-10 flex items-start gap-1"
+          className="absolute left-1.5 right-2 top-2 z-10 flex flex-wrap items-start gap-1"
           aria-hidden="true"
         >
-          <span className="block max-w-full truncate rounded border border-dark-border bg-dark-bg/90 px-1 py-0.5 text-[8px] font-medium text-gray-300 sm:px-1.5 sm:text-[10px]">
-            {tag}
-          </span>
+          {tag && (
+            <span className="block max-w-full truncate rounded border border-dark-border bg-dark-bg/90 px-1 py-0.5 text-[8px] font-medium text-gray-300 sm:px-1.5 sm:text-[10px]">
+              {tag}
+            </span>
+          )}
+          {releaseLabel && (
+            <span
+              className={`inline-flex max-w-full items-center gap-0.5 rounded border bg-dark-bg/90 px-1 py-0.5 text-[8px] font-medium sm:px-1.5 sm:text-[10px] ${
+                isUpcoming
+                  ? 'border-primary/50 text-primary-link'
+                  : 'border-dark-border text-gray-300'
+              }`}
+              title="Data de lançamento"
+            >
+              <CalendarClock
+                className="size-2 shrink-0 sm:size-2.5"
+                aria-hidden="true"
+              />
+              <span className="truncate">{releaseLabel}</span>
+            </span>
+          )}
         </div>
       )}
 

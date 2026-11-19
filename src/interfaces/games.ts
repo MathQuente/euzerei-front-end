@@ -1,4 +1,6 @@
+import type { LucideIcon } from 'lucide-react'
 import type { ComponentProps, ReactNode } from 'react'
+import type { IconType } from 'react-icons'
 import type {
   Game,
   GameBase,
@@ -8,7 +10,6 @@ import type {
   GameStatusEnum,
   SimilarGamesResponse,
 } from '../types/games'
-import type { LibraryPlatform } from '../types/platform'
 import type { ReleasePrecision } from '../utils/releaseDate'
 
 export type SortField =
@@ -23,6 +24,13 @@ export type SortField =
 export type SortOrder = 'asc' | 'desc'
 export type SectionType = 'coming' | 'trending' | 'rateds'
 
+/** Uma opção do filtro de plataforma (biblioteca ou catálogo). */
+export interface PlatformOption {
+  value: string
+  label: string
+  icon: IconType | LucideIcon
+}
+
 export interface GameCardProps {
   game: GameCardData
   className?: string
@@ -35,6 +43,8 @@ export interface GameCardProps {
   statusBar?: boolean
   favorite?: boolean
   showTag?: boolean
+  /** Mostra a data de lançamento também de jogo que já saiu. */
+  showReleaseDate?: boolean
 }
 
 export interface GameFormProps {
@@ -50,10 +60,12 @@ export interface GamesGridProps {
   games: GameCardData[]
   emptyState?: ReactNode
   className?: string
+  showReleaseDate?: boolean
 }
 
 export interface GameListProps {
   games: GameListData
+  showReleaseDate?: boolean
   page: number
   pageSize?: number
   setPage: (page: number) => void
@@ -74,8 +86,12 @@ export interface GameListProps {
   setSearch?: (search: string) => void
   searchPlaceholder?: string
   statusTabs?: StatusTab[]
-  platforms?: LibraryPlatform[]
-  setPlatforms?: (platforms: LibraryPlatform[]) => void
+  platforms?: string[]
+  setPlatforms?: (platforms: string[]) => void
+  /** Opções do filtro de plataforma; o padrão são as plataformas de loja da biblioteca. */
+  platformOptions?: PlatformOption[]
+  /** Lê `?platforms=` da URL ao voltar no histórico. */
+  parsePlatforms?: (param: string | null) => string[]
 }
 
 export interface GameListSectionProps extends ComponentProps<'div'> {
@@ -147,8 +163,9 @@ export interface ListToolbarProps {
   statusTabs?: StatusTab[]
   currentStatus?: GameStatusEnum
   onStatusChange?: (value: GameStatusEnum) => void
-  platforms?: LibraryPlatform[]
-  onPlatformsChange?: (platforms: LibraryPlatform[]) => void
+  platforms?: string[]
+  onPlatformsChange?: (platforms: string[]) => void
+  platformOptions?: PlatformOption[]
   /** "Atualizando…" ou "Carregando página N…" enquanto a lista troca. */
   loadingLabel?: string
 }

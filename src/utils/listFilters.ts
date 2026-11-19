@@ -12,6 +12,6 @@ export function parsePlatforms(param: string | null | undefined) {
 }
 
 /** O valor de `?platforms=`; `undefined` quando não há filtro. */
-export function platformsParam(platforms: LibraryPlatform[]) {
+export function platformsParam(platforms: readonly string[]) {
   return platforms.length > 0 ? platforms.join(',') : undefined
 }

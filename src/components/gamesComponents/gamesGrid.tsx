@@ -6,6 +6,7 @@ export function GamesGrid({
   games,
   emptyState,
   className = 'grid grid-cols-4 sm:grid-cols-6 2xl:grid-cols-8',
+  showReleaseDate = false,
 }: GamesGridProps) {
   if (games.length === 0) {
     return (
@@ -24,7 +25,13 @@ export function GamesGrid({
   return (
     <div className={`${className} p-2 gap-x-1 sm:gap-x-4 gap-y-4`}>
       {games.map(game => (
-        <GameCard key={game.igdbId} game={game} size="medium" enableModal />
+        <GameCard
+          key={game.igdbId}
+          game={game}
+          size="medium"
+          enableModal
+          showReleaseDate={showReleaseDate}
+        />
       ))}
     </div>
   )

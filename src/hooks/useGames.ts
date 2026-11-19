@@ -14,10 +14,20 @@ export const useGames = (
   sortBy: SortField,
   sortOrder: SortOrder,
   limit?: number,
-  options?: { prefetchNext?: boolean }
+  options?: { prefetchNext?: boolean; platforms?: string[] }
 ) => {
   const queryClient = useQueryClient()
-  const queryKey = ['games', page, search, sortBy, sortOrder, limit]
+  const platforms = options?.platforms
+  const platformsKey = platforms?.join(',') ?? ''
+  const queryKey = [
+    'games',
+    page,
+    search,
+    sortBy,
+    sortOrder,
+    limit,
+    platformsKey,
+  ]
 
   const {
     data: GamesResponse,
@@ -26,7 +36,8 @@ export const useGames = (
     isPlaceholderData,
   } = useQuery<UseGamesProps>({
     queryKey: queryKey,
-    queryFn: async () => api.getGames(page, search, sortBy, sortOrder, limit),
+    queryFn: async () =>
+      api.getGames(page, search, sortBy, sortOrder, limit, platforms),
     placeholderData: keepPreviousData,
   })
 
@@ -36,8 +47,24 @@ export const useGames = (
     if (!prefetchNext || isPlaceholderData || !limit || !total) return
     if (page * limit >= total) return
     queryClient.prefetchQuery({
-      queryKey: ['games', page + 1, search, sortBy, sortOrder, limit],
-      queryFn: () => api.getGames(page + 1, search, sortBy, sortOrder, limit),
+      queryKey: [
+        'games',
+        page + 1,
+        search,
+        sortBy,
+        sortOrder,
+        limit,
+        platformsKey,
+      ],
+      queryFn: () =>
+        api.getGames(
+          page + 1,
+          search,
+          sortBy,
+          sortOrder,
+          limit,
+          platformsKey ? platformsKey.split(',') : undefined
+        ),
       staleTime: 1000 * 60,
     })
   }, [
@@ -49,6 +76,7 @@ export const useGames = (
     search,
     sortBy,
     sortOrder,
+    platformsKey,
     queryClient,
   ])
 

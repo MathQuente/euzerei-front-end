@@ -10,13 +10,9 @@ import {
   X,
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import type { ListToolbarProps } from '../interfaces/games'
+import type { ListToolbarProps, PlatformOption } from '../interfaces/games'
 import { fieldFocus, focusRing } from '../styles/focus'
-import type { LibraryPlatform } from '../types/platform'
-import {
-  LIBRARY_PLATFORMS,
-  getLibraryPlatform,
-} from '../utils/libraryPlatforms'
+import { LIBRARY_PLATFORMS } from '../utils/libraryPlatforms'
 import { SORT_FIELD_META, sortLabel, sortOrdersFor } from '../utils/listSort'
 
 const SEARCH_DELAY_MS = 300
@@ -115,13 +111,15 @@ const chipClass = `inline-flex h-7 max-w-full items-center gap-1.5 rounded-full 
 function FiltersPanel({
   platforms,
   onPlatformsChange,
+  platformOptions,
   totalGames,
 }: {
-  platforms: LibraryPlatform[]
-  onPlatformsChange: (platforms: LibraryPlatform[]) => void
+  platforms: string[]
+  onPlatformsChange: (platforms: string[]) => void
+  platformOptions: PlatformOption[]
   totalGames: number
 }) {
-  function toggle(value: LibraryPlatform) {
+  function toggle(value: string) {
     onPlatformsChange(
       platforms.includes(value)
         ? platforms.filter(platform => platform !== value)
@@ -163,7 +161,7 @@ function FiltersPanel({
         >
           <p className="mb-2 text-xs text-gray-400">Plataforma</p>
           <div className="flex flex-wrap gap-1.5">
-            {LIBRARY_PLATFORMS.map(({ value, label, icon: Icon }) => {
+            {platformOptions.map(({ value, label, icon: Icon }) => {
               const active = platforms.includes(value)
               return (
                 <button
@@ -350,6 +348,7 @@ export function ListToolbar({
   onStatusChange,
   platforms = [],
   onPlatformsChange,
+  platformOptions = LIBRARY_PLATFORMS,
   loadingLabel,
 }: ListToolbarProps) {
   const hasControls = Boolean(
@@ -382,6 +381,7 @@ export function ListToolbar({
             <FiltersPanel
               platforms={platforms}
               onPlatformsChange={onPlatformsChange}
+              platformOptions={platformOptions}
               totalGames={totalGames}
             />
           )}
@@ -426,7 +426,9 @@ export function ListToolbar({
         )}
         {onPlatformsChange &&
           platforms.map(value => {
-            const label = getLibraryPlatform(value)?.label ?? value
+            const label =
+              platformOptions.find(option => option.value === value)?.label ??
+              value
             return (
               <button
                 key={value}

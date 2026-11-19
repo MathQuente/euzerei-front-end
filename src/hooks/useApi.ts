@@ -353,7 +353,8 @@ export const api = {
     search: string | undefined,
     sortBy: SortField,
     sortOrder: SortOrder,
-    limit?: number
+    limit?: number,
+    platforms?: string[]
   ) => {
     const response = await http.get('/games', {
       params: {
@@ -362,6 +363,7 @@ export const api = {
         sortBy,
         sortOrder,
         limit: limit ? limit : null,
+        platforms: platforms?.length ? platforms.join(',') : undefined,
       },
     })
     return response.data

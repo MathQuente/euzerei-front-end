@@ -41,6 +41,10 @@ interface CardSummaryInput {
   hundredPercent?: boolean
   favorite?: boolean
   platforms?: string[]
+  /** Data do lançamento, só para jogo que ainda não saiu. */
+  releasing?: string | null
+  /** Data do lançamento de jogo que já saiu. */
+  released?: string | null
 }
 
 const ratingFormat = new Intl.NumberFormat('pt-BR', {
@@ -60,6 +64,8 @@ export function cardSummary({
   hundredPercent,
   favorite,
   platforms,
+  releasing,
+  released,
 }: CardSummaryInput) {
   const parts: string[] = []
   if (tag) parts.push(tag)
@@ -72,5 +78,7 @@ export function cardSummary({
   if (platforms && platforms.length > 0) {
     parts.push(`jogado em ${platforms.join(', ')}`)
   }
+  if (releasing) parts.push(`lança em ${releasing}`)
+  if (released) parts.push(`lançado em ${released}`)
   return parts.join(', ')
 }

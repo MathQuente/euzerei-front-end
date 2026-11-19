@@ -51,6 +51,13 @@ describe('completionsText', () => {
   })
 })
 
+describe('cardSummary (lançamento)', () => {
+  it('fala a data de um jogo que ainda não saiu', () => {
+    expect(cardSummary({ releasing: '19/11/2027' })).toBe('lança em 19/11/2027')
+    expect(cardSummary({ releasing: null })).toBe('')
+  })
+})
+
 describe('cardSummary', () => {
   it('lists status, rating with a comma, completions, Infinito and every platform', () => {
     expect(

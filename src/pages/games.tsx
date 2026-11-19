@@ -4,6 +4,10 @@ import { GameListPage } from '../components/gameListPage'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useGames } from '../hooks/useGames'
 import type { SortField, SortOrder } from '../interfaces/games'
+import {
+  CATALOG_PLATFORMS,
+  parseCatalogPlatforms,
+} from '../utils/catalogPlatforms'
 import { sortFieldsFor } from '../utils/listSort'
 import { parsePage } from '../utils/parsePage'
 
@@ -31,6 +35,12 @@ export function Games() {
     return url.searchParams.get('search') ?? ''
   })
 
+  const [platforms, setPlatforms] = useState(() =>
+    parseCatalogPlatforms(
+      new URL(window.location.toString()).searchParams.get('platforms')
+    )
+  )
+
   const LIMIT = 48
   const { GamesResponse, isChangingPage } = useGames(
     page,
@@ -38,7 +48,7 @@ export function Games() {
     sortField,
     sortOrder,
     LIMIT,
-    { prefetchNext: true }
+    { prefetchNext: true, platforms }
   )
 
   if (!GamesResponse) {
@@ -68,6 +78,11 @@ export function Games() {
         search={search}
         setSearch={setSearch}
         searchPlaceholder="Buscar jogos"
+        platforms={platforms}
+        setPlatforms={setPlatforms}
+        platformOptions={CATALOG_PLATFORMS}
+        parsePlatforms={parseCatalogPlatforms}
+        showReleaseDate
       />
     </>
   )

@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from 'react'
 import { INFO_MESSAGES } from '../constants/messages'
 import type { GameListProps, SortField, SortOrder } from '../interfaces/games'
 import type { GameStatusEnum } from '../types/games'
-import type { LibraryPlatform } from '../types/platform'
-import { parsePlatforms, platformsParam } from '../utils/listFilters'
+import {
+  parsePlatforms as parseLibraryPlatforms,
+  platformsParam,
+} from '../utils/listFilters'
 import { pushListState } from '../utils/listHistory'
 import { SORT_FIELDS } from '../utils/listSort'
 import { notify } from '../utils/notify'
@@ -17,7 +19,7 @@ import { StatusMessage } from './statusMessage'
 const CHANGING_PAGE_DELAY_MS = 200
 /** Passou disso, as capas viram esqueleto: espera curta fica discreta, longa fica clara. */
 const SKELETON_AFTER_MS = 1500
-const NO_PLATFORMS: LibraryPlatform[] = []
+const NO_PLATFORMS: string[] = []
 
 export function GameListPage({
   games,
@@ -42,6 +44,9 @@ export function GameListPage({
   statusTabs,
   platforms = NO_PLATFORMS,
   setPlatforms,
+  platformOptions,
+  parsePlatforms = parseLibraryPlatforms,
+  showReleaseDate,
 }: GameListProps) {
   const gamesArray = games.games
 
@@ -141,7 +146,15 @@ export function GameListPage({
       window.removeEventListener('popstate', syncFromUrl)
       window.history.scrollRestoration = previousRestoration
     }
-  }, [setPage, setSortField, setSortOrder, setSearch, setPlatforms, sortFields])
+  }, [
+    setPage,
+    setSortField,
+    setSortOrder,
+    setSearch,
+    setPlatforms,
+    parsePlatforms,
+    sortFields,
+  ])
 
   function setCurrentPage(p: number) {
     changeKind.current = 'page'
@@ -177,7 +190,7 @@ export function GameListPage({
     setSearch?.(value)
   }
 
-  function onPlatformsChange(value: LibraryPlatform[]) {
+  function onPlatformsChange(value: string[]) {
     replaceListParam('platforms', platformsParam(value))
     setPlatforms?.(value)
   }
@@ -204,6 +217,7 @@ export function GameListPage({
         onStatusChange={onStatusChange}
         platforms={platforms}
         onPlatformsChange={setPlatforms ? onPlatformsChange : undefined}
+        platformOptions={platformOptions}
         loadingLabel={loadingLabel}
       />
 
@@ -234,7 +248,11 @@ export function GameListPage({
                   : 'transition-opacity duration-200'
               }
             >
-              <GamesGrid games={gamesArray} emptyState={listEmptyState} />
+              <GamesGrid
+                games={gamesArray}
+                emptyState={listEmptyState}
+                showReleaseDate={showReleaseDate}
+              />
             </div>
           )}
         </div>
