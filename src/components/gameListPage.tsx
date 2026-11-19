@@ -46,7 +46,7 @@ export function GameListPage({
   setPlatforms,
   platformOptions,
   parsePlatforms = parseLibraryPlatforms,
-  showReleaseDate,
+  releaseDateDisplay,
 }: GameListProps) {
   const gamesArray = games.games
 
@@ -251,7 +251,7 @@ export function GameListPage({
               <GamesGrid
                 games={gamesArray}
                 emptyState={listEmptyState}
-                showReleaseDate={showReleaseDate}
+                releaseDateDisplay={releaseDateDisplay}
               />
             </div>
           )}

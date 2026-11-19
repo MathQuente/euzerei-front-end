@@ -24,6 +24,8 @@ export type SortField =
 export type SortOrder = 'asc' | 'desc'
 export type SectionType = 'coming' | 'trending' | 'rateds'
 
+export type ReleaseDateDisplay = 'upcoming' | 'all' | 'none'
+
 /** Uma opção do filtro de plataforma (biblioteca ou catálogo). */
 export interface PlatformOption {
   value: string
@@ -43,8 +45,8 @@ export interface GameCardProps {
   statusBar?: boolean
   favorite?: boolean
   showTag?: boolean
-  /** Mostra a data de lançamento também de jogo que já saiu. */
-  showReleaseDate?: boolean
+  /** Data de lançamento no card: só jogo futuro (padrão), todos ou nenhum. */
+  releaseDateDisplay?: ReleaseDateDisplay
 }
 
 export interface GameFormProps {
@@ -60,12 +62,12 @@ export interface GamesGridProps {
   games: GameCardData[]
   emptyState?: ReactNode
   className?: string
-  showReleaseDate?: boolean
+  releaseDateDisplay?: ReleaseDateDisplay
 }
 
 export interface GameListProps {
   games: GameListData
-  showReleaseDate?: boolean
+  releaseDateDisplay?: ReleaseDateDisplay
   page: number
   pageSize?: number
   setPage: (page: number) => void

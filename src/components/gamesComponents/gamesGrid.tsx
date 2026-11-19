@@ -6,7 +6,7 @@ export function GamesGrid({
   games,
   emptyState,
   className = 'grid grid-cols-4 sm:grid-cols-6 2xl:grid-cols-8',
-  showReleaseDate = false,
+  releaseDateDisplay = 'upcoming',
 }: GamesGridProps) {
   if (games.length === 0) {
     return (
@@ -30,7 +30,7 @@ export function GamesGrid({
           game={game}
           size="medium"
           enableModal
-          showReleaseDate={showReleaseDate}
+          releaseDateDisplay={releaseDateDisplay}
         />
       ))}
     </div>

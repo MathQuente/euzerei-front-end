@@ -140,7 +140,7 @@ export function GameCard({
   statusBar = true,
   favorite = false,
   showTag = true,
-  showReleaseDate = false,
+  releaseDateDisplay = 'upcoming',
 }: GameCardProps) {
   const openGame = useGameModal()
   const [loadedSrc, setLoadedSrc] = useState<string | null>(null)
@@ -156,9 +156,11 @@ export function GameCard({
 
   const releaseTs = !bare && game?.releaseDate ? game.releaseDate : null
   const isUpcoming = releaseTs != null && releaseTs * 1000 > Date.now()
-  // Nos cards sem tag (favoritos) só entra a data pedida de propósito.
+  // 'upcoming' (padrão): só jogo futuro, e não nos cards sem tag (favoritos).
   const releaseLabel =
-    releaseTs != null && ((isUpcoming && showTag) || showReleaseDate)
+    releaseTs != null &&
+    (releaseDateDisplay === 'all' ||
+      (releaseDateDisplay === 'upcoming' && isUpcoming && showTag))
       ? formatReleaseLabel(releaseTs, game?.releaseDatePrecision)
       : null
   const releasingLabel = isUpcoming ? releaseLabel : null

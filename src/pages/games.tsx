@@ -82,7 +82,7 @@ export function Games() {
         setPlatforms={setPlatforms}
         platformOptions={CATALOG_PLATFORMS}
         parsePlatforms={parseCatalogPlatforms}
-        showReleaseDate
+        releaseDateDisplay={sortField === 'releaseDate' ? 'all' : 'none'}
       />
     </>
   )
