@@ -53,6 +53,13 @@ const PLATFORM_QUESTION: Record<number, string> = {
   [STATUS.DROPPED]: 'Onde você jogava?',
 }
 
+// "da Steam", "do Xbox"...: a frase fica certa para quem tem horas por conta.
+const PLATFORM_OF: Record<string, string> = {
+  STEAM: 'da Steam',
+  XBOX: 'do Xbox',
+  PLAYSTATION: 'da PlayStation',
+}
+
 const today = () => new Date().toISOString().slice(0, 10)
 
 const inputClass = `rounded-md bg-dark-bg px-2 py-1 text-sm text-white ${inlineFieldFocus} disabled:opacity-50`
@@ -149,7 +156,8 @@ export function PlatformEditor({
       </div>
       {entry.accountHours.length > 0 && (
         <p className="text-xs text-gray-400">
-          A próxima importação do Xbox substitui horas editadas à mão.
+          A próxima importação {PLATFORM_OF[entry.platform] ?? 'da loja'}{' '}
+          substitui horas editadas à mão.
         </p>
       )}
       {!completionsVisible && !endless && (
