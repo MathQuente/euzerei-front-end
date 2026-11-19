@@ -311,6 +311,7 @@ export function FavoriteGamesSection({
                   enableModal
                   statusBar={false}
                   hoverEffects={false}
+                  showTag={false}
                   favorite={game.isMain}
                 />
                 <FavoriteCardMarks

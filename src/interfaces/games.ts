@@ -34,6 +34,7 @@ export interface GameCardProps {
   eager?: boolean
   statusBar?: boolean
   favorite?: boolean
+  showTag?: boolean
 }
 
 export interface GameFormProps {

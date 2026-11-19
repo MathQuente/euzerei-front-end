@@ -137,6 +137,7 @@ export function GameCard({
   eager = false,
   statusBar = true,
   favorite = false,
+  showTag = true,
 }: GameCardProps) {
   const openGame = useGameModal()
   const [loadedSrc, setLoadedSrc] = useState<string | null>(null)
@@ -146,7 +147,7 @@ export function GameCard({
   const coverFailed = coverSrc !== null && failedSrc === coverSrc
   const bare = size === 'small' || size === 'row' || size === 'feature'
   const tag =
-    game && !bare
+    game && !bare && showTag
       ? getGameTag(game.name, game.summary, game.category, game.parentGameId)
       : null
 

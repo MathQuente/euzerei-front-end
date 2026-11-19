@@ -280,6 +280,7 @@ export function FavoriteSlots({
                     interactive={false}
                     hoverEffects={false}
                     statusBar={false}
+                    showTag={false}
                     favorite={game.igdbId === mainId}
                   />
                   <FavoriteCardMarks
@@ -398,6 +399,7 @@ export function FavoriteSlots({
               interactive={false}
               hoverEffects={false}
               statusBar={false}
+              showTag={false}
               favorite={floating.igdbId === mainId}
             />
             <FavoriteCardMarks
