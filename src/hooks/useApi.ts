@@ -108,24 +108,11 @@ async function openPlatformSignIn(path: string, expectedOrigin: string) {
   }
 }
 
-const LOGIN_ERROR_TOAST_ID = 'login-error'
-
 export const api = {
   login: async (email: string, password: string) => {
-    try {
-      const response = await http.post('/auth/login', { email, password })
-      setAccountDeletionInProgress(false)
-      return response.data
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        notify.failure(error, ERROR_MESSAGES.signIn, {
-          id: LOGIN_ERROR_TOAST_ID,
-        })
-        return
-      }
-
-      notify.error(ERROR_MESSAGES.unexpected, { id: LOGIN_ERROR_TOAST_ID })
-    }
+    const response = await http.post('/auth/login', { email, password })
+    setAccountDeletionInProgress(false)
+    return response.data
   },
   signup: async (email: string, password: string, acceptedTerms: boolean) => {
     const response = await http.post<{ message: string }>('/auth/register', {

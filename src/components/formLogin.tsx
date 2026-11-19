@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Lock, Mail } from 'lucide-react'
-import { useContext } from 'react'
+import { useContext, useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 import type { z } from 'zod'
@@ -18,24 +18,47 @@ type LoginForm = z.infer<typeof loginSchema>
 export function FormLogin() {
   const auth = useContext(AuthContext)
   const navigate = useNavigate()
+  const hasServerError = useRef(false)
 
   const {
     register,
     handleSubmit,
+    setError,
+    clearErrors,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
   })
 
+  useEffect(() => {
+    const subscription = watch(() => {
+      if (!hasServerError.current) return
+      hasServerError.current = false
+      clearErrors(['email', 'password'])
+    })
+    return () => subscription.unsubscribe()
+  }, [watch, clearErrors])
+
   async function onSubmit(data: LoginForm) {
     const redirectTo = safeRedirectPath(
       sessionStorage.getItem('redirectAfterLogin')
     )
-    const success = await auth.login(data.email, data.password)
-    if (success) {
-      navigate(redirectTo, { replace: true })
-      sessionStorage.removeItem('redirectAfterLogin')
+    const error = await auth.login(data.email, data.password)
+    if (error) {
+      // Não dizemos qual dos dois está errado: os dois campos ficam em vermelho,
+      // com a mesma mensagem, e o foco volta ao e-mail para corrigir.
+      hasServerError.current = true
+      setError('password', { type: 'server', message: error })
+      setError(
+        'email',
+        { type: 'server', message: error },
+        { shouldFocus: true }
+      )
+      return
     }
+    navigate(redirectTo, { replace: true })
+    sessionStorage.removeItem('redirectAfterLogin')
   }
 
   return (

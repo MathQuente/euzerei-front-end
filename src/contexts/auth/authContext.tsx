@@ -9,7 +9,8 @@ export interface SignupError {
 export type AuthContextType = {
   user: Partial<User> | null
   loading: boolean
-  login: (email: string, password: string) => Promise<boolean>
+  /** `null` no sucesso; no erro, a mensagem para mostrar no formulário. */
+  login: (email: string, password: string) => Promise<string | null>
   signup: (
     email: string,
     password: string,

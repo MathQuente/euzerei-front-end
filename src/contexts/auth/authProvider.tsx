@@ -1,6 +1,6 @@
 import { isAxiosError } from 'axios'
 import { useEffect, useRef, useState } from 'react'
-import { INFO_MESSAGES } from '../../constants/messages'
+import { ERROR_MESSAGES, INFO_MESSAGES } from '../../constants/messages'
 import { SESSION_ENDED_EVENT, api } from '../../hooks/useApi'
 import type { User } from '../../types/user'
 import { getErrorMessage } from '../../utils/getErrorMessage'
@@ -38,9 +38,15 @@ export function AuthProvider({ children }: { children: JSX.Element }) {
       const loggedUser = response.user
       setUser(loggedUser)
       await loadUser()
-      return true
-    } catch {
-      return false
+      return null
+    } catch (error) {
+      const status = isAxiosError(error) ? error.response?.status : undefined
+      return getErrorMessage(
+        error,
+        status && status < 500
+          ? ERROR_MESSAGES.signIn
+          : ERROR_MESSAGES.unexpected
+      )
     }
   }
 
