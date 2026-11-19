@@ -16,7 +16,7 @@ interface UseUserProfileOptions {
 }
 
 export const useUserProfile = (options?: UseUserProfileOptions) => {
-  const { user } = useAuth()
+  const { user, refreshUser } = useAuth()
   const userId = user?.id ?? ''
   const queryClient = useQueryClient()
 
@@ -116,6 +116,8 @@ export const useUserProfile = (options?: UseUserProfileOptions) => {
     onSuccess: async () => {
       notify.success(SUCCESS_MESSAGES.profileSaved)
       await queryClient.invalidateQueries({ queryKey })
+      // O link do rodapé usa o handle; sem isso ele aponta para o nome antigo.
+      await refreshUser().catch(() => {})
       options?.onUpdateSuccess?.()
     },
     onError: (error, _variables, context) => {

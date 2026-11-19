@@ -7,7 +7,9 @@ import { REVIEW_STATUS_LABEL } from '../constants/gameStatus'
 import { useIsClamped } from '../hooks/useIsClamped'
 import { focusRing } from '../styles/focus'
 import type { CommunityReview } from '../types/review'
+import { handleLabel } from '../utils/handleLabel'
 import { formatHours, formatHoursPlayedSpoken } from '../utils/hours'
+import { userPath } from '../utils/userPath'
 import { ReviewMarkdown } from './reviewMarkdown'
 
 function ExpandableText({ text }: { text: string }) {
@@ -51,7 +53,7 @@ export function CommunityReviewCard({
   expandable?: boolean
   plain?: boolean
 }) {
-  const authorName = review.userName ?? 'Usuário'
+  const authorName = handleLabel(review.userName)
   const statusLabel = review.status
     ? REVIEW_STATUS_LABEL[review.status]
     : undefined
@@ -62,7 +64,7 @@ export function CommunityReviewCard({
     >
       <div className="flex items-center justify-between gap-3">
         <Link
-          to={`/users/${review.userId}`}
+          to={userPath({ id: review.userId, userName: review.userName })}
           className={`flex items-center gap-2.5 min-w-0 ${focusRing} rounded-sm`}
         >
           <img

@@ -11,21 +11,26 @@ import { ProfileHeader } from '../components/libraryComponents/profileHeader'
 import { StatusMessage } from '../components/statusMessage'
 import { UserListModal } from '../components/userListModal'
 import { api } from '../hooks/useApi'
+import { useCanonicalUserUrl } from '../hooks/useCanonicalUserUrl'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useFollowers } from '../hooks/useFollowers'
 import { useFollowing } from '../hooks/useFollowing'
 import { usePublicUserGames } from '../hooks/usePublicUserGames'
 
 export function UserProfilePage() {
-  const { userId } = useParams()
+  const { userId: ref } = useParams()
   const [followersModalOpen, setFollowersModalOpen] = useState(false)
   const [followingModalOpen, setFollowingModalOpen] = useState(false)
 
   const { data, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ['publicUserProfile', userId],
-    queryFn: () => api.getUserProfile(userId ?? null),
-    enabled: !!userId,
+    queryKey: ['publicUserProfile', ref],
+    queryFn: () => api.getUserProfile(ref ?? null),
+    enabled: !!ref,
   })
+
+  // O endereço pode vir por UUID (link antigo) ou com outra caixa: normaliza.
+  const userId = data?.user.id
+  useCanonicalUserUrl(data?.user, ref)
 
   const {
     games,

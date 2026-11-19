@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import logo from '../assets/euzerei-logo.svg'
 import { useAuth } from '../hooks/useAuth'
 import { focusRing } from '../styles/focus'
+import { userPath } from '../utils/userPath'
 
 const linkClass = `block w-fit whitespace-nowrap rounded-sm py-1 text-sm text-gray-400 underline-offset-4 transition-colors hover:text-white hover:underline focus-visible:text-white focus-visible:underline ${focusRing}`
 
@@ -19,7 +20,10 @@ export function Footer() {
   const accountLinks = user?.id
     ? [
         { to: '/userLibrary', label: 'Biblioteca' },
-        { to: `/users/${encodeURIComponent(user.id)}`, label: 'Perfil' },
+        {
+          to: userPath({ id: user.id, userName: user.userName }),
+          label: 'Perfil',
+        },
       ]
     : [
         { to: '/auth?tab=login', label: 'Entrar' },

@@ -6,14 +6,15 @@ import { useForm } from 'react-hook-form'
 import type { z } from 'zod'
 import userProfilePictureDefault from '../../assets/Default_pfp.svg.png'
 import { useUserProfile } from '../../hooks/useUserProfile'
-import { updateProfileSchema } from '../../schemas/profileSchema'
+import { createUpdateProfileSchema } from '../../schemas/profileSchema'
 import { BANNER_FADE } from '../../styles/bannerFade'
 import { fieldFocus, focusRing, focusRingWithin } from '../../styles/focus'
+import { handleLabel } from '../../utils/handleLabel'
 import { buildProfileUpdate } from '../../utils/profileUpdate'
 import { Button, buttonClasses } from '../button'
 import { SettingsCardHeader, settingsCardClass } from '../settingsCard'
 
-type ProfileForm = z.infer<typeof updateProfileSchema>
+type ProfileForm = z.infer<ReturnType<typeof createUpdateProfileSchema>>
 
 const IMAGE_ACCEPT = 'image/png,image/jpeg,image/gif,image/webp'
 const bannerButton =
@@ -29,6 +30,7 @@ export function UserProfileForm({
 }: {
   onDirtyChange?: (dirty: boolean) => void
 }) {
+  const originalNameRef = useRef('')
   const [profilePicturePreview, setProfilePicturePreview] = useState('')
   const [userBannerPreview, setUserBannerPreview] = useState('')
   const [shouldRemoveBanner, setShouldRemoveBanner] = useState(false)
@@ -54,11 +56,12 @@ export function UserProfileForm({
     watch,
     formState: { errors },
   } = useForm<ProfileForm>({
-    resolver: zodResolver(updateProfileSchema),
+    resolver: zodResolver(
+      createUpdateProfileSchema(() => originalNameRef.current)
+    ),
   })
 
   const watchedUserName = watch('userName')
-  const originalNameRef = useRef('')
 
   useEffect(() => {
     if (UserProfileResponse?.user) {
@@ -203,7 +206,7 @@ export function UserProfileForm({
             aria-hidden="true"
             className="absolute bottom-3 left-[6.5rem] right-4 break-words font-display text-2xl font-extrabold leading-tight tracking-tight text-white [text-shadow:0_1px_2px_rgb(0_0_0/0.85),0_0_10px_rgb(0_0_0/0.55)] sm:left-[8.5rem] sm:text-[1.75rem]"
           >
-            {previewName}
+            {handleLabel(previewName)}
           </p>
           <div className="absolute right-3 top-3 flex gap-2">
             <label className={fileButton}>
@@ -286,12 +289,23 @@ export function UserProfileForm({
           <input
             id="userName"
             type="text"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
             aria-invalid={errors.userName ? true : undefined}
             aria-describedby="userName-hint"
             className={`block min-h-11 w-full rounded-lg border bg-dark-bg px-3 text-sm [@media(max-width:639px)]:text-base text-white placeholder-gray-500 transition-colors duration-150 ${
               errors.userName ? 'border-red-400' : 'border-dark-border'
             } ${fieldFocus}`}
-            {...registerField('userName')}
+            {...registerField('userName', {
+              // Espaço não entra: o nome vira o endereço do perfil.
+              onChange: event => {
+                const stripped = event.target.value.replace(/\s/g, '')
+                event.target.value = stripped
+                // O formulário já guardou o valor com espaço: alinha com o campo.
+                setValue('userName', stripped, { shouldDirty: true })
+              },
+            })}
           />
           <div className="mt-1.5 flex items-start justify-between gap-3">
             <p
@@ -299,7 +313,7 @@ export function UserProfileForm({
               className={`text-xs ${errors.userName ? 'text-red-300' : 'text-gray-400'}`}
             >
               {errors.userName?.message ??
-                '1 a 30 caracteres. Fica do jeito que você digitar.'}
+                '3 a 30 caracteres, sem espaço: letras, números, _ e -. Aparece como @nome e vira o endereço do perfil.'}
             </p>
             <span
               className="shrink-0 font-display text-xs tabular-nums text-gray-500"

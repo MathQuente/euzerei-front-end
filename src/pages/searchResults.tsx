@@ -3,7 +3,6 @@ import { Link, useParams, useSearchParams } from 'react-router-dom'
 import userProfilePictureDefault from '../assets/Default_pfp.svg.png'
 import { BackButton } from '../components/backButton'
 import { Button, buttonClasses } from '../components/button'
-import { rowLink } from '../components/homeComponents/styles'
 import { Pagination } from '../components/pagination'
 import { SearchResultCard } from '../components/searchResultCard'
 import { StatusMessage } from '../components/statusMessage'
@@ -11,9 +10,13 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { SEARCH_PAGE_SIZE, useGameSearch } from '../hooks/useGameSearch'
 import { useUserSearch } from '../hooks/useUserSearch'
 import { focusRing } from '../styles/focus'
+import { handleLabel } from '../utils/handleLabel'
 import { parsePage } from '../utils/parsePage'
+import { userPath } from '../utils/userPath'
 
 const USERS_PAGE_SIZE = 30
+
+const userCard = `flex items-center gap-3 rounded-xl border border-dark-border bg-dark-bg-light p-3 transition-colors hover:border-primary hover:bg-dark-bg-lighter ${focusRing}`
 
 const tabClass = (active: boolean) =>
   `px-3 py-1.5 text-sm rounded-lg transition-colors ${focusRing} ${
@@ -237,18 +240,18 @@ export function SearchResults() {
       description={emptyDescription('usuários')}
     />
   ) : (
-    <ul className="flex flex-col">
+    <ul className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-2.5">
       {users.map(u => (
         <li key={u.id}>
-          <Link to={`/users/${u.id}`} className={rowLink}>
+          <Link to={userPath(u)} className={userCard}>
             <img
               src={u.profilePicture || userProfilePictureDefault}
               alt=""
-              className="size-9 rounded-full object-cover border border-dark-border shrink-0"
+              className="size-11 rounded-full object-cover border border-dark-border shrink-0"
             />
             <div className="min-w-0">
               <p className="truncate text-sm font-medium text-white">
-                {u.userName ?? 'Usuário'}
+                {handleLabel(u.userName)}
               </p>
               <p className="text-xs text-gray-400">
                 {u.userGamesAmount} {u.userGamesAmount === 1 ? 'jogo' : 'jogos'}

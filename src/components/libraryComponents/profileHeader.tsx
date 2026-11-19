@@ -5,6 +5,7 @@ import { BANNER_FADE } from '../../styles/bannerFade'
 import { focusRing } from '../../styles/focus'
 import type { TotalPerStatus } from '../../types/games'
 import type { AchievementStats } from '../../types/user'
+import { handleLabel } from '../../utils/handleLabel'
 import { formatMemberSince } from '../../utils/memberSince'
 import { ProfileStats } from './profileStats'
 import { type StoreAccounts, StoreChips, hasStoreAccounts } from './storeChips'
@@ -99,7 +100,7 @@ export function ProfileHeader({
         <h1
           className={`absolute bottom-3 left-[6rem] right-4 break-words font-display text-2xl font-extrabold leading-tight tracking-tight text-white sm:left-[8.75rem] sm:right-[17rem] sm:text-3xl ${onBanner}`}
         >
-          {userName}
+          {handleLabel(userName)}
         </h1>
         {(actions || memberSince) && (
           <div className="absolute right-4 top-3 flex flex-col items-end gap-2 sm:bottom-3 sm:right-6 sm:top-auto sm:flex-row-reverse sm:items-center sm:gap-3">
