@@ -132,7 +132,7 @@ export function ProfileHeader({
             isOwn && (
               <Link
                 to="/configuracoes/importar"
-                className={`inline-flex min-h-11 items-center rounded-sm text-sm text-primary-link underline underline-offset-4 transition-colors hover:text-white ${focusRing}`}
+                className={`inline-flex min-h-11 items-center rounded-sm text-sm text-primary-link transition-colors hover:text-white ${focusRing}`}
               >
                 Conectar Steam, Xbox ou PlayStation
               </Link>

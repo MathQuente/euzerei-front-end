@@ -45,6 +45,42 @@ export function Layout() {
       window.scrollTo(0, 0)
   }, [pathname])
 
+  // Clicar num link para a página em que já se está não navega e, portanto, não
+  // rola: o React Router só troca o histórico. Aqui devolvemos o feedback.
+  useEffect(() => {
+    const onClick = (event: MouseEvent) => {
+      if (
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      )
+        return
+      const anchor = (event.target as Element | null)?.closest?.('a[href]')
+      if (!(anchor instanceof HTMLAnchorElement)) return
+      if (anchor.target && anchor.target !== '_self') return
+      const url = new URL(anchor.href, window.location.href)
+      if (
+        url.origin === window.location.origin &&
+        url.pathname === window.location.pathname &&
+        url.search === window.location.search &&
+        !url.hash
+      ) {
+        window.scrollTo({
+          top: 0,
+          behavior: window.matchMedia('(prefers-reduced-motion: reduce)')
+            .matches
+            ? 'auto'
+            : 'smooth',
+        })
+      }
+    }
+    // Captura: roda antes do Link do React Router, que chama preventDefault no clique.
+    document.addEventListener('click', onClick, true)
+    return () => document.removeEventListener('click', onClick, true)
+  }, [])
+
   return (
     <GameModalProvider>
       <div className="flex flex-col min-h-screen bg-dark-bg mx-auto w-full max-w-[1920px] overflow-x-clip px-4 sm:px-6 lg:px-10 2xl:px-16 pt-4 pb-8">

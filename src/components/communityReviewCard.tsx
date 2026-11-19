@@ -62,7 +62,7 @@ export function CommunityReviewCard({
     <div
       className={`flex flex-col gap-3 ${plain ? '' : 'bg-dark-bg-light border border-dark-border rounded-lg p-4'}`}
     >
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
         <Link
           to={userPath({ id: review.userId, userName: review.userName })}
           className={`flex items-center gap-2.5 min-w-0 ${focusRing} rounded-sm`}
@@ -82,7 +82,7 @@ export function CommunityReviewCard({
           </div>
         </Link>
 
-        <div className="flex items-center gap-2 shrink-0 text-xs text-gray-300">
+        <div className="flex flex-wrap items-center gap-2 text-xs text-gray-300">
           {review.rating != null && (
             <span
               className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-dark-bg border border-dark-border"
