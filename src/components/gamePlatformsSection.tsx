@@ -1,8 +1,17 @@
-import { ChevronRight, Minus, Plus, Trash2 } from 'lucide-react'
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
+import {
+  Check,
+  ChevronDown,
+  ChevronRight,
+  Minus,
+  Plus,
+  Trash2,
+} from 'lucide-react'
 import { useEffect, useId, useState } from 'react'
 import { USER_GAME_STATUS_ID as STATUS } from '../constants/gameStatus'
 import { INFO_MESSAGES } from '../constants/messages'
 import { focusRing, inlineFieldFocus } from '../styles/focus'
+import { menuClass, menuItemClass, menuLabelClass } from '../styles/menu'
 import type {
   LibraryPlatform,
   PlatformConsole,
@@ -30,6 +39,7 @@ import { notify } from '../utils/notify'
 import {
   consoleGroupsFor,
   consoleLabel,
+  consoleOptionLabel,
   consolesForGame,
   entryDisplayName,
   entryHint,
@@ -385,34 +395,58 @@ function ConsolePicker({
       <label htmlFor={selectId} className="text-xs text-gray-400">
         Em qual console? ({platformLabel})
       </label>
-      <select
-        id={selectId}
-        value={value}
-        onChange={e => setValue(e.target.value as PlatformConsole)}
-        disabled={disabled}
-        className={`w-full min-h-11 ${inputClass}`}
-      >
-        <option value="" disabled>
-          Escolha o console
-        </option>
-        {groups.map(group =>
-          grouped ? (
-            <optgroup key={group.label} label={group.label}>
-              {group.consoles.map(c => (
-                <option key={c} value={c}>
-                  {consoleLabel(c)}
-                </option>
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger
+          id={selectId}
+          disabled={disabled}
+          className={`flex h-11 w-full items-center justify-between gap-2 rounded-lg border border-dark-border bg-dark-bg-darker px-3 text-left text-sm transition-colors hover:border-gray-600 data-[state=open]:border-primary-light/60 disabled:opacity-50 ${focusRing}`}
+        >
+          <span className={value === '' ? 'text-gray-400' : 'text-white'}>
+            {value === ''
+              ? 'Escolha o console'
+              : consoleOptionLabel(platform, value)}
+          </span>
+          <ChevronDown className="size-4 shrink-0 text-gray-400" aria-hidden />
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Portal>
+          <DropdownMenu.Content
+            align="start"
+            sideOffset={6}
+            collisionPadding={12}
+            className={`${menuClass} w-[var(--radix-dropdown-menu-trigger-width)]`}
+          >
+            <DropdownMenu.RadioGroup
+              value={value}
+              onValueChange={next => setValue(next as PlatformConsole)}
+            >
+              {groups.map(group => (
+                <div key={group.label}>
+                  {grouped && (
+                    <DropdownMenu.Label className={menuLabelClass}>
+                      {group.label}
+                    </DropdownMenu.Label>
+                  )}
+                  {group.consoles.map(c => (
+                    <DropdownMenu.RadioItem
+                      key={c}
+                      value={c}
+                      className={menuItemClass}
+                    >
+                      {consoleOptionLabel(platform, c)}
+                      <DropdownMenu.ItemIndicator>
+                        <Check
+                          className="size-4 text-primary-link"
+                          aria-hidden
+                        />
+                      </DropdownMenu.ItemIndicator>
+                    </DropdownMenu.RadioItem>
+                  ))}
+                </div>
               ))}
-            </optgroup>
-          ) : (
-            group.consoles.map(c => (
-              <option key={c} value={c}>
-                {consoleLabel(c)}
-              </option>
-            ))
-          )
-        )}
-      </select>
+            </DropdownMenu.RadioGroup>
+          </DropdownMenu.Content>
+        </DropdownMenu.Portal>
+      </DropdownMenu.Root>
       <div className="flex justify-end gap-2">
         <Button type="button" variant="secondary" size="sm" onClick={onCancel}>
           Cancelar

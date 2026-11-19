@@ -7,6 +7,7 @@ import {
   SiSteam,
   SiXbox,
 } from 'react-icons/si'
+import type { GameCardData } from '../types/games'
 import type { LibraryPlatform } from '../types/platform'
 
 export interface LibraryPlatformOption {
@@ -66,4 +67,26 @@ export function getAvailableLibraryPlatforms(
   }
 
   return addable.filter(p => available.has(p.value))
+}
+
+const PORT_CATEGORY = 11
+const WINDOWS_PLATFORM = 'PC (Microsoft Windows)'
+const XBOX_ON_PC_HINT = 'Xbox (PC)'
+
+const mentionsXbox = (name: string) => name.toLowerCase().includes('xbox')
+
+export function platformsOfferedFor(
+  game: Pick<GameCardData, 'platforms' | 'category'> & {
+    parentGame?: Pick<GameCardData, 'platforms'>
+  }
+) {
+  const own = game.platforms
+  if (!own) return own
+  const isWindowsPort =
+    game.category === PORT_CATEGORY && own.includes(WINDOWS_PLATFORM)
+  const parentHasXbox = game.parentGame?.platforms?.some(mentionsXbox)
+  if (isWindowsPort && parentHasXbox && !own.some(mentionsXbox)) {
+    return [...own, XBOX_ON_PC_HINT]
+  }
+  return own
 }

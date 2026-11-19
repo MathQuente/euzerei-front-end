@@ -12,20 +12,13 @@ import {
 import { useEffect, useRef, useState } from 'react'
 import type { ListToolbarProps, PlatformOption } from '../interfaces/games'
 import { fieldFocus, focusRing } from '../styles/focus'
+import { menuClass, menuItemClass, menuLabelClass } from '../styles/menu'
 import { LIBRARY_PLATFORMS } from '../utils/libraryPlatforms'
 import { SORT_FIELD_META, sortLabel, sortOrdersFor } from '../utils/listSort'
 
 const SEARCH_DELAY_MS = 300
 
 const controlClass = `inline-flex h-11 sm:h-9 min-w-0 flex-1 sm:flex-none items-center justify-center gap-2 rounded-lg border border-dark-border bg-dark-bg-darker px-3 text-sm text-gray-300 transition-colors hover:border-gray-600 data-[state=open]:border-primary-light/60 ${focusRing}`
-
-const menuClass =
-  'z-[70] w-[min(16rem,calc(100vw-2rem))] rounded-xl border border-dark-border bg-dark-bg-light p-1.5 shadow-xl shadow-black/50'
-
-const labelClass = 'px-2.5 pt-2 pb-1 text-[11px] text-gray-500'
-
-const itemClass =
-  'flex w-full min-h-11 sm:min-h-9 cursor-pointer items-center justify-between gap-3 rounded-lg px-2.5 text-sm text-gray-300 outline-none transition-colors data-[highlighted]:bg-dark-bg-lighter data-[highlighted]:text-white data-[state=checked]:text-white'
 
 function SortMenu({
   sortField,
@@ -56,7 +49,7 @@ function SortMenu({
           collisionPadding={12}
           className={menuClass}
         >
-          <DropdownMenu.Label className={labelClass}>
+          <DropdownMenu.Label className={menuLabelClass}>
             Ordenar por
           </DropdownMenu.Label>
           <DropdownMenu.RadioGroup
@@ -71,7 +64,7 @@ function SortMenu({
                 key={field}
                 value={field}
                 onSelect={event => event.preventDefault()}
-                className={itemClass}
+                className={menuItemClass}
               >
                 {SORT_FIELD_META[field].label}
                 <DropdownMenu.ItemIndicator>
@@ -81,7 +74,9 @@ function SortMenu({
             ))}
           </DropdownMenu.RadioGroup>
           <DropdownMenu.Separator className="mx-1 my-1.5 h-px bg-dark-border" />
-          <DropdownMenu.Label className={labelClass}>Ordem</DropdownMenu.Label>
+          <DropdownMenu.Label className={menuLabelClass}>
+            Ordem
+          </DropdownMenu.Label>
           <DropdownMenu.RadioGroup
             value={sortOrder}
             onValueChange={value =>

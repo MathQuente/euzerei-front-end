@@ -6,6 +6,7 @@ import { endlessControl } from '../../utils/endlessAvailability'
 import { EndlessToggle } from '../endlessToggle'
 import { FavoriteToggle } from '../favoriteToggle'
 import { GamePlatformsSection } from '../gamePlatformsSection'
+import { platformsOfferedFor } from '../../utils/libraryPlatforms'
 import { HundredPercentToggle } from '../hundredPercentToggle'
 import { LibraryRecordFields } from '../libraryRecordFields'
 import { GameStatusButtons } from './gameStatusButtons'
@@ -55,7 +56,7 @@ export function GameForm({ game }: GameFormProps) {
 
       {canHavePlatforms && (
         <GamePlatformsSection
-          gamePlatforms={game.platforms}
+          gamePlatforms={platformsOfferedFor(game)}
           platforms={platforms}
           totalHours={totals?.hoursPlayed ?? 0}
           totalCompletions={totals?.completions ?? 0}

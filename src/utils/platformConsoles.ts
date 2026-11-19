@@ -15,6 +15,7 @@ const XBOX: PlatformConsole[] = [
   'XBOX_360',
   'XBOX_ONE',
   'XBOX_SERIES',
+  'PC',
 ]
 const NINTENDO: PlatformConsole[] = [
   'NES',
@@ -180,6 +181,14 @@ export function consoleGroupsFor(
     }))
     .filter(group => group.consoles.length > 0)
   return filtered.length > 0 ? filtered : groups
+}
+
+export function consoleOptionLabel(
+  platform: LibraryPlatform,
+  value: PlatformConsole
+) {
+  if (platform === 'XBOX' && value === 'PC') return 'PC (Xbox / Game Pass)'
+  return consoleLabel(value)
 }
 
 export function consoleLabel(value: PlatformConsole) {
