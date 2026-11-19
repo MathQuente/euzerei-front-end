@@ -84,6 +84,9 @@ export interface UserGameEntry extends GameCardData {
   updatedAt?: string
   /** Quando entrou em Larguei; só vem para jogos que estão em Larguei agora. */
   droppedAt?: string
+  createdAt?: string
+  /** Última vez que o jogo foi aberto numa plataforma importada. */
+  lastPlayedAt?: string
 }
 
 export interface RouletteResponse {

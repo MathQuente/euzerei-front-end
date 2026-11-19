@@ -6,8 +6,17 @@ const game = (
   igdbId: number,
   status: string,
   updatedAt?: string,
-  droppedAt?: string
-) => ({ igdbId, status, updatedAt, droppedAt }) as UserGameEntry
+  droppedAt?: string,
+  lastPlayedAt: string | undefined = updatedAt
+) =>
+  ({
+    igdbId,
+    status,
+    updatedAt,
+    createdAt: updatedAt,
+    droppedAt,
+    lastPlayedAt,
+  }) as UserGameEntry
 
 const ids = (games: UserGameEntry[]) => games.map(g => g.igdbId)
 
@@ -113,5 +122,31 @@ describe('mergeQueue', () => {
     )
 
     expect(ids(merged)).toEqual([1, 2, 3])
+  })
+
+  it('puts opened games first by last activity, then never-opened by entry date', () => {
+    const merged = mergeQueue(
+      [
+        game(1, 'BACKLOG', '2026-11-10T00:00:00Z', undefined, ''),
+        game(
+          2,
+          'BACKLOG',
+          '2026-11-01T00:00:00Z',
+          undefined,
+          '2026-09-01T00:00:00Z'
+        ),
+        game(
+          3,
+          'BACKLOG',
+          '2026-11-05T00:00:00Z',
+          undefined,
+          '2026-10-01T00:00:00Z'
+        ),
+      ],
+      [],
+      10
+    )
+
+    expect(ids(merged)).toEqual([3, 2, 1])
   })
 })

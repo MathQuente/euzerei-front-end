@@ -9,15 +9,14 @@ export const QUEUE_STATUSES: GameStatusEnum[] = [
 ]
 
 /**
- * O momento que coloca um jogo na fila: um largado vale pela data em que foi
+ * A data que posiciona um jogo na fila: um largado vale pela data em que foi
  * largado (editar um largado não o devolve ao topo); os demais, pela última
- * mudança. Sem `droppedAt` (backend antigo, ou data ainda não gravada) o
- * largado cai para `updatedAt`.
+ * vez que foram abertos, ou pela entrada na conta se nunca foram abertos. Sem a data (backend antigo) cai para `updatedAt`.
  */
 function queueMoment(game: UserGameEntry) {
   return game.status === GameStatusEnum.Dropped
     ? (game.droppedAt ?? game.updatedAt)
-    : game.updatedAt
+    : game.lastPlayedAt || game.createdAt || game.updatedAt
 }
 
 export function mergeQueue(
@@ -27,7 +26,13 @@ export function mergeQueue(
 ): UserGameEntry[] {
   const all = [...backlog, ...dropped].map((game, index) => {
     const moment = queueMoment(game)
-    return { game, index, time: moment ? Date.parse(moment) : Number.NaN }
+    return {
+      game,
+      index,
+      neverOpened:
+        game.status !== GameStatusEnum.Dropped && !game.lastPlayedAt ? 1 : 0,
+      time: moment ? Date.parse(moment) : Number.NaN,
+    }
   })
   // Sem data, ou com uma data que não dá para ler, a ordem do backend vale.
   if (all.some(item => Number.isNaN(item.time))) {
@@ -35,7 +40,10 @@ export function mergeQueue(
   }
 
   return all
-    .sort((a, b) => b.time - a.time || a.index - b.index)
+    .sort(
+      (a, b) =>
+        a.neverOpened - b.neverOpened || b.time - a.time || a.index - b.index
+    )
     .slice(0, limit)
     .map(({ game }) => game)
 }

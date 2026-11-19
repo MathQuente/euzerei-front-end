@@ -264,6 +264,7 @@ export const api = {
       hoursPlayed: 'hoursPlayed',
       completedAt: 'completedAt',
       droppedAt: 'droppedAt',
+      lastPlayedAt: 'lastPlayedAt',
       dateAdded: 'dateAdded',
     } as const
 

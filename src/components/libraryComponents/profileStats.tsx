@@ -25,15 +25,19 @@ function RailCell({
   value,
   label,
   spoken,
+  tone = 'text-white',
 }: {
   value: string
   label: string
   spoken: string
+  tone?: string
 }) {
   return (
     <li className="border-l border-dark-border px-4 first:border-l-0 first:pl-0 last:pr-0">
       <span className="flex flex-col items-center gap-1" aria-hidden="true">
-        <b className="font-display text-xl font-bold leading-none tracking-tight tabular-nums text-white">
+        <b
+          className={`font-display text-xl font-bold leading-none tracking-tight tabular-nums ${tone}`}
+        >
           {value}
         </b>
         <span className="text-[10px] uppercase tracking-widest text-gray-400">
@@ -50,15 +54,17 @@ function Cell({
   value,
   label,
   spoken,
+  tone = 'text-primary-link',
 }: {
   icon: ReactNode
   value: string
   label: string
   spoken: string
+  tone?: string
 }) {
   return (
     <li className="flex items-center gap-1.5 text-sm text-gray-400">
-      <span className="text-primary-link" aria-hidden="true">
+      <span className={tone} aria-hidden="true">
         {icon}
       </span>
       <span className="flex items-baseline gap-1" aria-hidden="true">
@@ -126,16 +132,19 @@ export function ProfileStats({
         <RailCell
           value={fmt(played)}
           label="Zerados"
+          tone="text-amber-400"
           spoken={spokenCount(played, 'zerado', 'zerados')}
         />
         <RailCell
           value={fmt(playing)}
           label="Jogando"
+          tone="text-emerald-400"
           spoken={spokenCount(playing, 'jogando')}
         />
         <RailCell
           value={fmt(backlog)}
           label="Na fila"
+          tone="text-slate-400"
           spoken={spokenCount(backlog, 'na fila')}
         />
         <RailCell
@@ -179,18 +188,21 @@ export function ProfileStats({
           icon={<Gamepad2 className={iconClass} />}
           value={fmt(played)}
           label="Zerados"
+          tone="text-amber-400"
           spoken={spokenCount(played, 'zerado', 'zerados')}
         />
         <Cell
           icon={<Play className={iconClass} />}
           value={fmt(playing)}
           label="Jogando"
+          tone="text-emerald-400"
           spoken={spokenCount(playing, 'jogando')}
         />
         <Cell
           icon={<Library className={iconClass} />}
           value={fmt(backlog)}
           label="Na fila"
+          tone="text-slate-400"
           spoken={spokenCount(backlog, 'na fila')}
         />
         <Cell

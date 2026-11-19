@@ -19,6 +19,11 @@ export const SORT_FIELD_META: Record<SortField, SortFieldMeta> = {
     defaultOrder: 'desc',
     orderLabels: { desc: 'Mais recentes', asc: 'Mais antigos' },
   },
+  lastPlayedAt: {
+    label: 'Última atividade',
+    defaultOrder: 'desc',
+    orderLabels: { desc: 'Mais recentes', asc: 'Mais antigas' },
+  },
   completedAt: {
     label: 'Data de finalização',
     defaultOrder: 'desc',
@@ -54,11 +59,19 @@ export const SORT_FIELD_META: Record<SortField, SortFieldMeta> = {
 export const SORT_FIELDS = Object.keys(SORT_FIELD_META) as SortField[]
 
 const FIELDS_BY_CONTEXT: Record<ListContext, SortField[]> = {
-  library: ['dateAdded', 'name', 'releaseDate', 'rating', 'hoursPlayed'],
+  library: [
+    'dateAdded',
+    'lastPlayedAt',
+    'name',
+    'releaseDate',
+    'rating',
+    'hoursPlayed',
+  ],
   played: ['completedAt', 'name', 'releaseDate', 'rating', 'hoursPlayed'],
   dropped: [
     'droppedAt',
     'dateAdded',
+    'lastPlayedAt',
     'name',
     'releaseDate',
     'rating',
@@ -67,6 +80,13 @@ const FIELDS_BY_CONTEXT: Record<ListContext, SortField[]> = {
   // Jogo que você ainda não tem: sem nota sua nem horas jogadas para ordenar.
   wishlist: ['dateAdded', 'name', 'releaseDate'],
   games: ['name', 'releaseDate', 'rating'],
+}
+
+export function defaultSortFieldFor(context: ListContext): SortField {
+  if (context === 'played') return 'completedAt'
+  if (context === 'dropped') return 'droppedAt'
+  if (context === 'library') return 'lastPlayedAt'
+  return 'dateAdded'
 }
 
 export function sortFieldsFor(context: ListContext): SortField[] {
@@ -87,6 +107,7 @@ export function sortLabel(field: SortField, order: SortOrder) {
   if (field === 'dateAdded') return `Adição · ${orderLabel.toLowerCase()}`
   if (field === 'completedAt')
     return `Finalização · ${orderLabel.toLowerCase()}`
+  if (field === 'lastPlayedAt') return `Atividade · ${orderLabel.toLowerCase()}`
   if (field === 'droppedAt') return `Largado · ${orderLabel.toLowerCase()}`
   return `${label} · ${orderLabel.toLowerCase()}`
 }
