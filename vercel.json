@@ -1,15 +1,24 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "rewrites": [
+  "routes": [
     {
-      "source": "/api/:path*",
-      "destination": "https://euzerei-api.onrender.com/:path*"
-    },
-    { "source": "/(.*)", "destination": "/index.html" }
+      "src": "/api/(.*)",
+      "dest": "https://euzerei-api.onrender.com/$1",
+      "transforms": [
+        {
+          "type": "request.headers",
+          "op": "set",
+          "target": { "key": "x-origin-secret" },
+          "args": "$ORIGIN_SECRET",
+          "env": ["ORIGIN_SECRET"]
+        }
+      ]
+    }
   ],
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
   "headers": [
     {
-      "source": "/api/:path*",
+      "source": "/api/(.*)",
       "headers": [{ "key": "x-vercel-enable-rewrite-caching", "value": "0" }]
     }
   ]
