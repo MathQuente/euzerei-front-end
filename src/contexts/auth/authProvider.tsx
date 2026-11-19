@@ -50,9 +50,7 @@ export function AuthProvider({ children }: { children: JSX.Element }) {
     acceptedTerms: boolean
   ) => {
     try {
-      const { user: newUser } = await api.signup(email, password, acceptedTerms)
-      setUser(newUser)
-      await loadUser()
+      await api.signup(email, password, acceptedTerms)
       return null
     } catch (error) {
       const termsMessage = isAxiosError(error)
@@ -72,6 +70,12 @@ export function AuthProvider({ children }: { children: JSX.Element }) {
         ),
       }
     }
+  }
+
+  const confirmRegistration = async (token: string) => {
+    const { user: newUser } = await api.confirmRegistration(token)
+    setUser(newUser)
+    await loadUser()
   }
 
   const logout = async () => {
@@ -124,6 +128,7 @@ export function AuthProvider({ children }: { children: JSX.Element }) {
         login,
         logout,
         signup,
+        confirmRegistration,
         refreshUser,
         clearSession,
       }}

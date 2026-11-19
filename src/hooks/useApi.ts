@@ -128,11 +128,15 @@ export const api = {
     }
   },
   signup: async (email: string, password: string, acceptedTerms: boolean) => {
-    const response = await http.post('/auth/register', {
+    const response = await http.post<{ message: string }>('/auth/register', {
       email,
       password,
       acceptedTerms,
     })
+    return response.data
+  },
+  confirmRegistration: async (token: string) => {
+    const response = await http.post('/auth/register/confirm', { token })
     setAccountDeletionInProgress(false)
     return response.data
   },

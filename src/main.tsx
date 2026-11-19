@@ -14,6 +14,7 @@ import { AboutPage } from './pages/aboutPage'
 import { Authentication } from './pages/authentication'
 import { ComingSoonPage } from './pages/comingSoonPage'
 import { ConfirmEmailChangePage } from './pages/confirmEmailChangePage'
+import { ConfirmRegistrationPage } from './pages/confirmRegistrationPage'
 import { ContactPage } from './pages/contactPage'
 import { ForgotPasswordPage } from './pages/forgotPasswordPage'
 import { GamePage } from './pages/gamePage'
@@ -72,6 +73,10 @@ const router = createBrowserRouter([
           {
             path: '/reset-password',
             element: <ResetPasswordPage />,
+          },
+          {
+            path: '/confirmar-cadastro',
+            element: <ConfirmRegistrationPage />,
           },
           {
             path: '/verify-email',

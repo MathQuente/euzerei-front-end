@@ -1,12 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Lock, Mail } from 'lucide-react'
-import { useContext, useId } from 'react'
+import { useContext, useId, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import type { z } from 'zod'
 import { AuthContext } from '../contexts/auth/authContext'
 import { signUpSchema } from '../schemas/signUpSchema'
-import { safeRedirectPath } from '../utils/safeRedirectPath'
 
 import { focusRing } from '../styles/focus'
 import { AuthInput } from './authInput'
@@ -18,7 +17,7 @@ type SignUpForm = z.infer<typeof signUpSchema>
 
 export function FormSignUp() {
   const auth = useContext(AuthContext)
-  const navigate = useNavigate()
+  const [sentTo, setSentTo] = useState<string | null>(null)
 
   const {
     register,
@@ -34,21 +33,44 @@ export function FormSignUp() {
   const acceptedTerms = watch('acceptedTerms')
 
   async function onSubmit(data: SignUpForm) {
-    const redirectTo = safeRedirectPath(
-      sessionStorage.getItem('redirectAfterLogin')
-    )
     const signupError = await auth.signup(
       data.email,
       data.password,
       data.acceptedTerms
     )
     if (!signupError) {
-      navigate(redirectTo, { replace: true })
-      sessionStorage.removeItem('redirectAfterLogin')
+      setSentTo(data.email)
       return
     }
 
     setError(signupError.field, { message: signupError.message })
+  }
+
+  if (sentTo) {
+    return (
+      <div aria-live="polite" className="flex flex-col gap-3 py-6 text-center">
+        <h2 className="font-display text-xl font-extrabold text-white">
+          Confira seu e-mail
+        </h2>
+        <p className="text-sm text-gray-300">
+          Se{' '}
+          <span className="break-words font-medium text-white">{sentTo}</span>{' '}
+          puder ser usado, enviamos um link para concluir o cadastro. Ele vale
+          por 24 horas.
+        </p>
+        <p className="text-xs text-gray-400">
+          Não chegou? Veja a pasta de spam. Se você já tem conta, o e-mail avisa
+          isso e mostra como entrar.
+        </p>
+        <button
+          type="button"
+          onClick={() => setSentTo(null)}
+          className={`mx-auto mt-2 rounded-sm text-sm text-primary-link hover:underline ${focusRing}`}
+        >
+          Usar outro e-mail
+        </button>
+      </div>
+    )
   }
 
   return (

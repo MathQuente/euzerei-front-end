@@ -15,6 +15,7 @@ export type AuthContextType = {
     password: string,
     acceptedTerms: boolean
   ) => Promise<SignupError | null>
+  confirmRegistration: (token: string) => Promise<void>
   logout: () => void
   clearSession: () => void
   refreshUser: () => Promise<void>

@@ -38,6 +38,10 @@ export function EmailVerificationNotice() {
           .
         </p>
         <p className="mt-1 text-xs text-gray-400">
+          Confirmar protege sua conta: sem isso, entrar com Google ou Discord
+          usando este e-mail desativa a senha.
+        </p>
+        <p className="mt-1 text-xs text-gray-400">
           Não encontrou? Veja também a pasta de spam ou lixo eletrônico e
           procure por euzerei.suporte@gmail.com.
         </p>
