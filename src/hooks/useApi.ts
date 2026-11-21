@@ -108,6 +108,17 @@ async function openPlatformSignIn(path: string, expectedOrigin: string) {
   }
 }
 
+const USER_GAMES_SORT_BY_MAP = {
+  name: 'gameName',
+  releaseDate: 'dateRelease',
+  rating: 'rating',
+  hoursPlayed: 'hoursPlayed',
+  completedAt: 'completedAt',
+  droppedAt: 'droppedAt',
+  lastPlayedAt: 'lastPlayedAt',
+  dateAdded: 'dateAdded',
+} as const
+
 export const api = {
   login: async (email: string, password: string) => {
     const response = await http.post('/auth/login', { email, password })
@@ -248,17 +259,6 @@ export const api = {
     sortOrder?: SortOrder,
     platforms?: LibraryPlatform[]
   ) => {
-    const USER_GAMES_SORT_BY_MAP = {
-      name: 'gameName',
-      releaseDate: 'dateRelease',
-      rating: 'rating',
-      hoursPlayed: 'hoursPlayed',
-      completedAt: 'completedAt',
-      droppedAt: 'droppedAt',
-      lastPlayedAt: 'lastPlayedAt',
-      dateAdded: 'dateAdded',
-    } as const
-
     const response = await http.get('/users/userGames', {
       params: {
         pageIndex: page ? page - 1 : undefined,
@@ -296,6 +296,36 @@ export const api = {
       '/users/favorites',
       { igdbIds, mainIgdbId },
       {}
+    )
+    return response.data
+  },
+  getPublicUserGamesPage: async (
+    userId: string | null,
+    params: {
+      page: number
+      search?: string
+      filter: GameStatusEnum | typeof QUEUE_FILTER
+      sortBy?: SortField
+      sortOrder?: SortOrder
+      platforms?: LibraryPlatform[]
+    }
+  ) => {
+    const response = await http.get<UserGamesResponse>(
+      `/users/${encodeURIComponent(String(userId))}/games`,
+      {
+        params: {
+          pageIndex: params.page - 1,
+          query: params.search || undefined,
+          filter: params.filter,
+          platforms: params.platforms?.length
+            ? params.platforms.join(',')
+            : undefined,
+          sortBy: params.sortBy
+            ? USER_GAMES_SORT_BY_MAP[params.sortBy]
+            : undefined,
+          sortOrder: params.sortOrder,
+        },
+      }
     )
     return response.data
   },

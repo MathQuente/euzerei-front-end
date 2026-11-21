@@ -26,12 +26,15 @@ interface LibraryShelvesProps {
   games: UserGamesByStatus
   totalPerStatus: TotalPerStatus[]
   readOnly?: boolean
+  /** Perfil público: endereço da lista completa (`/users/handle`). */
+  allBasePath?: string
 }
 
 export function LibraryShelves({
   games,
   totalPerStatus,
   readOnly = false,
+  allBasePath,
 }: LibraryShelvesProps) {
   const [playingTab, setPlayingTab] = useState<PlayingTab>('NOW')
 
@@ -41,9 +44,10 @@ export function LibraryShelves({
 
   const allLink = (status: ShelfStatus, route: string, count?: number) => {
     const total = count ?? totalOf(status)
-    return readOnly || total < 2
+    const base = readOnly ? allBasePath : '/userLibrary'
+    return !base || total < 2
       ? undefined
-      : { to: `/userLibrary/${route}`, label: 'Ver todos' }
+      : { to: `${base}/${route}`, label: 'Ver todos' }
   }
 
   const empty = (ownText: string) => (readOnly ? 'Nenhum jogo ainda.' : ownText)

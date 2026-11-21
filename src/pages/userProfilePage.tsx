@@ -18,6 +18,7 @@ import {
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useFollowers } from '../hooks/useFollowers'
 import { useFollowing } from '../hooks/useFollowing'
+import { userPath } from '../utils/userPath'
 import { usePublicUserGames } from '../hooks/usePublicUserGames'
 
 export function UserProfilePage() {
@@ -126,6 +127,7 @@ export function UserProfilePage() {
           games={games}
           totalPerStatus={totalPerStatus}
           readOnly
+          allBasePath={userPath({ id: user.id, userName: user.userName })}
         />
       ) : (
         !isLoadingGames && (
