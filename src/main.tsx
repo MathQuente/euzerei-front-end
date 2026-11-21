@@ -33,6 +33,7 @@ import { SecurityTab } from './pages/settings/securityTab'
 import { SettingsPage } from './pages/settingsPage'
 import { TermsPage } from './pages/termsPage'
 import { UserGamesPageByStatus } from './pages/userGamesPages'
+import { PublicUserGamesPage } from './pages/publicUserGamesPage'
 import { UserLibrary } from './pages/userLibrary'
 import { UserProfilePage } from './pages/userProfilePage'
 import { VerifyEmailPage } from './pages/verifyEmailPage'
@@ -113,6 +114,10 @@ const router = createBrowserRouter([
           {
             path: '/users/:userId',
             element: <UserProfilePage />,
+          },
+          {
+            path: '/users/:userId/:status',
+            element: <PublicUserGamesPage />,
           },
           {
             path: '/userLibrary',
