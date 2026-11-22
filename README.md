@@ -9,12 +9,26 @@ Aplicação web para organizar a sua biblioteca de jogos: cada jogo no status ce
 
 **Demo:** https://euzereiapp.vercel.app
 
-![Biblioteca pessoal no EuZerei](docs/screenshots/biblioteca.gif)
+<p align="center">
+  <img src="docs/media/biblioteca.gif" alt="Biblioteca pessoal no EuZerei" width="900">
+</p>
 
-![Navegando pelo catálogo do EuZerei](docs/screenshots/demo.gif)
+<table>
+  <tr>
+    <td width="50%"><img src="docs/media/home.jpg" alt="Página inicial"></td>
+    <td width="50%"><img src="docs/media/catalogo.jpg" alt="Catálogo com mais de 14 mil jogos"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Página inicial</sub></td>
+    <td align="center"><sub>Catálogo com mais de 14 mil jogos</sub></td>
+  </tr>
+</table>
 
-![Página inicial do EuZerei](docs/screenshots/home.jpg)
-![Catálogo de jogos](docs/screenshots/games.jpg)
+<details>
+  <summary>Ver a busca no catálogo em GIF</summary>
+  <br>
+  <img src="docs/media/catalogo.gif" alt="Busca no catálogo de jogos" width="900">
+</details>
 
 Este repositório é o front-end. A API fica em [MathQuente/euzerei](https://github.com/MathQuente/euzerei).
 
