@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/logo/euzerei-horizontal-on-dark.svg">
+  <img src="docs/logo/euzerei-horizontal.svg" alt="EuZerei" height="56">
+</picture>
+
 # EuZerei (front-end)
 
 Aplicação web para organizar a sua biblioteca de jogos: cada jogo no status certo, com horas por plataforma, nota e review. Dá para importar a biblioteca da Steam, da PSN e do Xbox.
