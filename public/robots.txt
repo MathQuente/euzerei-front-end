@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://euzereiapp.vercel.app/sitemap.xml

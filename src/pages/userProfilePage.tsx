@@ -18,8 +18,8 @@ import {
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useFollowers } from '../hooks/useFollowers'
 import { useFollowing } from '../hooks/useFollowing'
-import { userPath } from '../utils/userPath'
 import { usePublicUserGames } from '../hooks/usePublicUserGames'
+import { userPath } from '../utils/userPath'
 
 export function UserProfilePage() {
   const { userId: ref } = useParams()
