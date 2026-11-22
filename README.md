@@ -5,6 +5,8 @@
 
 # EuZerei (front-end)
 
+[![CI](https://github.com/MathQuente/euzerei-front-end/actions/workflows/ci.yml/badge.svg)](https://github.com/MathQuente/euzerei-front-end/actions/workflows/ci.yml)
+
 Aplicação web para organizar a sua biblioteca de jogos: cada jogo no status certo, com horas por plataforma, nota e review. Dá para importar a biblioteca da Steam, da PSN e do Xbox.
 
 **Demo:** https://euzereiapp.vercel.app
