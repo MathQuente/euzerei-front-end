@@ -9,6 +9,8 @@ Aplicação web para organizar a sua biblioteca de jogos: cada jogo no status ce
 
 **Demo:** https://euzereiapp.vercel.app
 
+![Navegando pelo catálogo do EuZerei](docs/screenshots/demo.gif)
+
 ![Página inicial do EuZerei](docs/screenshots/home.jpg)
 ![Catálogo de jogos](docs/screenshots/games.jpg)
 
