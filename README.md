@@ -7,9 +7,11 @@
 
 [![CI](https://github.com/MathQuente/euzerei-front-end/actions/workflows/ci.yml/badge.svg)](https://github.com/MathQuente/euzerei-front-end/actions/workflows/ci.yml)
 
-Aplicação web para organizar a sua biblioteca de jogos: cada jogo no status certo, com horas por plataforma, nota e review. Dá para importar a biblioteca da Steam, da PSN e do Xbox.
+Front-end do EuZerei, um rastreador de biblioteca de jogos: cada jogo no status certo, com horas por plataforma, nota e review, e importação da Steam, PSN e Xbox.
 
 **Demo:** https://euzereiapp.vercel.app
+
+Este repositório é o front-end. A API fica em [MathQuente/euzerei](https://github.com/MathQuente/euzerei).
 
 <p align="center">
   <img src="docs/media/biblioteca.gif" alt="Biblioteca pessoal no EuZerei" width="900">
@@ -32,8 +34,6 @@ Aplicação web para organizar a sua biblioteca de jogos: cada jogo no status ce
   <img src="docs/media/catalogo.gif" alt="Busca no catálogo de jogos" width="900">
 </details>
 
-Este repositório é o front-end. A API fica em [MathQuente/euzerei](https://github.com/MathQuente/euzerei).
-
 ## Funcionalidades
 
 - Catálogo de jogos com busca, filtros e ordenação (dados do IGDB)
@@ -46,22 +46,30 @@ Este repositório é o front-end. A API fica em [MathQuente/euzerei](https://git
 
 ## Stack
 
-React 18, TypeScript, Vite, Tailwind CSS, React Router 7, TanStack Query 5, react-hook-form + Zod, Radix UI, Embla Carousel. Testes com Vitest e lint/formatação com Biome.
+- **Interface:** React 18, TypeScript, Vite, Tailwind CSS, Radix UI, Embla Carousel
+- **Rotas:** React Router 7
+- **Dados do servidor:** TanStack Query 5, com axios como cliente HTTP
+- **Formulários:** react-hook-form + Zod
+- **Qualidade:** Vitest nos testes, Biome no lint e na formatação, GitHub Actions no CI
+- **Hospedagem:** Vercel
 
-## Organização do código
+## Estrutura do repositório
 
-```
-src/
-  pages/        uma página por rota (rotas registradas em main.tsx)
-  components/   componentes de interface
-  hooks/        hooks do TanStack Query e o cliente HTTP (useApi.ts)
-  contexts/     autenticação (React Context)
-  schemas/      validações com Zod
-```
+- `src/pages/` — uma página por rota (registradas em `main.tsx`)
+- `src/components/` — componentes de interface
+- `src/hooks/` — hooks do TanStack Query e o cliente HTTP (`useApi.ts`)
+- `src/contexts/` — autenticação (React Context)
+- `src/schemas/` — validações com Zod
+- `public/` — ícones, `og-image.jpg`, `robots.txt` e `sitemap.xml`
+- `docs/` — mapa do código, logo e mídia deste README
 
 O estado vindo do servidor passa todo pelo TanStack Query. A autenticação usa cookie httpOnly, definido pela API.
 
-## Rodando localmente
+## Documentação
+
+- Mapa detalhado do código, fluxos de dados e armadilhas conhecidas: [`docs/CODEBASE_MAP.md`](docs/CODEBASE_MAP.md)
+
+## Como rodar
 
 Pré-requisitos: Node 22 ou mais novo e a [API](https://github.com/MathQuente/euzerei) rodando em `http://localhost:3333`.
 
@@ -71,8 +79,6 @@ npm run dev
 ```
 
 Em desenvolvimento, o Vite encaminha `/api` para `http://localhost:3333`. A variável opcional `VITE_API_URL` muda o endereço da API usado nos botões de login social.
-
-## Scripts
 
 | Comando | O que faz |
 | --- | --- |
@@ -85,6 +91,6 @@ Em desenvolvimento, o Vite encaminha `/api` para `http://localhost:3333`. A vari
 
 O front-end roda na Vercel. O `vercel.json` encaminha `/api/*` para a API, hospedada separadamente.
 
-## Documentação
+## Licença
 
-O mapa detalhado do código está em [docs/CODEBASE_MAP.md](docs/CODEBASE_MAP.md).
+[MIT](LICENSE)
