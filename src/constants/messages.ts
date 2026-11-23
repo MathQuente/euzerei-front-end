@@ -104,4 +104,5 @@ export const OAUTH_ERROR_MESSAGES: Record<string, string> = {
   access_denied: 'Login cancelado.',
   email_not_verified:
     'O email dessa conta não foi verificado no provedor. Verifique lá e tente de novo.',
+  account_suspended: 'Esta conta está suspensa. Fale com o suporte.',
 }
