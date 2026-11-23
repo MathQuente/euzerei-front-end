@@ -1,12 +1,12 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import userProfilePictureDefault from '../../assets/Default_pfp.svg.png'
 import { BANNER_FADE } from '../../styles/bannerFade'
 import { focusRing } from '../../styles/focus'
 import type { TotalPerStatus } from '../../types/games'
 import type { AchievementStats } from '../../types/user'
 import { handleLabel } from '../../utils/handleLabel'
 import { formatMemberSince } from '../../utils/memberSince'
+import AvatarImage from '../avatarImage'
 import { ProfileStats } from './profileStats'
 import { type StoreAccounts, StoreChips, hasStoreAccounts } from './storeChips'
 
@@ -115,8 +115,8 @@ export function ProfileHeader({
       </div>
 
       <div className="flex flex-wrap items-start gap-x-4 gap-y-1 px-4 pb-2 sm:flex-nowrap sm:gap-x-5 sm:px-6">
-        <img
-          src={profilePicture || userProfilePictureDefault}
+        <AvatarImage
+          src={profilePicture}
           alt={`Foto de perfil de ${userName}`}
           className="relative -mt-11 size-20 flex-none rounded-full border-4 border-dark-bg bg-dark-bg object-cover sm:-mt-[3.25rem] sm:size-24"
         />
