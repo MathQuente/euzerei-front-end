@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 import { Clock, Infinity as InfinityIcon, RotateCcw, Star } from 'lucide-react'
 import { useId, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import userProfilePictureDefault from '../assets/Default_pfp.svg.png'
+import AvatarImage from './avatarImage'
 import { REVIEW_STATUS_LABEL } from '../constants/gameStatus'
 import { useIsClamped } from '../hooks/useIsClamped'
 import { focusRing } from '../styles/focus'
@@ -67,8 +67,8 @@ export function CommunityReviewCard({
           to={userPath({ id: review.userId, userName: review.userName })}
           className={`flex items-center gap-2.5 min-w-0 ${focusRing} rounded-sm`}
         >
-          <img
-            src={review.profilePicture || userProfilePictureDefault}
+          <AvatarImage
+            src={review.profilePicture}
             alt=""
             className="size-8 rounded-full object-cover border border-dark-border shrink-0"
           />

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import userProfilePictureDefault from '../assets/Default_pfp.svg.png'
+import AvatarImage from './avatarImage'
 import { focusRing } from '../styles/focus'
 import type { FollowSummary } from '../types/follow'
 import { handleLabel } from '../utils/handleLabel'
@@ -24,8 +24,8 @@ export function FollowList({
             to={userPath(user)}
             className={`flex min-w-0 flex-1 items-center gap-3 rounded-sm ${focusRing}`}
           >
-            <img
-              src={user.profilePicture || userProfilePictureDefault}
+            <AvatarImage
+              src={user.profilePicture}
               alt=""
               className="size-10 shrink-0 rounded-full border border-dark-border object-cover"
             />

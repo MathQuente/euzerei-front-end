@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
-import userProfilePictureDefault from '../assets/Default_pfp.svg.png'
+import AvatarImage from '../components/avatarImage'
 import { BackButton } from '../components/backButton'
 import { Button, buttonClasses } from '../components/button'
 import { Pagination } from '../components/pagination'
@@ -244,8 +244,8 @@ export function SearchResults() {
       {users.map(u => (
         <li key={u.id}>
           <Link to={userPath(u)} className={userCard}>
-            <img
-              src={u.profilePicture || userProfilePictureDefault}
+            <AvatarImage
+              src={u.profilePicture}
               alt=""
               className="size-11 rounded-full object-cover border border-dark-border shrink-0"
             />
