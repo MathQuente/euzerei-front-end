@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { ERROR_MESSAGES, INFO_MESSAGES, SUCCESS_MESSAGES } from './messages'
+import {
+  ERROR_MESSAGES,
+  INFO_MESSAGES,
+  OAUTH_ERROR_MESSAGES,
+  SUCCESS_MESSAGES,
+} from './messages'
 
 function allTexts() {
   const texts: string[] = []
@@ -36,5 +41,20 @@ describe('toast messages', () => {
     expect(SUCCESS_MESSAGES.verificationLinkSent('a@b.com')).toBe(
       'Enviamos um novo link para a@b.com.'
     )
+  })
+})
+
+describe('OAuth error messages', () => {
+  it('explains a suspended account with the same text as the password login', () => {
+    expect(OAUTH_ERROR_MESSAGES.account_suspended).toBe(
+      'Esta conta está suspensa. Fale com o suporte.'
+    )
+  })
+
+  it('has no emoji and ends every sentence with a period', () => {
+    for (const text of Object.values(OAUTH_ERROR_MESSAGES)) {
+      expect(text).not.toMatch(/\p{Extended_Pictographic}/u)
+      expect(text.endsWith('.')).toBe(true)
+    }
   })
 })
