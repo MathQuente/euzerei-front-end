@@ -46,7 +46,7 @@ export function AboutPage() {
                 jogado, jogando, pausado, na fila, na lista de desejos ou
                 largado
               </strong>
-              , dá nota, escreve resenhas e segue outras pessoas. Também dá para
+              , dá nota, escreve análises e segue outras pessoas. Também dá para
               importar a biblioteca da Steam, do Xbox e da PlayStation.
             </p>
             <div className="flex flex-wrap gap-2.5 pt-1">

@@ -9,10 +9,11 @@ export const SUCCESS_MESSAGES = {
   completedAtSaved: 'Data salva.',
   ratingSaved: 'Nota salva.',
   ratingRemoved: 'Nota removida.',
-  reviewSaved: 'Resenha salva.',
+  reviewSaved: 'Análise salva.',
   gameAdded: 'Jogo adicionado.',
   platformConnected: (label: string) => `${label} conectada.`,
-  reviewRemoved: 'Resenha removida.',
+  reviewRemoved: 'Análise removida.',
+  reviewReported: 'Denúncia enviada. Obrigado por avisar.',
   gameRemoved: 'Jogo removido.',
   platformDisconnected: (label: string) => `${label} desconectada.`,
   verificationLinkSent: (email?: string) =>
@@ -53,8 +54,9 @@ export const ERROR_MESSAGES = {
   saveProfile: cannot('salvar o perfil'),
   imageRejected:
     'Essa imagem não foi aceita. Selecione um JPG, PNG, GIF ou WebP menor.',
-  saveReview: cannot('salvar a resenha'),
-  removeReview: cannot('remover a resenha'),
+  saveReview: cannot('salvar a análise'),
+  removeReview: cannot('remover a análise'),
+  reportReview: cannot('enviar a denúncia'),
   requestPasswordReset: cannot('pedir a redefinição'),
   resetPassword: cannot('redefinir a senha'),
   follow: cannot('seguir este usuário'),
@@ -72,6 +74,16 @@ export const ERROR_MESSAGES = {
   markAsPlayed: cannot('marcar como Jogado'),
   dismissSuggestion: cannot('dispensar a sugestão'),
   undoSuggestion: cannot('desfazer'),
+} as const
+
+export const REPORT_MESSAGES = {
+  alreadyReported: 'Você já denunciou esta análise.',
+  unavailable: 'Esta análise não está mais disponível.',
+  ownReview: 'Você não pode denunciar a sua própria análise.',
+  tooManyReports: (wait: string) =>
+    `Você já enviou muitas denúncias. Tente de novo ${wait}.`,
+  tooManyReportsNoWait:
+    'Você já enviou muitas denúncias. Tente de novo mais tarde.',
 } as const
 
 export const INFO_MESSAGES = {

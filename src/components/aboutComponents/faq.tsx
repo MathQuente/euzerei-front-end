@@ -13,7 +13,7 @@ const items: { question: string; answer: ReactNode }[] = [
     question: 'O que as outras pessoas veem de mim?',
     answer: (
       <>
-        Resenhas, notas, nome de usuário e imagens ficam visíveis em perfis
+        Análises, notas, nome de usuário e imagens ficam visíveis em perfis
         públicos. Os detalhes estão nos{' '}
         <Link to="/termos" className={textLinkClass}>
           Termos de uso

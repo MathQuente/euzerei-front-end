@@ -33,7 +33,7 @@ export function ReviewSection({ game }: { game: GameCardData }) {
   if (blockedReason) {
     return (
       <div className="bg-dark-bg-light border border-dark-border rounded-lg p-5">
-        <SectionHeading>Sua resenha</SectionHeading>
+        <SectionHeading>Sua análise</SectionHeading>
         <ReviewRequirement
           reason={blockedReason}
           variant="link"
@@ -70,14 +70,14 @@ export function ReviewSection({ game }: { game: GameCardData }) {
   return (
     <div className="bg-dark-bg-light border border-dark-border rounded-lg p-5">
       <div className="flex items-center justify-between">
-        <SectionHeading>Sua resenha</SectionHeading>
+        <SectionHeading>Sua análise</SectionHeading>
         {!showEditor && (
           <div className="flex items-center gap-1 -mt-4">
             <IconButton
               variant="bare"
               onClick={() => setIsEditing(true)}
-              title="Editar resenha"
-              aria-label="Editar resenha"
+              title="Editar análise"
+              aria-label="Editar análise"
             >
               <Pencil className="size-3.5" />
             </IconButton>
@@ -85,8 +85,8 @@ export function ReviewSection({ game }: { game: GameCardData }) {
               variant="bare"
               tone="danger"
               onClick={() => setConfirmOpen(true)}
-              title="Excluir resenha"
-              aria-label="Excluir resenha"
+              title="Excluir análise"
+              aria-label="Excluir análise"
             >
               <Trash2 className="size-3.5" />
             </IconButton>
@@ -110,8 +110,8 @@ export function ReviewSection({ game }: { game: GameCardData }) {
       <ConfirmDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        title="Excluir resenha?"
-        description="Essa ação não pode ser desfeita. Sua resenha será removida permanentemente."
+        title="Excluir análise?"
+        description="Essa ação não pode ser desfeita. Sua análise será removida permanentemente."
         confirmLabel="Excluir"
         onConfirm={handleDelete}
         isLoading={isDeleting}

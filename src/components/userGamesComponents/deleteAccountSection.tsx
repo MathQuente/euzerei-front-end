@@ -31,7 +31,7 @@ export function DeleteAccountSection() {
         id="delete-account-title"
         title="Excluir conta"
         tone="danger"
-        description="Isso apaga sua biblioteca, avaliações, resenhas, seguidores e contas vinculadas, e não dá para desfazer."
+        description="Isso apaga sua biblioteca, avaliações, análises, seguidores e contas vinculadas, e não dá para desfazer."
       />
       <div className="flex flex-col gap-3.5 px-4 pb-4 sm:px-5">
         <div>

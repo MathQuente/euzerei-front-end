@@ -69,8 +69,8 @@ export function FeatureShowcase() {
         </Feature>
 
         <Feature
-          title="Nota e resenha"
-          text="Dê uma nota de 0,5 a 5 estrelas, escreva o que achou e veja a nota da comunidade. As resenhas aparecem no seu perfil público."
+          title="Nota e análise"
+          text="Dê uma nota de 0,5 a 5 estrelas, escreva o que achou e veja a nota da comunidade. As análises aparecem no seu perfil público."
         >
           <Sample>
             <p className="sr-only">4 de 5 estrelas</p>

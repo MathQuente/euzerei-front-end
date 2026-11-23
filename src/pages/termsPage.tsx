@@ -11,7 +11,7 @@ const sections: LegalSection[] = [
   {
     heading: '2. O que você publica',
     paragraphs: [
-      'Resenhas, notas, nome de usuário e imagens ficam visíveis em perfis públicos. Você continua sendo o titular do que publica e autoriza o EuZerei a exibir, armazenar e processar esse conteúdo apenas para operar o serviço.',
+      'Análises, notas, nome de usuário e imagens ficam visíveis em perfis públicos. Você continua sendo o titular do que publica e autoriza o EuZerei a exibir, armazenar e processar esse conteúdo apenas para operar o serviço.',
       'Conteúdo que viole estes Termos pode ser denunciado em euzerei.suporte@gmail.com. A denúncia será analisada em até 15 dias e o conteúdo poderá ser removido ou a conta suspensa.',
     ],
   },

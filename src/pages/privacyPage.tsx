@@ -5,7 +5,7 @@ const sections: LegalSection[] = [
     heading: '1. Dados que coletamos',
     paragraphs: [
       'Cadastro: e-mail e senha (guardada apenas em forma de hash) ou, se você entrar com Google ou Discord, os dados básicos que esses serviços informam.',
-      'Perfil e uso: nome de usuário, foto, banner, biblioteca de jogos, horas jogadas, notas, resenhas e quem você segue.',
+      'Perfil e uso: nome de usuário, foto, banner, biblioteca de jogos, horas jogadas, notas, análises e quem você segue.',
       'Integrações opcionais: ao vincular Steam, Xbox ou PlayStation, guardamos o identificador das contas e importamos sua biblioteca, horas e conquistas.',
       'Aceite: data e versão dos Termos que você aceitou ao criar a conta.',
       'Dados técnicos: cookies de sessão e registros de acesso necessários para segurança e limite de tentativas.',
@@ -20,7 +20,7 @@ const sections: LegalSection[] = [
   {
     heading: '3. Perfis públicos',
     paragraphs: [
-      'Seu perfil e sua biblioteca são públicos. Não há opção de torná-los privados nesta versão. Quem visitar seu perfil vê suas notas, resenhas e os status que você marcou.',
+      'Seu perfil e sua biblioteca são públicos. Não há opção de torná-los privados nesta versão. Quem visitar seu perfil vê suas notas, análises e os status que você marcou.',
     ],
   },
   {

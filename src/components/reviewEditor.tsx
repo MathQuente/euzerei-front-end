@@ -43,11 +43,11 @@ export function ReviewEditor({
         rows={6}
         disabled={locked}
         aria-describedby={describedBy}
-        aria-label="Texto da resenha"
+        aria-label="Texto da análise"
         placeholder={
           locked
             ? 'Entre na sua conta para escrever'
-            : 'Escreva sua resenha... (suporta markdown básico)'
+            : 'Escreva sua análise... (suporta markdown básico)'
         }
         className={`w-full resize-y rounded-md bg-dark-bg px-3 py-2 text-sm text-white placeholder:text-gray-500 ${focusRing} ${locked ? 'opacity-60 cursor-not-allowed resize-none disabled:cursor-not-allowed' : ''}`}
       />

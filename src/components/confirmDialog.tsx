@@ -16,6 +16,8 @@ export function ConfirmDialog({
   lockWhileLoading,
   returnFocusTo,
   titleIcon,
+  titleIconTone = 'danger',
+  confirmClassName,
   wide,
   children,
 }: {
@@ -32,6 +34,8 @@ export function ConfirmDialog({
   lockWhileLoading?: boolean
   returnFocusTo?: RefObject<HTMLElement | null>
   titleIcon?: ReactNode
+  titleIconTone?: 'danger' | 'primary'
+  confirmClassName?: string
   wide?: boolean
   children?: ReactNode
 }) {
@@ -67,12 +71,12 @@ export function ConfirmDialog({
             event.preventDefault()
             opener.focus({ preventScroll: true })
           }}
-          className={`w-[calc(100vw-2rem)] ${wide ? 'max-w-[440px]' : 'max-w-[380px]'} fixed bg-dark-bg-lighter text-white top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-lg z-confirm-content p-5 flex flex-col gap-4`}
+          className={`w-[calc(100vw-2rem)] ${wide ? 'max-w-[440px]' : 'max-w-[380px]'} fixed bg-dark-bg-lighter text-white top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-lg z-confirm-content p-5 flex flex-col gap-4 max-h-[calc(100dvh-2rem)] overflow-y-auto`}
         >
           {titleIcon ? (
             <div className="flex items-start gap-3">
               <span
-                className="grid size-9 shrink-0 place-items-center rounded-[10px] bg-red-400/10 text-red-400"
+                className={`grid size-9 shrink-0 place-items-center rounded-[10px] ${titleIconTone === 'primary' ? 'bg-primary/20 text-primary-link' : 'bg-red-400/10 text-red-400'}`}
                 aria-hidden="true"
               >
                 {titleIcon}
@@ -105,6 +109,7 @@ export function ConfirmDialog({
               onClick={onConfirm}
               loading={isLoading}
               disabled={confirmDisabled}
+              className={confirmClassName}
             >
               {confirmLabel}
             </Button>
