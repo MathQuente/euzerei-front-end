@@ -29,7 +29,9 @@ interface CoverRowProps<T extends GameCardData> {
   edgeClassName?: string
 }
 
-const GAP_PX = 12 // gap-3
+// Margem à direita de cada capa (mr-3). Não usar `gap` na lista: o Embla lê a
+// margem do último slide para fechar a emenda do loop, e o `gap` não conta.
+const GAP_PX = 12
 // Embla só faz o loop se a faixa for bem maior que a janela; abaixo disso,
 // a lista é repetida até passar de duas janelas.
 const MIN_TRACK_RATIO = 2
@@ -163,13 +165,16 @@ export function CoverRow<T extends GameCardData>({
         ref={emblaRef}
         className={twMerge('-my-1 overflow-hidden py-1', edgeClassName)}
       >
-        <ul className="flex gap-3 touch-pan-y">
+        <ul className="flex touch-pan-y">
           {Array.from({ length: copies }, (_, copy) => copy).flatMap(copy =>
             games.map(game => (
               <li
                 key={`${copy}-${game.igdbId}`}
                 aria-hidden={copy > 0 || undefined}
-                className={twMerge('w-28 flex-none sm:w-40', itemClassName)}
+                className={twMerge(
+                  'mr-3 w-28 flex-none sm:w-40',
+                  itemClassName
+                )}
               >
                 <Link
                   to={gamePath(game)}
