@@ -49,7 +49,7 @@ export function ReviewStatusPicker({
   return (
     <div className="flex flex-col gap-3">
       <p id={questionId} className="text-sm text-gray-300">
-        Resenhas são de jogos que você já começou. Em que ponto você está com
+        Análises são de jogos que você já começou. Em que ponto você está com
         este jogo?
       </p>
       <fieldset

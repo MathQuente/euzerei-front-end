@@ -30,7 +30,7 @@ function consequences(summary: DeleteAccountSummary) {
     },
     {
       icon: Star,
-      title: 'Resenhas e notas',
+      title: 'Análises e notas',
       detail: 'e as curtidas delas',
     },
     {

@@ -29,6 +29,8 @@ import type { CreateRatingResponse } from '../types/rating'
 import type {
   GetCommunityReviewsResponse,
   GetReviewResponse,
+  ReportReason,
+  ReportReviewResponse,
   UpsertReviewResponse,
 } from '../types/review'
 import type { SteamImportStatusResponse } from '../types/steam'
@@ -652,6 +654,17 @@ export const api = {
     const response = await http.get<GetCommunityReviewsResponse>(
       `/reviews/${igdbId}/community`,
       { params: { pageIndex, limit } }
+    )
+    return response.data
+  },
+  reportReview: async (
+    igdbId: string | undefined,
+    authorId: string,
+    reason: ReportReason
+  ) => {
+    const response = await http.post<ReportReviewResponse>(
+      `/reviews/${igdbId}/authors/${authorId}/reports`,
+      { reason }
     )
     return response.data
   },

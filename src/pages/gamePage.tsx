@@ -47,7 +47,7 @@ export function GamePage() {
   const prefersReducedMotion = usePrefersReducedMotion()
 
   useEffect(() => {
-    if ((hash !== '#biblioteca' && hash !== '#resenha') || !isLoaded) return
+    if ((hash !== '#biblioteca' && hash !== '#análise') || !isLoaded) return
     document.getElementById(hash.slice(1))?.scrollIntoView({
       behavior: prefersReducedMotion ? 'auto' : 'smooth',
     })
@@ -258,7 +258,7 @@ export function GamePage() {
           )}
 
           {user && (
-            <div id="resenha" className="scroll-mt-6">
+            <div id="análise" className="scroll-mt-6">
               <ReviewSection game={game} />
             </div>
           )}

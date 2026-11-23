@@ -23,7 +23,7 @@ export function ReviewRequirement({
   if (reason === 'unreleased') {
     return (
       <p className="text-sm text-gray-400">
-        Este jogo ainda não foi lançado. Você poderá escrever a resenha depois
+        Este jogo ainda não foi lançado. Você poderá escrever a análise depois
         do lançamento.
       </p>
     )
@@ -43,7 +43,7 @@ export function ReviewRequirement({
 
   return (
     <p className="text-sm text-gray-400">
-      Resenhas são de jogos que você já começou.{' '}
+      Análises são de jogos que você já começou.{' '}
       {inBacklog
         ? 'Escolha o status ou registre horas ou uma finalização em'
         : 'Escolha o status em'}{' '}

@@ -95,8 +95,8 @@ export function GameReviewsPage() {
     ref.isNotFound || isGameNotFound
       ? undefined
       : game
-        ? `Resenhas de ${game.name}`
-        : 'Resenhas da comunidade'
+        ? `Análises de ${game.name}`
+        : 'Análises da comunidade'
   )
 
   if (ref.isNotFound || isGameNotFound) {
@@ -106,7 +106,7 @@ export function GameReviewsPage() {
         <StatusMessage
           variant="not-found"
           title="Jogo não encontrado"
-          description="Não há resenhas porque esse jogo não existe no catálogo."
+          description="Não há análises porque esse jogo não existe no catálogo."
           primaryAction={<StatusLink to="/games">Ver catálogo</StatusLink>}
         />
       </>
@@ -166,7 +166,7 @@ export function GameReviewsPage() {
         )}
         <div className="min-w-0">
           <h1 className="text-2xl font-semibold text-white text-balance">
-            Resenhas da comunidade
+            Análises da comunidade
           </h1>
           {game ? (
             <p className="text-sm text-gray-400">
@@ -175,8 +175,7 @@ export function GameReviewsPage() {
                 className={`text-primary-link hover:text-white transition-colors rounded-sm ${focusRing}`}
               >
                 {game.name}
-              </Link>{' '}
-              · voltar para a página do jogo
+              </Link>
             </p>
           ) : (
             <div className="mt-1 h-4 w-40 rounded bg-dark-bg-lighter animate-pulse" />
@@ -196,7 +195,7 @@ export function GameReviewsPage() {
           id="community-reviews-title"
           className="flex items-center gap-4 text-center text-[13px] font-normal uppercase tracking-[0.08em] text-gray-400 before:h-px before:flex-1 before:bg-dark-border after:h-px after:flex-1 after:bg-dark-border"
         >
-          Resenhas da comunidade
+          Análises da comunidade
         </h2>
         <div className="flex flex-col gap-3">
           {isLoading ? (
@@ -216,7 +215,7 @@ export function GameReviewsPage() {
             >
               <div>
                 <p className="text-red-400 text-sm">
-                  Não foi possível carregar as resenhas
+                  Não foi possível carregar as análises
                 </p>
                 <p className="text-gray-400 text-xs">
                   Verifique a conexão e tente de novo.
@@ -229,7 +228,7 @@ export function GameReviewsPage() {
           ) : total === 0 ? (
             <div className="flex flex-col items-center gap-1 py-4 text-center">
               <p className="text-sm font-medium text-gray-200">
-                Ninguém publicou uma resenha desse jogo.
+                Ninguém publicou uma análise desse jogo.
               </p>
               <p className="text-sm text-gray-400">
                 Quando alguém publicar, aparece aqui. A sua pode ser a primeira.
@@ -239,8 +238,8 @@ export function GameReviewsPage() {
             <>
               <p className="text-sm text-gray-400">
                 {page === 1
-                  ? 'Ninguém mais publicou uma resenha desse jogo.'
-                  : 'Não há outras resenhas nesta página.'}
+                  ? 'Ninguém mais publicou uma análise desse jogo.'
+                  : 'Não há outras análises nesta página.'}
               </p>
               {totalPages > 1 && (
                 <Pagination
@@ -255,7 +254,7 @@ export function GameReviewsPage() {
           ) : (
             <>
               <p className="text-sm text-gray-400">
-                {othersTotal} {othersTotal === 1 ? 'resenha' : 'resenhas'}
+                {othersTotal} {othersTotal === 1 ? 'análise' : 'análises'}
                 {hasOwn ? ' de outras pessoas' : ''}
               </p>
               <div ref={listRef} className="flex flex-col gap-3 scroll-mt-6">
@@ -264,6 +263,7 @@ export function GameReviewsPage() {
                     key={review.userId}
                     review={review}
                     expandable
+                    reportIgdbId={igdbId}
                   />
                 ))}
               </div>

@@ -79,12 +79,12 @@ export function OwnReviewCard({
     return (
       <section aria-labelledby="own-review-title" className={lockedPanel}>
         <h2 id="own-review-title" className="text-sm font-semibold text-white">
-          Sua nota e sua resenha
+          Sua nota e sua análise
         </h2>
         <OwnRatingEntry game={game} signedIn={false} />
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p id={loginNoticeId} className="text-sm text-gray-400">
-            Entre na sua conta para avaliar e escrever uma resenha de {gameName}
+            Entre na sua conta para avaliar e escrever uma análise de {gameName}
             .
           </p>
           <StatusLink to="/auth?tab=login">
@@ -116,7 +116,7 @@ export function OwnReviewCard({
             id="own-review-title"
             className="text-sm font-semibold text-white"
           >
-            Para escrever sua resenha de {gameName}
+            Para escrever sua análise de {gameName}
           </h2>
           <OwnRatingEntry game={game} signedIn />
           <ReviewRequirement
@@ -135,7 +135,7 @@ export function OwnReviewCard({
     return (
       <section aria-labelledby="own-review-title" className={editingPanel}>
         <h2 id="own-review-title" className="text-sm font-semibold text-white">
-          Sua nota e sua resenha
+          Sua nota e sua análise
         </h2>
         <OwnRatingEntry game={game} signedIn />
         <p className="text-sm text-gray-400">
@@ -182,7 +182,7 @@ export function OwnReviewCard({
     <section aria-labelledby="own-review-title" className={editingPanel}>
       <div className="flex items-center justify-between gap-3">
         <h2 id="own-review-title" className="text-sm font-semibold text-white">
-          Sua nota e sua resenha
+          Sua nota e sua análise
         </h2>
         {!editing && (
           <div className="flex items-center gap-2">
@@ -223,8 +223,8 @@ export function OwnReviewCard({
       <ConfirmDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        title="Excluir resenha?"
-        description="Essa ação não pode ser desfeita. Sua resenha será removida permanentemente."
+        title="Excluir análise?"
+        description="Essa ação não pode ser desfeita. Sua análise será removida permanentemente."
         confirmLabel="Excluir"
         onConfirm={handleDelete}
         isLoading={isDeleting}

@@ -33,7 +33,7 @@ export function CommunityReviewsSection({
   return (
     <div className="bg-dark-bg-light border border-dark-border rounded-lg p-5">
       <div className="flex items-center justify-between mb-4">
-        <SectionHeading className="mb-0">Resenhas da comunidade</SectionHeading>
+        <SectionHeading className="mb-0">Análises da comunidade</SectionHeading>
         <Link
           to={gamePath({ igdbId, slug }, { reviews: true })}
           className={`text-xs text-gray-400 hover:text-primary transition-colors ${focusRing} rounded-sm`}
@@ -44,7 +44,12 @@ export function CommunityReviewsSection({
 
       <div className="flex flex-col gap-3">
         {reviews.map(review => (
-          <CommunityReviewCard key={review.userId} review={review} expandable />
+          <CommunityReviewCard
+            key={review.userId}
+            review={review}
+            expandable
+            reportIgdbId={igdbId}
+          />
         ))}
       </div>
     </div>

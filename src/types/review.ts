@@ -24,6 +24,15 @@ export interface CommunityReview {
   endless?: boolean
   text: string
   createdAt: string
+  reportedByMe?: boolean
+}
+
+export const REPORT_REASONS = ['OFFENSE', 'SPAM', 'SPOILER', 'OTHER'] as const
+
+export type ReportReason = (typeof REPORT_REASONS)[number]
+
+export interface ReportReviewResponse {
+  reported: true
 }
 
 export interface GetCommunityReviewsResponse {

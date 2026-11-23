@@ -94,7 +94,7 @@ export function ContactPage() {
               />
               <TopicLink
                 title="Denunciar conteúdo"
-                hint="Mande o endereço do perfil, da resenha ou do jogo."
+                hint="Mande o endereço do perfil, da análise ou do jogo."
                 subject="[EuZerei] Denúncia de conteúdo"
                 about="denúncia de conteúdo"
               />

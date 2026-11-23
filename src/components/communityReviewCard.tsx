@@ -10,6 +10,7 @@ import { handleLabel } from '../utils/handleLabel'
 import { formatHours, formatHoursPlayedSpoken } from '../utils/hours'
 import { userPath } from '../utils/userPath'
 import AvatarImage from './avatarImage'
+import { ReportReviewButton } from './reportReviewButton'
 import { ReviewMarkdown } from './reviewMarkdown'
 
 function ExpandableText({ text }: { text: string }) {
@@ -47,11 +48,13 @@ export function CommunityReviewCard({
   clamp = false,
   expandable = false,
   plain = false,
+  reportIgdbId,
 }: {
   review: CommunityReview
   clamp?: boolean
   expandable?: boolean
   plain?: boolean
+  reportIgdbId?: string
 }) {
   const authorName = handleLabel(review.userName)
   const statusLabel = review.status
@@ -150,6 +153,17 @@ export function CommunityReviewCard({
         >
           <ReviewMarkdown text={review.text} />
         </div>
+      )}
+
+      {reportIgdbId && (
+        <ReportReviewButton
+          igdbId={reportIgdbId}
+          authorId={review.userId}
+          authorName={authorName}
+          reviewText={review.text}
+          createdAt={review.createdAt}
+          reportedByMe={review.reportedByMe === true}
+        />
       )}
     </div>
   )
