@@ -106,7 +106,7 @@ export const OAUTH_ERROR_MESSAGES: Record<string, string> = {
     'O email dessa conta não foi verificado no provedor. Verifique lá e tente de novo.',
   account_suspended: 'Esta conta está suspensa. Fale com o suporte.',
   rate_limited:
-    'O provedor está limitando pedidos agora. Espere alguns minutos e tente de novo.',
+    'O login por esse provedor está temporariamente indisponível, porque ele limitou os pedidos do nosso servidor. Tente de novo em alguns minutos ou entre com outro método.',
   invalid_state:
     'A sessão de login expirou ou foi aberta em outro navegador. Tente de novo.',
   oauth_failed:
