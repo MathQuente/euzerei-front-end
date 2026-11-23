@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import AvatarImage from './avatarImage'
 import { focusRing } from '../styles/focus'
 import type { FollowSummary } from '../types/follow'
 import { handleLabel } from '../utils/handleLabel'
 import { userPath } from '../utils/userPath'
+import AvatarImage from './avatarImage'
 
 export function FollowList({
   users,

@@ -1,4 +1,4 @@
-import { useEffect, useState, type ImgHTMLAttributes } from 'react'
+import { type ImgHTMLAttributes, useEffect, useState } from 'react'
 import userProfilePictureDefault from '../assets/Default_pfp.svg.png'
 
 type AvatarImageProps = Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'> & {
@@ -11,7 +11,11 @@ type AvatarImageProps = Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'> & {
  * recusa pedidos às vezes), nada muda e a pessoa continua vendo a padrão, sem o ícone quebrado nem o texto alternativo
  * vazando do círculo. `no-referrer` porque o Google recusa pedidos com referência de outro site.
  */
-export default function AvatarImage({ src, alt = '', ...rest }: AvatarImageProps) {
+export default function AvatarImage({
+  src,
+  alt = '',
+  ...rest
+}: AvatarImageProps) {
   const [loadedSrc, setLoadedSrc] = useState<string | null>(null)
   const [failedSrc, setFailedSrc] = useState<string | null>(null)
 

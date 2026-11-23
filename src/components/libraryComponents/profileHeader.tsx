@@ -1,12 +1,12 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import AvatarImage from '../avatarImage'
 import { BANNER_FADE } from '../../styles/bannerFade'
 import { focusRing } from '../../styles/focus'
 import type { TotalPerStatus } from '../../types/games'
 import type { AchievementStats } from '../../types/user'
 import { handleLabel } from '../../utils/handleLabel'
 import { formatMemberSince } from '../../utils/memberSince'
+import AvatarImage from '../avatarImage'
 import { ProfileStats } from './profileStats'
 import { type StoreAccounts, StoreChips, hasStoreAccounts } from './storeChips'
 
