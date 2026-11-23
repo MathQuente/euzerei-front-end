@@ -109,5 +109,6 @@ export const OAUTH_ERROR_MESSAGES: Record<string, string> = {
     'O provedor está limitando pedidos agora. Espere alguns minutos e tente de novo.',
   invalid_state:
     'A sessão de login expirou ou foi aberta em outro navegador. Tente de novo.',
-  oauth_failed: 'Não foi possível concluir o login com o provedor. Tente de novo.',
+  oauth_failed:
+    'Não foi possível concluir o login com o provedor. Tente de novo.',
 }
