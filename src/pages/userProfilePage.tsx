@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { BackButton } from '../components/backButton'
 import { Button } from '../components/button'
@@ -25,6 +25,14 @@ export function UserProfilePage() {
   const { userId: ref } = useParams()
   const [followersModalOpen, setFollowersModalOpen] = useState(false)
   const [followingModalOpen, setFollowingModalOpen] = useState(false)
+
+  // Clicar num perfil da lista só troca o endereço: esta página continua montada
+  // e o estado dos modais sobreviveria, reabrindo a lista sobre o outro perfil.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `ref` é o gatilho
+  useEffect(() => {
+    setFollowersModalOpen(false)
+    setFollowingModalOpen(false)
+  }, [ref])
 
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: [PUBLIC_USER_PROFILE_KEY, ref],
