@@ -40,11 +40,11 @@ export function StartPlayingButton({
     <Button
       type="button"
       variant="primary"
-      size="md"
+      size="sm"
       loading={isSaving}
       onClick={startPlaying}
       disabled={celebrating}
-      className={`min-h-11 whitespace-nowrap px-5 transition-[background-color,transform] duration-300 disabled:opacity-100 ${
+      className={`min-h-9 whitespace-nowrap px-4 transition-[background-color,transform] duration-300 disabled:opacity-100 ${
         celebrating ? 'bg-green-700 hover:bg-green-700' : ''
       }`}
     >
