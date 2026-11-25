@@ -47,7 +47,7 @@ function Suggestion({
   }
 
   return (
-    <article className="relative isolate overflow-hidden rounded-2xl border border-dark-border bg-dark-bg-darker">
+    <article className="relative isolate overflow-hidden rounded-2xl border border-dark-border bg-dark-bg-darker [container-type:inline-size]">
       <div
         aria-hidden="true"
         className="absolute -inset-8 -z-10 opacity-35 blur-3xl transition-[background] duration-500"
@@ -57,13 +57,17 @@ function Suggestion({
         aria-hidden="true"
         className="absolute inset-0 -z-10 bg-gradient-to-r from-dark-bg-darker/35 to-dark-bg-darker/85"
       />
-      <div className="flex flex-col gap-5 p-4 sm:flex-row sm:items-end sm:gap-6 sm:p-5 lg:p-6">
+      <div className="flex flex-col gap-3 p-3 [@container(min-width:24rem)]:flex-row [@container(min-width:24rem)]:items-end [@container(min-width:24rem)]:gap-4">
         <div
-          className={`relative w-28 flex-none rounded-lg shadow-2xl shadow-black/60 sm:w-36 lg:w-44 ${
+          className={`relative w-36 flex-none rounded-lg shadow-2xl shadow-black/60 [@container(min-width:24rem)]:w-36 [@container(min-width:36rem)]:w-40 ${
             leaving ? 'next-up-out' : entering ? 'next-up-cover-in' : ''
           }`}
         >
-          <Link to={gamePath(game)} className={coverLink}>
+          <Link
+            to={gamePath(game)}
+            aria-label={game.name}
+            className={coverLink}
+          >
             <GameCard game={game} size="medium" interactive={false} />
           </Link>
           {celebrating && (
@@ -76,11 +80,8 @@ function Suggestion({
           )}
         </div>
         <div
-          className={`min-w-0 pb-1 ${leaving ? 'next-up-out' : entering ? 'next-up-in' : ''}`}
+          className={`min-w-0 ${leaving ? 'next-up-out' : entering ? 'next-up-in' : ''}`}
         >
-          <p className="font-display text-xl font-extrabold leading-tight tracking-tight text-white lg:text-[1.65rem]">
-            {game.name}
-          </p>
           {(celebrating || message) && (
             <p
               className={`mt-1 text-sm ${celebrating ? 'text-green-400' : 'text-gray-400'}`}
@@ -88,7 +89,7 @@ function Suggestion({
               {celebrating ? 'Movido para Jogando agora' : message}
             </p>
           )}
-          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-0">
             <StartPlayingButton
               key={game.igdbId}
               igdbId={game.igdbId}
@@ -101,7 +102,7 @@ function Suggestion({
                 type="button"
                 onClick={onAnother}
                 disabled={celebrating}
-                className={`group inline-flex min-h-11 items-center gap-1.5 px-1 ${textLink} disabled:opacity-50`}
+                className={`group inline-flex min-h-9 items-center gap-1.5 px-1 text-sm ${textLink} disabled:opacity-50`}
               >
                 <RefreshCw
                   className="size-4 transition-transform duration-500 group-hover:rotate-180 motion-reduce:transition-none"
@@ -119,7 +120,7 @@ function Suggestion({
             {showRoulette && !celebrating && (
               <Link
                 to="/roleta"
-                className={`inline-flex min-h-11 items-center gap-0.5 px-1 ${textLink}`}
+                className={`inline-flex min-h-9 items-center gap-0.5 px-1 text-sm ${textLink}`}
               >
                 Sortear na roleta
                 <ChevronRight className="size-4" aria-hidden="true" />
@@ -240,7 +241,7 @@ export function NextUp({
       <section className="min-w-0 [container-type:inline-size]">
         <h2 className={sectionTitle}>{title}</h2>
         <div
-          className={`mt-4 grid gap-5 ${wide ? '[@container(min-width:680px)]:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] [@container(min-width:680px)]:items-stretch' : ''}`}
+          className={`mt-4 grid gap-5 ${wide ? '[@container(min-width:680px)]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] [@container(min-width:680px)]:items-stretch' : ''}`}
         >
           <Suggestion
             key={celebrate ? `done:${shown.igdbId}` : shown.igdbId}
