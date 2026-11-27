@@ -104,15 +104,16 @@ export function PlatformEditor({
 }) {
   const option = getLibraryPlatform(entry.platform)
   const name = option ? entryDisplayName(entry, option.label) : ''
-  const [hours, setHours] = useState(
-    sanitizeHoursInput(entry.hoursPlayed?.toString() ?? '')
-  )
+  // O valor guardado entra como está (a importação traz 5,53 h): só o que a
+  // pessoa digita é cortado em uma casa. Cortar aqui deixava o Salvar sempre
+  // aceso e, ao salvar, apagava os centésimos.
+  const [hours, setHours] = useState(entry.hoursPlayed?.toString() ?? '')
   const [date, setDate] = useState(entry.completedAt ?? '')
   const [showCompletions, setShowCompletions] = useState(false)
   const dateId = useId()
 
   useEffect(() => {
-    setHours(sanitizeHoursInput(entry.hoursPlayed?.toString() ?? ''))
+    setHours(entry.hoursPlayed?.toString() ?? '')
   }, [entry.hoursPlayed])
 
   useEffect(() => {
