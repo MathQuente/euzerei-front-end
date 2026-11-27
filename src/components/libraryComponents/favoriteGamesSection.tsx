@@ -313,6 +313,7 @@ export function FavoriteGamesSection({
                   hoverEffects={false}
                   showTag={false}
                   favorite={game.isMain}
+                  hundredWave={false}
                 />
                 <FavoriteCardMarks
                   main={game.isMain}

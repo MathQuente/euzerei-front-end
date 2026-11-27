@@ -58,6 +58,7 @@ export interface UserGamePlatformEntry {
   hoursPlayed: number | null
   completions: number
   completedAt: string | null
+  completedAtUnknown?: boolean
   accountHours: AccountHours[]
 }
 
@@ -74,4 +75,5 @@ export interface UserGamePlatformPatch {
   hoursPlayed?: number | null
   completions?: number
   completedAt?: string | null
+  completedAtUnknown?: boolean
 }

@@ -139,6 +139,7 @@ export function GameCard({
   eager = false,
   statusBar = true,
   favorite = false,
+  hundredWave = true,
   showTag = true,
   releaseDateDisplay = 'upcoming',
 }: GameCardProps) {
@@ -218,6 +219,12 @@ export function GameCard({
 
   const cardContent = (
     <>
+      {showHundred && hundredWave && (
+        <span
+          className="favorite-wave favorite-wave--holo"
+          aria-hidden="true"
+        />
+      )}
       {statusBadge && !showHundred && (
         <span
           className={`absolute top-0 inset-x-0 h-0.5 z-10 ${statusBadge.barColor}`}

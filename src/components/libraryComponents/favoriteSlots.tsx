@@ -282,6 +282,7 @@ export function FavoriteSlots({
                     statusBar={false}
                     showTag={false}
                     favorite={game.igdbId === mainId}
+                    hundredWave={false}
                   />
                   <FavoriteCardMarks
                     main={game.igdbId === mainId}
@@ -401,6 +402,7 @@ export function FavoriteSlots({
               statusBar={false}
               showTag={false}
               favorite={floating.igdbId === mainId}
+              hundredWave={false}
             />
             <FavoriteCardMarks
               main={floating.igdbId === mainId}

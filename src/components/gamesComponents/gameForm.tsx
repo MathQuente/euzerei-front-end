@@ -4,6 +4,7 @@ import { useGameStatus } from '../../hooks/useGameStatus'
 import type { GameFormProps } from '../../interfaces/games'
 import { endlessControl } from '../../utils/endlessAvailability'
 import { platformsOfferedFor } from '../../utils/libraryPlatforms'
+import { isExactDate, releaseDay } from '../../utils/releaseDate'
 import { EndlessToggle } from '../endlessToggle'
 import { FavoriteToggle } from '../favoriteToggle'
 import { GamePlatformsSection } from '../gamePlatformsSection'
@@ -16,6 +17,11 @@ export function GameForm({ game }: GameFormProps) {
   const { gameStatus } = useGameStatus(igdbId)
 
   const activeStatus = gameStatus?.userGameStatus
+  // Lançamento só por mês/ano/trimestre: a data guardada é aproximada e
+  // recusaria zeradas reais do mesmo período.
+  const minDate = isExactDate(game?.releaseDatePrecision)
+    ? releaseDay(game?.releaseDate)
+    : undefined
   const isEndless = gameStatus?.endless ?? false
   const hasStatus = (statusId: number) => activeStatus?.id === statusId
   const canHavePlatforms = !!activeStatus && activeStatus.id !== STATUS.WISHLIST
@@ -64,6 +70,7 @@ export function GameForm({ game }: GameFormProps) {
           isPlayed={hasStatus(STATUS.PLAYED)}
           endless={isEndless}
           statusId={activeStatus?.id}
+          minDate={minDate}
           disabled={isMutating}
           onAdd={addPlatform}
           onUpdate={updatePlatform}
@@ -76,6 +83,7 @@ export function GameForm({ game }: GameFormProps) {
           game={game}
           isPlayed={hasStatus(STATUS.PLAYED)}
           endless={isEndless}
+          minDate={minDate}
         />
       )}
     </div>
