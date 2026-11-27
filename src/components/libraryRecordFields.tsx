@@ -41,11 +41,11 @@ export function LibraryRecordFields({
   } = useCompletedAt(igdbId)
   const { completions, updatePlayedCount } = usePlayedCount(igdbId)
 
-  const [hours, setHours] = useState(sanitizeHoursInput(hoursPlayed.toString()))
+  const [hours, setHours] = useState(hoursPlayed.toString())
   const [date, setDate] = useState(completedAt ?? '')
 
   useEffect(() => {
-    setHours(sanitizeHoursInput(hoursPlayed.toString()))
+    setHours(hoursPlayed.toString())
   }, [hoursPlayed])
 
   useEffect(() => {
