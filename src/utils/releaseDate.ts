@@ -159,3 +159,11 @@ export function countdownSpoken(ms: number) {
   if (hours > 0 && minutes > 0) return `${h} e ${m}`
   return hours > 0 ? h : m
 }
+
+/** Dia do lançamento (AAAA-MM-DD, UTC) a partir do timestamp em segundos da API. */
+export function releaseDay(
+  seconds: number | null | undefined
+): string | undefined {
+  if (!seconds) return undefined
+  return new Date(seconds * 1000).toISOString().slice(0, 10)
+}

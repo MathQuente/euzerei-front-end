@@ -19,10 +19,12 @@ export function LibraryRecordFields({
   game,
   isPlayed,
   endless = false,
+  minDate,
 }: {
   game: GameCardData
   isPlayed: boolean
   endless?: boolean
+  minDate?: string
 }) {
   const igdbId = game.igdbId.toString()
   const hoursId = useId()
@@ -60,7 +62,10 @@ export function LibraryRecordFields({
     parsedHours <= MAX_HOURS
   const hoursDirty = hoursValid && parsedHours !== hoursPlayed
 
-  const dateValid = date.trim() !== '' && date <= today()
+  const dateValid =
+    date.trim() !== '' && date <= today() && (!minDate || date >= minDate)
+  const dateInFuture = date !== '' && date > today()
+  const dateBeforeRelease = date !== '' && !!minDate && date < minDate
   const dateDirty = isPlayed && dateValid && date !== completedAt
 
   const isDirty = hoursDirty || dateDirty
@@ -139,14 +144,29 @@ export function LibraryRecordFields({
           <input
             id={dateId}
             type="date"
+            min={minDate}
             max={today()}
             value={date}
             onChange={e => setDate(e.target.value)}
             disabled={isBusy}
             aria-invalid={!dateValid}
-            className={`[color-scheme:dark] ${inputClass}`}
+            aria-describedby={
+              dateInFuture || dateBeforeRelease ? `${dateId}-error` : undefined
+            }
+            className={`[color-scheme:dark] ${inputClass}${dateInFuture || dateBeforeRelease ? ' ring-1 ring-red-400' : ''}`}
           />
         </div>
+      )}
+      {isPlayed && (dateInFuture || dateBeforeRelease) && (
+        <p
+          id={`${dateId}-error`}
+          aria-live="polite"
+          className="text-right text-[13px] leading-snug text-red-400"
+        >
+          {dateInFuture
+            ? 'A data não pode ser no futuro.'
+            : 'A data não pode ser anterior ao lançamento do jogo.'}
+        </p>
       )}
 
       {isDirty && (

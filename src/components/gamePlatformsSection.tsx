@@ -78,7 +78,8 @@ export function hasPlatformData(entry: UserGamePlatformEntry) {
   return (
     (entry.hoursPlayed ?? 0) > 0 ||
     entry.completions > 0 ||
-    entry.completedAt !== null
+    entry.completedAt !== null ||
+    entry.completedAtUnknown === true
   )
 }
 
@@ -88,6 +89,7 @@ export function PlatformEditor({
   entry,
   isPlayed,
   endless = false,
+  minDate,
   disabled,
   onSave,
 }: {
@@ -96,6 +98,7 @@ export function PlatformEditor({
   entry: UserGamePlatformEntry
   isPlayed: boolean
   endless?: boolean
+  minDate?: string
   disabled: boolean
   onSave: (patch: UserGamePlatformPatch) => Promise<unknown>
 }) {
@@ -120,7 +123,9 @@ export function PlatformEditor({
   const hoursValid =
     parsedHours === null ||
     (!Number.isNaN(parsedHours) && parsedHours >= 0 && parsedHours <= MAX_HOURS)
-  const dateValid = date === '' || date <= today()
+  const dateInFuture = date !== '' && date > today()
+  const dateBeforeRelease = date !== '' && !!minDate && date < minDate
+  const dateValid = !dateInFuture && !dateBeforeRelease
 
   const patch: UserGamePlatformPatch = {}
   if (hoursValid && parsedHours !== entry.hoursPlayed) {
@@ -209,21 +214,53 @@ export function PlatformEditor({
             </div>
           )}
           {isPlayed && (
-            <div className="flex items-center justify-between gap-2">
-              <label htmlFor={dateId} className="text-xs text-gray-400">
-                Finalizado em
-              </label>
-              <input
-                id={dateId}
-                type="date"
-                max={today()}
-                value={date}
-                onChange={e => setDate(e.target.value)}
-                disabled={disabled}
-                aria-invalid={!dateValid}
-                className={`[color-scheme:dark] ${inputClass}`}
-              />
-            </div>
+            <>
+              <div className="flex items-center justify-between gap-2">
+                <label htmlFor={dateId} className="text-xs text-gray-400">
+                  Finalizado em
+                </label>
+                <div className="flex items-center gap-2">
+                  {date === '' &&
+                    (entry.completedAtUnknown ? (
+                      <span className="text-xs text-gray-400">
+                        Data desconhecida
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => onSave({ completedAtUnknown: true })}
+                        disabled={disabled}
+                        className={`text-xs text-primary-link hover:underline rounded-sm ${focusRing}`}
+                      >
+                        Não sei a data
+                      </button>
+                    ))}
+                  <input
+                    id={dateId}
+                    type="date"
+                    min={minDate}
+                    max={today()}
+                    value={date}
+                    onChange={e => setDate(e.target.value)}
+                    disabled={disabled}
+                    aria-invalid={!dateValid}
+                    aria-describedby={dateValid ? undefined : `${dateId}-error`}
+                    className={`[color-scheme:dark] ${inputClass}${dateValid ? '' : ' ring-1 ring-red-400'}`}
+                  />
+                </div>
+              </div>
+              {!dateValid && (
+                <p
+                  id={`${dateId}-error`}
+                  aria-live="polite"
+                  className="text-right text-[13px] leading-snug text-red-400"
+                >
+                  {dateInFuture
+                    ? 'A data não pode ser no futuro.'
+                    : 'A data não pode ser anterior ao lançamento do jogo.'}
+                </p>
+              )}
+            </>
           )}
         </>
       )}
@@ -277,6 +314,7 @@ function PlatformRow({
   hint,
   isPlayed,
   endless,
+  minDate,
   disabled,
   open,
   onToggle,
@@ -287,6 +325,7 @@ function PlatformRow({
   hint: string | null
   isPlayed: boolean
   endless?: boolean
+  minDate?: string
   disabled: boolean
   open: boolean
   onToggle: () => void
@@ -355,6 +394,7 @@ function PlatformRow({
           entry={entry}
           isPlayed={isPlayed}
           endless={endless}
+          minDate={minDate}
           disabled={disabled}
           onSave={onSave}
         />
@@ -474,6 +514,7 @@ export function GamePlatformsSection({
   isPlayed,
   endless,
   statusId,
+  minDate,
   disabled,
   onAdd,
   onUpdate,
@@ -487,6 +528,7 @@ export function GamePlatformsSection({
   isPlayed: boolean
   endless?: boolean
   statusId?: number
+  minDate?: string
   disabled: boolean
   onAdd: (
     platform: LibraryPlatform,
@@ -611,6 +653,7 @@ export function GamePlatformsSection({
             }
             isPlayed={isPlayed}
             endless={endless}
+            minDate={minDate}
             disabled={disabled}
             open={openKey === key}
             onToggle={() => setOpenKey(openKey === key ? null : key)}
