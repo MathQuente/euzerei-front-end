@@ -44,6 +44,7 @@ export interface GameCardProps {
   eager?: boolean
   statusBar?: boolean
   favorite?: boolean
+  hundredWave?: boolean
   showTag?: boolean
   /** Data de lançamento no card: só jogo futuro (padrão), todos ou nenhum. */
   releaseDateDisplay?: ReleaseDateDisplay
