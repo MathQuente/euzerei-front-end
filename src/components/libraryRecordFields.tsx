@@ -3,17 +3,13 @@ import { useEffect, useId, useState } from 'react'
 import { useCompletedAt } from '../hooks/useCompletedAt'
 import { useHoursPlayed } from '../hooks/useHoursPlayed'
 import { usePlayedCount } from '../hooks/usePlayedCount'
-import { inlineFieldFocus } from '../styles/focus'
 import type { GameCardData } from '../types/games'
-import { sanitizeHoursInput } from '../utils/hours'
 import { Button } from './button'
+import { DateField } from './dateField'
+import { HoursField } from './hoursField'
 import { IconButton } from './iconButton'
 
 const MAX_HOURS = 9999.9
-
-const today = () => new Date().toISOString().slice(0, 10)
-
-const inputClass = `rounded-md bg-dark-bg px-2.5 py-1.5 text-sm text-white ${inlineFieldFocus} disabled:opacity-50`
 
 export function LibraryRecordFields({
   game,
@@ -27,7 +23,6 @@ export function LibraryRecordFields({
   minDate?: string
 }) {
   const igdbId = game.igdbId.toString()
-  const hoursId = useId()
   const hoursErrorId = useId()
   const dateId = useId()
 
@@ -43,29 +38,23 @@ export function LibraryRecordFields({
   } = useCompletedAt(igdbId)
   const { completions, updatePlayedCount } = usePlayedCount(igdbId)
 
-  const [hours, setHours] = useState(hoursPlayed.toString())
+  const [hours, setHours] = useState<number | null>(hoursPlayed)
+  const [dateOk, setDateOk] = useState(true)
   const [date, setDate] = useState(completedAt ?? '')
 
   useEffect(() => {
-    setHours(hoursPlayed.toString())
+    setHours(hoursPlayed)
   }, [hoursPlayed])
 
   useEffect(() => {
     setDate(completedAt ?? '')
+    setDateOk(true)
   }, [completedAt])
 
-  const parsedHours = Number(hours)
-  const hoursValid =
-    hours.trim() !== '' &&
-    !Number.isNaN(parsedHours) &&
-    parsedHours >= 0 &&
-    parsedHours <= MAX_HOURS
-  const hoursDirty = hoursValid && parsedHours !== hoursPlayed
+  const hoursValid = hours !== null && hours >= 0 && hours <= MAX_HOURS
+  const hoursDirty = hoursValid && hours !== hoursPlayed
 
-  const dateValid =
-    date.trim() !== '' && date <= today() && (!minDate || date >= minDate)
-  const dateInFuture = date !== '' && date > today()
-  const dateBeforeRelease = date !== '' && !!minDate && date < minDate
+  const dateValid = dateOk && date !== ''
   const dateDirty = isPlayed && dateValid && date !== completedAt
 
   const isDirty = hoursDirty || dateDirty
@@ -74,37 +63,24 @@ export function LibraryRecordFields({
   const count = Math.max(completions ?? 0, minimum)
 
   async function handleSave() {
-    if (hoursDirty) await updateHoursPlayed(parsedHours)
+    if (hoursDirty) await updateHoursPlayed(hours as number)
     if (dateDirty) await updateCompletedAt(date)
   }
 
   return (
     <div className="flex flex-col gap-2.5 w-full p-3 rounded-lg bg-dark-bg-lighter">
       <div className="flex items-center justify-between gap-3 min-h-11">
-        <label htmlFor={hoursId} className="text-xs text-gray-400">
-          Horas jogadas
-        </label>
-        <div className="flex items-center gap-2">
-          <input
-            id={hoursId}
-            type="number"
-            inputMode="decimal"
-            min={0}
-            max={MAX_HOURS}
-            step="any"
-            value={hours}
-            onChange={e => setHours(sanitizeHoursInput(e.target.value))}
-            disabled={isBusy}
-            aria-invalid={!hoursValid}
-            aria-describedby={hoursValid ? undefined : hoursErrorId}
-            className={`w-20 text-right [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${inputClass}`}
-          />
-          <span className="text-xs text-gray-400">h</span>
-        </div>
+        <span className="text-xs text-gray-400">Horas jogadas</span>
+        <HoursField
+          value={hours}
+          onChange={setHours}
+          disabled={isBusy}
+          label="Horas jogadas"
+        />
       </div>
       {!hoursValid && (
         <p id={hoursErrorId} className="text-[13px] leading-snug text-red-400">
-          Use um valor entre 0 e 9999,9.
+          Informe as horas e os minutos jogados.
         </p>
       )}
 
@@ -141,32 +117,17 @@ export function LibraryRecordFields({
           <label htmlFor={dateId} className="text-xs text-gray-400">
             Finalizado em
           </label>
-          <input
+          <DateField
             id={dateId}
-            type="date"
             min={minDate}
-            max={today()}
             value={date}
-            onChange={e => setDate(e.target.value)}
+            onChange={(iso, ok) => {
+              setDate(iso)
+              setDateOk(ok)
+            }}
             disabled={isBusy}
-            aria-invalid={!dateValid}
-            aria-describedby={
-              dateInFuture || dateBeforeRelease ? `${dateId}-error` : undefined
-            }
-            className={`[color-scheme:dark] ${inputClass}${dateInFuture || dateBeforeRelease ? ' ring-1 ring-red-400' : ''}`}
           />
         </div>
-      )}
-      {isPlayed && (dateInFuture || dateBeforeRelease) && (
-        <p
-          id={`${dateId}-error`}
-          aria-live="polite"
-          className="text-right text-[13px] leading-snug text-red-400"
-        >
-          {dateInFuture
-            ? 'A data não pode ser no futuro.'
-            : 'A data não pode ser anterior ao lançamento do jogo.'}
-        </p>
       )}
 
       {isDirty && (

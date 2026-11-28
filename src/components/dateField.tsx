@@ -41,12 +41,14 @@ export function DateField({
   onChange,
   disabled,
   clearable = true,
+  min,
 }: {
   id?: string
   value: string
   onChange: (iso: string, valid: boolean) => void
   disabled?: boolean
   clearable?: boolean
+  min?: string
 }) {
   const [open, setOpen] = useState(false)
   const [text, setText] = useState(isoToBr(value))
@@ -72,7 +74,10 @@ export function DateField({
     emit(
       iso,
       masked === '' ||
-        (iso !== '' && iso <= toIsoDate(today) && iso >= MIN_DATE)
+        (iso !== '' &&
+          iso <= toIsoDate(today) &&
+          iso >= MIN_DATE &&
+          (!min || iso >= min))
     )
   }
 
@@ -89,11 +94,13 @@ export function DateField({
       ? null
       : parsed !== null && parsed > toIsoDate(today)
         ? 'A data não pode ser no futuro.'
-        : parsed !== null && parsed < MIN_DATE
-          ? 'Use uma data a partir de 1970.'
-          : complete && parsed === null
-            ? 'Essa data não existe.'
-            : null
+        : parsed !== null && min && parsed < min
+          ? 'A data não pode ser anterior ao lançamento do jogo.'
+          : parsed !== null && parsed < MIN_DATE
+            ? 'Use uma data a partir de 1970.'
+            : complete && parsed === null
+              ? 'Essa data não existe.'
+              : null
   const invalid = message !== null
   const errorId = useId()
 
@@ -140,7 +147,10 @@ export function DateField({
               endMonth={today}
               defaultMonth={selected ?? today}
               selected={selected ?? undefined}
-              disabled={{ after: today }}
+              disabled={{
+                after: today,
+                before: parseIso(min ?? '') ?? undefined,
+              }}
               style={pickerStyle}
               className={pickerClass}
               onSelect={date => date && pick(toIsoDate(date))}

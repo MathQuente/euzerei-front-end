@@ -10,7 +10,7 @@ import {
 import { useEffect, useId, useState } from 'react'
 import { USER_GAME_STATUS_ID as STATUS } from '../constants/gameStatus'
 import { INFO_MESSAGES } from '../constants/messages'
-import { focusRing, inlineFieldFocus } from '../styles/focus'
+import { focusRing } from '../styles/focus'
 import { menuClass, menuItemClass, menuLabelClass } from '../styles/menu'
 import type {
   LibraryPlatform,
@@ -24,13 +24,7 @@ import {
   hasAccountBreakdown,
   hasNoHours,
 } from '../utils/accountHours'
-import {
-  NO_HOURS_LABEL,
-  formatHours,
-  formatHoursOrNone,
-  isUnderOneHour,
-  sanitizeHoursInput,
-} from '../utils/hours'
+import { NO_HOURS_LABEL, formatHoursOrNone } from '../utils/hours'
 import {
   getAvailableLibraryPlatforms,
   getLibraryPlatform,
@@ -50,6 +44,8 @@ import {
 } from '../utils/platformConsoles'
 import { Button } from './button'
 import { ConfirmDialog } from './confirmDialog'
+import { DateField } from './dateField'
+import { HoursField } from './hoursField'
 import { IconButton } from './iconButton'
 import { TotalsStrip } from './totalsGrid'
 
@@ -69,10 +65,6 @@ const PLATFORM_OF: Record<string, string> = {
   XBOX: 'do Xbox',
   PLAYSTATION: 'da PlayStation',
 }
-
-const today = () => new Date().toISOString().slice(0, 10)
-
-const inputClass = `rounded-md bg-dark-bg px-2 py-1 text-sm text-white ${inlineFieldFocus} disabled:opacity-50`
 
 export function hasPlatformData(entry: UserGamePlatformEntry) {
   return (
@@ -107,30 +99,27 @@ export function PlatformEditor({
   // O valor guardado entra como está (a importação traz 5,53 h): só o que a
   // pessoa digita é cortado em uma casa. Cortar aqui deixava o Salvar sempre
   // aceso e, ao salvar, apagava os centésimos.
-  const [hours, setHours] = useState(entry.hoursPlayed?.toString() ?? '')
+  const [hours, setHours] = useState<number | null>(entry.hoursPlayed)
   const [date, setDate] = useState(entry.completedAt ?? '')
+  const [dateOk, setDateOk] = useState(true)
   const [showCompletions, setShowCompletions] = useState(false)
   const dateId = useId()
 
   useEffect(() => {
-    setHours(entry.hoursPlayed?.toString() ?? '')
+    setHours(entry.hoursPlayed)
   }, [entry.hoursPlayed])
 
   useEffect(() => {
     setDate(entry.completedAt ?? '')
+    setDateOk(true)
   }, [entry.completedAt])
 
-  const parsedHours = hours.trim() === '' ? null : Number(hours)
-  const hoursValid =
-    parsedHours === null ||
-    (!Number.isNaN(parsedHours) && parsedHours >= 0 && parsedHours <= MAX_HOURS)
-  const dateInFuture = date !== '' && date > today()
-  const dateBeforeRelease = date !== '' && !!minDate && date < minDate
-  const dateValid = !dateInFuture && !dateBeforeRelease
+  const hoursValid = hours === null || (hours >= 0 && hours <= MAX_HOURS)
+  const dateValid = dateOk
 
   const patch: UserGamePlatformPatch = {}
-  if (hoursValid && parsedHours !== entry.hoursPlayed) {
-    patch.hoursPlayed = parsedHours
+  if (hoursValid && hours !== entry.hoursPlayed) {
+    patch.hoursPlayed = hours
   }
   if (isPlayed && dateValid && (date || null) !== entry.completedAt) {
     patch.completedAt = date || null
@@ -145,30 +134,12 @@ export function PlatformEditor({
     <div id={id} className={className}>
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs text-gray-400">Horas jogadas</span>
-        <div className="flex items-center gap-2">
-          {hoursValid &&
-            parsedHours !== null &&
-            isUnderOneHour(parsedHours) && (
-              <span className="text-xs text-gray-400">
-                ≈ {formatHours(parsedHours)}
-              </span>
-            )}
-          <input
-            type="number"
-            inputMode="decimal"
-            min={0}
-            max={MAX_HOURS}
-            step="any"
-            placeholder="—"
-            value={hours}
-            onChange={e => setHours(sanitizeHoursInput(e.target.value))}
-            disabled={disabled}
-            aria-label={`Horas jogadas em ${name}${entry.hoursPlayed === null ? `, ${NO_HOURS_LABEL}` : ''}`}
-            aria-invalid={!hoursValid}
-            className={`w-16 text-right [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${inputClass}`}
-          />
-          <span className="text-xs text-gray-400">h</span>
-        </div>
+        <HoursField
+          value={hours}
+          onChange={setHours}
+          disabled={disabled}
+          label={`Horas jogadas em ${name}${entry.hoursPlayed === null ? `, ${NO_HOURS_LABEL}` : ''}`}
+        />
       </div>
       {entry.accountHours.length > 0 && (
         <p className="text-xs text-gray-400">
@@ -215,53 +186,38 @@ export function PlatformEditor({
             </div>
           )}
           {isPlayed && (
-            <>
-              <div className="flex items-center justify-between gap-2">
-                <label htmlFor={dateId} className="text-xs text-gray-400">
-                  Finalizado em
-                </label>
-                <div className="flex items-center gap-2">
-                  {date === '' &&
-                    (entry.completedAtUnknown ? (
-                      <span className="text-xs text-gray-400">
-                        Data desconhecida
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => onSave({ completedAtUnknown: true })}
-                        disabled={disabled}
-                        className={`text-xs text-primary-link hover:underline rounded-sm ${focusRing}`}
-                      >
-                        Não sei a data
-                      </button>
-                    ))}
-                  <input
-                    id={dateId}
-                    type="date"
-                    min={minDate}
-                    max={today()}
-                    value={date}
-                    onChange={e => setDate(e.target.value)}
-                    disabled={disabled}
-                    aria-invalid={!dateValid}
-                    aria-describedby={dateValid ? undefined : `${dateId}-error`}
-                    className={`[color-scheme:dark] ${inputClass}${dateValid ? '' : ' ring-1 ring-red-400'}`}
-                  />
-                </div>
+            <div className="flex items-center justify-between gap-2">
+              <label htmlFor={dateId} className="text-xs text-gray-400">
+                Finalizado em
+              </label>
+              <div className="flex items-center gap-2">
+                {date === '' &&
+                  (entry.completedAtUnknown ? (
+                    <span className="text-xs text-gray-400">
+                      Data desconhecida
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => onSave({ completedAtUnknown: true })}
+                      disabled={disabled}
+                      className={`text-xs text-primary-link hover:underline rounded-sm ${focusRing}`}
+                    >
+                      Não sei a data
+                    </button>
+                  ))}
+                <DateField
+                  id={dateId}
+                  min={minDate}
+                  value={date}
+                  onChange={(iso, ok) => {
+                    setDate(iso)
+                    setDateOk(ok)
+                  }}
+                  disabled={disabled}
+                />
               </div>
-              {!dateValid && (
-                <p
-                  id={`${dateId}-error`}
-                  aria-live="polite"
-                  className="text-right text-[13px] leading-snug text-red-400"
-                >
-                  {dateInFuture
-                    ? 'A data não pode ser no futuro.'
-                    : 'A data não pode ser anterior ao lançamento do jogo.'}
-                </p>
-              )}
-            </>
+            </div>
           )}
         </>
       )}
@@ -508,6 +464,7 @@ function ConsolePicker({
 
 export function GamePlatformsSection({
   gamePlatforms,
+  missingPcStores,
   platforms,
   totalHours,
   totalCompletions,
@@ -522,6 +479,7 @@ export function GamePlatformsSection({
   onRemove,
 }: {
   gamePlatforms?: string[]
+  missingPcStores?: LibraryPlatform[]
   platforms: UserGamePlatformEntry[]
   totalHours: number
   totalCompletions: number
@@ -555,7 +513,8 @@ export function GamePlatformsSection({
   const registered = platforms.map(p => p.platform)
   const addable = getAvailableLibraryPlatforms(
     gamePlatforms,
-    registered
+    registered,
+    missingPcStores
   ).filter(p =>
     platformAsksConsole(p.value)
       ? hasFreeConsole(p.value, platforms, releasedConsoles)
