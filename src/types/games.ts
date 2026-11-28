@@ -24,6 +24,7 @@ export interface GameCardData {
   hoursPlayed?: number
   playedOn?: string[]
   platforms?: string[]
+  missingPcStores?: ('STEAM' | 'EPIC')[]
   status?: string
   endless?: boolean
   hundredPercent?: boolean

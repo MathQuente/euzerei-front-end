@@ -63,6 +63,7 @@ export function GameForm({ game }: GameFormProps) {
       {canHavePlatforms && (
         <GamePlatformsSection
           gamePlatforms={platformsOfferedFor(game)}
+          missingPcStores={game.missingPcStores}
           platforms={platforms}
           totalHours={totals?.hoursPlayed ?? 0}
           totalCompletions={totals?.completions ?? 0}

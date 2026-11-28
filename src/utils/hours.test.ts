@@ -6,8 +6,10 @@ import {
   formatHoursOrNone,
   formatHoursSpoken,
   isUnderOneHour,
+  joinHours,
   playedWord,
   sanitizeHoursInput,
+  splitHours,
 } from './hours'
 
 const NBSP = '\u00a0'
@@ -119,5 +121,23 @@ describe('sanitizeHoursInput', () => {
   it('drops leading zeros but keeps 0.5', () => {
     expect(sanitizeHoursInput('007')).toBe('7')
     expect(sanitizeHoursInput('0.55')).toBe('0.5')
+  })
+})
+
+describe('splitHours / joinHours', () => {
+  it('33 min é 0,55 h e volta igual', () => {
+    expect(joinHours(0, 33)).toBe(0.55)
+    expect(splitHours(0.55)).toEqual({ hours: 0, minutes: 33 })
+  })
+
+  it('5 h 23 min guarda 5,38 e volta como 5 h 23 min', () => {
+    expect(joinHours(5, 23)).toBe(5.38)
+    expect(splitHours(5.38)).toEqual({ hours: 5, minutes: 23 })
+  })
+
+  it('todo minuto de 0 a 59 sobrevive à ida e volta', () => {
+    for (let h = 0; h < 3; h++)
+      for (let m = 0; m < 60; m++)
+        expect(splitHours(joinHours(h, m))).toEqual({ hours: h, minutes: m })
   })
 })
