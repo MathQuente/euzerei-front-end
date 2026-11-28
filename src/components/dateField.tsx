@@ -6,9 +6,9 @@ import { ptBR } from 'react-day-picker/locale'
 import 'react-day-picker/style.css'
 import { focusRing } from '../styles/focus'
 import {
+  MIN_DATE,
   brToIso,
   isoToBr,
-  MIN_DATE,
   maskDate,
   parseIso,
   toIsoDate,
