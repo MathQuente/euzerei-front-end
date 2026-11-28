@@ -56,7 +56,8 @@ function libraryPlatformsFor(gamePlatformName: string): LibraryPlatform[] {
 
 export function getAvailableLibraryPlatforms(
   gamePlatforms: string[] | undefined,
-  registered: LibraryPlatform[] = []
+  registered: LibraryPlatform[] = [],
+  missingPcStores: LibraryPlatform[] = []
 ) {
   const addable = LIBRARY_PLATFORMS.filter(p => p.value !== 'OTHER')
   if (!gamePlatforms || gamePlatforms.length === 0) return addable
@@ -66,7 +67,11 @@ export function getAvailableLibraryPlatforms(
     for (const platform of libraryPlatformsFor(name)) available.add(platform)
   }
 
-  return addable.filter(p => available.has(p.value))
+  return addable.filter(
+    p =>
+      available.has(p.value) &&
+      (registered.includes(p.value) || !missingPcStores.includes(p.value))
+  )
 }
 
 const PORT_CATEGORY = 11

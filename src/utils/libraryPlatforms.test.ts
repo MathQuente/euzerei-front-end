@@ -72,3 +72,25 @@ describe('Xbox console options', () => {
     ])
   })
 })
+
+describe('getAvailableLibraryPlatforms', () => {
+  const windows = ['PC (Microsoft Windows)', 'PlayStation 5', 'Xbox One']
+
+  it('esconde Steam e Epic quando o IGDB mostra que o jogo não está lá', () => {
+    const values = getAvailableLibraryPlatforms(
+      windows,
+      [],
+      ['STEAM', 'EPIC']
+    ).map(p => p.value)
+    expect(values).toEqual(['PLAYSTATION', 'XBOX'])
+  })
+
+  it('mantém a loja que o usuário já registrou', () => {
+    const values = getAvailableLibraryPlatforms(
+      windows,
+      ['STEAM'],
+      ['STEAM']
+    ).map(p => p.value)
+    expect(values).toContain('STEAM')
+  })
+})
