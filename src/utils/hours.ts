@@ -62,3 +62,16 @@ export function playedWord(hours: number) {
 export function formatHoursPlayedSpoken(hours: number) {
   return `${formatHoursSpoken(hours)} ${playedWord(hours)}`
 }
+
+export const MAX_WHOLE_HOURS = 9999
+
+/** Horas guardadas (5,38) em horas e minutos inteiros (5 h 23 min). */
+export function splitHours(hours: number) {
+  const total = Math.round(hours * 60)
+  return { hours: Math.floor(total / 60), minutes: total % 60 }
+}
+
+/** Horas e minutos digitados em horas com duas casas, como a coluna guarda. */
+export function joinHours(hours: number, minutes: number) {
+  return Math.round(((hours * 60 + minutes) * 100) / 60) / 100
+}
